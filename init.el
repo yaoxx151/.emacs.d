@@ -1,4 +1,3 @@
-;; MELPA
 ;; ____________________________________________________________________________
 ;; Aquamacs custom-file warning:
 ;; Warning: After loading this .emacs file, Aquamacs will also load
@@ -60,9 +59,6 @@ There are two things you can do about this warning:
   kept-old-versions 10
   version-control t)
 
-; theme.
-; (load-theme 'spacemacs-light t)
-
 ; highlight current word
 (require 'highlight-symbol)
 (add-hook 'prog-mode-hook 'highlight-symbol-mode)
@@ -103,9 +99,9 @@ This command does not push text to `kill-ring'."
 (set-face-background hl-line-face "#DCDCDC")
 
 ; Show line numbers by default
-;; (global-linum-mode)
-(add-hook 'prog-mode-hook 'linum-relative-mode)
-(setq linum-relative-current-symbol "")
+(global-linum-mode)
+;; (add-hook 'prog-mode-hook 'linum-relative-mode)
+;; (setq linum-relative-current-symbol "")
 
 ; tramp
 (setq tramp-default-method "ssh")
@@ -194,6 +190,8 @@ This command does not push text to `kill-ring'."
 (add-hook 'prog-mode-hook 'flyspell-prog-mode)
 (add-hook 'text-mode-hook 'flyspell-mode)
 (add-hook 'org-mode-hook 'flyspell-mode)
+(add-hook 'latex-mode-hook 'flyspell-mode)
+(setq ispell-program-name "/usr/local/bin/ispell")
 
 ; mgit.
 ; (global-set-key (kbd "C-x g") 'magit-status)
@@ -271,6 +269,7 @@ This command does not push text to `kill-ring'."
 ; org mode
 (add-hook 'org-mode-hook 'visual-line-mode)
 (remove-hook 'org-mode-hook 'linum-relative-mode)
+(add-hook 'latex-mode-hook 'linum-relative-mode)
 
 ; Copy
 (defun get-point (symbol &optional arg)
@@ -382,12 +381,21 @@ Version 2018-09-10"
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("6e70d505e0957aaa67562ff0487b7b1b1e10f879655f2c47adf85949790fb687" default)))
  '(package-selected-packages
    (quote
-    (highlight-symbol linum-relative highlight-indent-guides crux markdown-mode+ magit elpy flycheck company-lsp lsp-ui lsp-mode expand-region multiple-cursors rainbow-delimiters undo-tree helm ivy fill-column-indicator))))
+    (zenburn-theme highlight-symbol linum-relative highlight-indent-guides crux markdown-mode+ magit elpy flycheck company-lsp lsp-ui lsp-mode expand-region multiple-cursors rainbow-delimiters undo-tree helm ivy fill-column-indicator))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+; theme.
+;; (load-theme 'spacemacs-light t)
+(if (display-graphic-p)
+    (load-theme 'zenburn)
+  (load-theme 'spacemacs-light t))
