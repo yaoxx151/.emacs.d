@@ -1,12 +1,3 @@
-;; ____________________________________________________________________________
-;; Aquamacs custom-file warning:
-;; Warning: After loading this .emacs file, Aquamacs will also load
-;; customizations from `custom-file' (customizations.el). Any settings there
-;; will override those made here.
-;; Consider moving your startup settings to the Preferences.el file, which
-;; is loaded after `custom-file':
-;; ~/Library/Preferences/Aquamacs Emacs/Preferences
-;; _____________________________________________________________________________
 (require 'package)
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
                     (not (gnutls-available-p))))
@@ -60,7 +51,6 @@ There are two things you can do about this warning:
   version-control t)
 
 ; highlight current word
-(require 'highlight-symbol)
 (add-hook 'prog-mode-hook 'highlight-symbol-mode)
 
 ; shell
@@ -72,8 +62,8 @@ There are two things you can do about this warning:
 ; some deletes don't need to kill
 (defun my-delete-word (arg)
   "Delete characters forward until encountering the end of a word.
-With argument, do this that many times.
-This command does not push text to `kill-ring'."
+  With argument, do this that many times.
+  This command does not push text to `kill-ring'."
   (interactive "p")
   (delete-region
    (point)
@@ -83,8 +73,8 @@ This command does not push text to `kill-ring'."
 
 (defun my-backward-delete-word (arg)
   "Delete characters backward until encountering the beginning of a word.
-With argument, do this that many times.
-This command does not push text to `kill-ring'."
+  With argument, do this that many times.
+  This command does not push text to `kill-ring'."
   (interactive "p")
   (my-delete-word (- arg)))
 
@@ -107,11 +97,6 @@ This command does not push text to `kill-ring'."
 (setq tramp-default-method "ssh")
 
 ; column width
-;; (require 'fill-column-indicator)
-;; (setq fci-rule-width 1)
-;; (setq fci-rule-color "red")
-;; (setq fci-rule-column 80)
-;; (add-hook 'prog-mode-hook 'fci-mode)
 (load "~/.emacs.d/elpa/column-marker.el")
 (require 'column-marker)
 (add-hook 'prog-mode-hook (lambda () (interactive) (column-marker-1 81)))
@@ -143,14 +128,6 @@ This command does not push text to `kill-ring'."
 (require 'ivy)
 (ivy-mode 1)
 
-; Wind move
-; (when (fboundp 'windmove-default-keybindings)
-;   (windmove-default-keybindings))
-; (global-set-key (kbd "C-c <left>")  'windmove-left)
-; (global-set-key (kbd "C-c <right>") 'windmove-right)
-; (global-set-key (kbd "C-c <up>")    'windmove-up)
-; (global-set-key (kbd "C-c <down>")  'windmove-down)
-
 ; Undo tree
 (global-undo-tree-mode)
 
@@ -164,19 +141,6 @@ This command does not push text to `kill-ring'."
 ; Expand region.
 (require 'expand-region)
 (global-set-key (kbd "C-c C-y") 'er/expand-region)
-
-; lsp mode.
-; (require 'lsp-mode)
-; (add-hook 'prog-mode-hook #'lsp)
-; (lsp-register-client
-;  (make-lsp-client :new-connection (lsp-tramp-connection "pyls")
-;                   :major-modes '(python-mode)
-;                   :remote? t
-;                   :server-id 'pyls))
-; (require 'lsp-ui)
-; (add-hook 'lsp-mode-hook 'lsp-ui-mode)
-; (require 'company-lsp)
-; (push 'company-lsp company-backends)
 
 ; flycheck.
 (add-hook 'prog-mode-hook 'flycheck-mode)
@@ -193,13 +157,8 @@ This command does not push text to `kill-ring'."
 (add-hook 'latex-mode-hook 'flyspell-mode)
 (setq ispell-program-name "/usr/local/bin/ispell")
 
-; mgit.
-; (global-set-key (kbd "C-x g") 'magit-status)
-
 ; crux
 (global-set-key (kbd "C-k") #'crux-smart-kill-line)
-; (global-set-key (kbd "C-c d")  #'crux-duplicate-current-line-or-region)
-; (global-set-key (kbd "C-c k")  #'crux-kill-whole-line)
 
 ; comment
 (defun comment-or-uncomment-region-or-line ()
@@ -212,29 +171,6 @@ This command does not push text to `kill-ring'."
         (comment-or-uncomment-region beg end)
         (next-line)))
 (global-set-key (kbd "C-c c") 'comment-or-uncomment-region-or-line)
-
-; Scroll halp page
-;; (defun window-half-height ()
-;;  (max 1 (/ (1- (window-height (selected-window))) 2)))
-
-;; (defun scroll-up-half ()
-;;  (interactive)
-;;  (scroll-up (window-half-height)))
-
-;; (defun scroll-down-half ()
-;;  (interactive)
-;;  (scroll-down (window-half-height)))
-
-;; (global-set-key (kbd "C-v") 'scroll-up-half)
-;; (global-set-key (kbd "M-v") 'scroll-down-half)
-
-; Vim's o
-; (defun newline-without-break-of-line ()
-;   (interactive)
-;   (let ((oldpos (point)))
-;     (end-of-line)
-;     (newline-and-indent)))
-; (global-set-key (kbd "C-o") 'newline-without-break-of-line)
 
 ; helm.
 (global-set-key (kbd "M-x") 'helm-M-x)
@@ -271,34 +207,7 @@ This command does not push text to `kill-ring'."
 (remove-hook 'org-mode-hook 'linum-relative-mode)
 (add-hook 'latex-mode-hook 'linum-relative-mode)
 
-; Copy
-(defun get-point (symbol &optional arg)
-  (funcall symbol arg)
-  (point))
-
-(defun copy-thing (begin-of-thing end-of-thing &optional arg)
-  (save-excursion
-    (let ((beg (get-point begin-of-thing 1))
-          (end (get-point end-of-thing arg)))
-      (copy-region-as-kill beg end))))
-
-(defun paste-to-mark (&optional arg)
-  (unless (eq arg 1)
-    (if (string= "shell-mode" major-mode)
-        (comint-next-prompt 25535)
-      (goto-char (mark)))
-    (yank)))
-
-(defun copy-word (&optional arg)
-  "Copy words at point into kill-ring"
-  (interactive "P")
-  (copy-thing 'backward-word 'forward-word arg)
-  ;;(paste-to-mark arg)
-  )
-
-(global-set-key (kbd "C-c w") (quote copy-word))
-
-; Handle copy and paste.
+; Handle copy and paste in OSX.
 (defun copy-from-osx ()
   "Handle copy/paste intelligently on osx."
   (let ((pbpaste (purecopy "/usr/bin/pbpaste")))
@@ -316,64 +225,6 @@ This command does not push text to `kill-ring'."
 
 (setq interprogram-cut-function 'paste-to-osx
       interprogram-paste-function 'copy-from-osx)
-
-;; Cut and copy current line with new line.
-(defun xah-cut-line-or-region ()
-  "Cut current line, or text selection.
-When `universal-argument' is called first, cut whole buffer (respects `narrow-to-region').
-
-URL `http://ergoemacs.org/emacs/emacs_copy_cut_current_line.html'
-Version 2015-06-10"
-  (interactive)
-  (if current-prefix-arg
-      (progn ; not using kill-region because we don't want to include previous kill
-        (kill-new (buffer-string))
-        (delete-region (point-min) (point-max)))
-    (progn (if (use-region-p)
-               (kill-region (region-beginning) (region-end) t)
-             (kill-region (line-beginning-position) (line-beginning-position 2))))))
-
-(defun xah-copy-line-or-region ()
-  "Copy current line, or text selection.
-When called repeatedly, append copy subsequent lines.
-When `universal-argument' is called first, copy whole buffer (respects `narrow-to-region').
-
-URL `http://ergoemacs.org/emacs/emacs_copy_cut_current_line.html'
-Version 2018-09-10"
-  (interactive)
-  (if current-prefix-arg
-      (progn
-        (copy-region-as-kill (point-min) (point-max)))
-    (if (use-region-p)
-        (progn
-          (copy-region-as-kill (region-beginning) (region-end)))
-      (if (eq last-command this-command)
-          (if (eobp)
-              (progn )
-            (progn
-              (kill-append "\n" nil)
-              (kill-append
-               (buffer-substring-no-properties (line-beginning-position) (line-end-position))
-               nil)
-              (progn
-                (end-of-line)
-                (forward-char))))
-        (if (eobp)
-            (if (eq (char-before) 10 )
-                (progn )
-              (progn
-                (copy-region-as-kill (line-beginning-position) (line-end-position))
-                (end-of-line)))
-          (progn
-            (copy-region-as-kill (line-beginning-position) (line-end-position))
-            (end-of-line)
-            (forward-char)))))))
-
-(global-set-key (kbd "C-c d") 'xah-cut-line-or-region) ; cut
-(global-set-key (kbd "C-c y") 'xah-copy-line-or-region) ; copy
-
-; Disable soul torturing beep!
-;; (setq ring-bell-function 'ignore)
 
 ;;;;;;;;;;;;;; Added by program ;;;;;;;;;;;;
 (custom-set-variables
