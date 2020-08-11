@@ -4,6 +4,7 @@ bookmarks
 history
 recentf
 tramp
+elpa/*
 url/*
 eshell/*
 auto-save-list/*

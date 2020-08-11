@@ -15,23 +15,11 @@ There are two things you can do about this warning:
   (when (< emacs-major-version 24)
     ;; For important compatibility libraries like cl-lib
     (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
+
+(add-to-list 'package-archives
+             '("melpa-stable" . "https://stable.melpa.org/packages/"))
+
 (package-initialize)
-
-; (server-start)
-
-; Don't use arrow key.
-(global-unset-key (kbd "<left>"))
-(global-unset-key (kbd "<right>"))
-(global-unset-key (kbd "<up>"))
-(global-unset-key (kbd "<down>"))
-(global-unset-key (kbd "<C-left>"))
-(global-unset-key (kbd "<C-right>"))
-(global-unset-key (kbd "<C-up>"))
-(global-unset-key (kbd "<C-down>"))
-(global-unset-key (kbd "<M-left>"))
-(global-unset-key (kbd "<M-right>"))
-(global-unset-key (kbd "<M-up>"))
-(global-unset-key (kbd "<M-down>"))
 
 ;; key bindings
 (when (eq system-type 'darwin) ;; mac specific settings
@@ -51,6 +39,7 @@ There are two things you can do about this warning:
   version-control t)
 
 ; highlight current word
+(require 'highlight-symbol)
 (add-hook 'prog-mode-hook 'highlight-symbol-mode)
 
 ; shell
@@ -59,28 +48,12 @@ There are two things you can do about this warning:
 ; disable some keys
 (global-unset-key (kbd "C-x C-b"))
 
-; some deletes don't need to kill
-(defun my-delete-word (arg)
-  "Delete characters forward until encountering the end of a word.
-  With argument, do this that many times.
-  This command does not push text to `kill-ring'."
-  (interactive "p")
-  (delete-region
-   (point)
-   (progn
-     (forward-word arg)
-     (point))))
-
-(defun my-backward-delete-word (arg)
-  "Delete characters backward until encountering the beginning of a word.
-  With argument, do this that many times.
-  This command does not push text to `kill-ring'."
-  (interactive "p")
-  (my-delete-word (- arg)))
-
-(global-set-key (kbd "M-d") 'my-delete-word)
-(global-set-key (kbd "M-<BACKSPACE>") 'my-backward-delete-word)
-(global-set-key (kbd "M-<DEL>") 'my-backward-delete-word)
+; evil mode
+;;(add-to-list 'load-path "~/.emacs.d/evil")
+;; (require 'evil)
+;;(evil-mode 1)
+;; (evil-define-minor-mode-key 'motion 'visual-line-mode "j" 'evil-next-visual-line)
+;; (evil-define-minor-mode-key 'motion 'visual-line-mode "k" 'evil-previous-visual-line)
 
 ; Hightlight current line.
 ; (global-hl-line-mode +1)
@@ -100,6 +73,7 @@ There are two things you can do about this warning:
 (load "~/.emacs.d/elpa/column-marker.el")
 (require 'column-marker)
 (add-hook 'prog-mode-hook (lambda () (interactive) (column-marker-1 81)))
+(add-hook 'latex-mode-hook (lambda () (interactive) (column-marker-1 81)))
 
 ; Paren match.
 (add-hook 'prog-mode-hook 'show-paren-mode)
@@ -118,7 +92,7 @@ There are two things you can do about this warning:
         tab-mark))
 
 ; consider xx_xx in word
-(add-hook 'prog-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
+;; (add-hook 'prog-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
 
 ; automatically switch focus to newly splitted buffer
 (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
@@ -129,23 +103,21 @@ There are two things you can do about this warning:
 (ivy-mode 1)
 
 ; Undo tree
+(require 'undo-tree)
 (global-undo-tree-mode)
-
-; rainbow delimieter
-(add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-
-; Multiple cursor
-(require 'multiple-cursors)
-(global-set-key (kbd "C-c C-a") 'mc/edit-lines)
+(global-set-key (kbd "M-z") 'undo-tree-undo)
+(global-set-key (kbd "M-y") 'undo-tree-redo)
 
 ; Expand region.
 (require 'expand-region)
 (global-set-key (kbd "C-c C-y") 'er/expand-region)
 
 ; flycheck.
+(require 'flycheck)
 (add-hook 'prog-mode-hook 'flycheck-mode)
 
 ; auto-complete-mode
+(require 'company)
 (add-hook 'prog-mode-hook 'company-mode)
 (remove-hook 'text-mode-hook 'company-mode)
 
@@ -158,6 +130,7 @@ There are two things you can do about this warning:
 (setq ispell-program-name "/usr/local/bin/ispell")
 
 ; crux
+(require 'crux)
 (global-set-key (kbd "C-k") #'crux-smart-kill-line)
 
 ; comment
@@ -170,9 +143,10 @@ There are two things you can do about this warning:
             (setq beg (line-beginning-position) end (line-end-position)))
         (comment-or-uncomment-region beg end)
         (next-line)))
-(global-set-key (kbd "C-c c") 'comment-or-uncomment-region-or-line)
+(global-set-key (kbd "M-;") 'comment-or-uncomment-region-or-line)
 
 ; helm.
+(require 'helm)
 (global-set-key (kbd "M-x") 'helm-M-x)
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
 (with-eval-after-load 'helm
@@ -181,31 +155,35 @@ There are two things you can do about this warning:
   (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB works in terminal
   (define-key helm-map (kbd "C-z")  'helm-select-action))
 
-; Mark the whole line default.
-(defun select-current-line ()
-  (interactive)
-  (end-of-line) ; move to end of line
-  (set-mark (line-beginning-position)))
-(global-set-key (kbd "C-c m") 'select-current-line)
-
 ; Go to line.
 (global-set-key (kbd "C-c g") 'goto-line)
 
-; Better undo.
-(global-set-key (kbd "C-/") 'undo-tree-undo)
-(global-set-key (kbd "M-/") 'undo-tree-redo)
-
 ; highlight indent.
+(require 'highlight-indent-guides)
 (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
 (setq highlight-indent-guides-method 'character)
-(require 'highlight-indent-guides)
 (setq highlight-indent-guides-auto-enabled nil)
 (set-face-foreground 'highlight-indent-guides-character-face "#C0C0C0")
 
 ; org mode
 (add-hook 'org-mode-hook 'visual-line-mode)
-(remove-hook 'org-mode-hook 'linum-relative-mode)
-(add-hook 'latex-mode-hook 'linum-relative-mode)
+(add-hook 'org-mode-hook (lambda () (linum-mode -1)))
+; make tab work in Org-mode code block
+(setq org-src-tab-acts-natively t)
+;; (add-hook 'latex-mode-hook 'visual-line-mode)
+; (add-hook 'latex-mode-hook 'linum-relative-mode)
+
+;; For python, import path
+(require 'exec-path-from-shell)
+(exec-path-from-shell-copy-env "PATH")
+
+;; autopep8
+(require 'py-autopep8)
+(add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
+
+;; isort
+;; (require 'py-isort)
+;; (add-hook 'before-save-hook 'py-isort-before-save)
 
 ; Handle copy and paste in OSX.
 (defun copy-from-osx ()
@@ -226,6 +204,55 @@ There are two things you can do about this warning:
 (setq interprogram-cut-function 'paste-to-osx
       interprogram-paste-function 'copy-from-osx)
 
+; some deletes don't need to kill
+(defun my-delete-word (arg)
+  "Delete characters forward until encountering the end of a word.
+With argument, do this that many times.
+This command does not push text to `kill-ring'."
+  (interactive "p")
+  (delete-region
+   (point)
+   (progn
+     (forward-word arg)
+     (point))))
+
+(defun my-backward-delete-word (arg)
+  "Delete characters backward until encountering the beginning of a word.
+With argument, do this that many times.
+This command does not push text to `kill-ring'."
+  (interactive "p")
+  (my-delete-word (- arg)))
+
+; bind them to emacs's default shortcut keys:
+(global-set-key (kbd "M-<DEL>") 'my-backward-delete-word)
+
+; ace jump.
+(autoload
+  'ace-jump-mode
+  "ace-jump-mode"
+  "Emacs quick move minor mode"
+  t)
+(define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
+
+; projectile
+(projectile-mode +1)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+(setq projectile-auto-discover nil)
+(setq projectile-sort-order 'recentf)
+(setq projectile-completion-system 'ivy)
+(setq projectile-file-exists-remote-cache-expire nil)
+
+
+; theme.
+(if (display-graphic-p)
+     ;; (disable-theme 'spacemacs-light)
+    ;; (load-theme 'spacemacs-light t)
+    (load-theme 'zenburn t)
+(load-theme 'spacemacs-light t))
+
+(if (display-graphic-p)
+    (load "~/.emacs.d/org.el"))
+
 ;;;;;;;;;;;;;; Added by program ;;;;;;;;;;;;
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -234,19 +261,18 @@ There are two things you can do about this warning:
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("6e70d505e0957aaa67562ff0487b7b1b1e10f879655f2c47adf85949790fb687" default)))
+    ("f3455b91943e9664af7998cc2c458cfc17e674b6443891f519266e5b3c51799d" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "6e70d505e0957aaa67562ff0487b7b1b1e10f879655f2c47adf85949790fb687" default)))
  '(package-selected-packages
    (quote
-    (zenburn-theme highlight-symbol linum-relative highlight-indent-guides crux markdown-mode+ magit elpy flycheck company-lsp lsp-ui lsp-mode expand-region multiple-cursors rainbow-delimiters undo-tree helm ivy fill-column-indicator))))
+    (ace-jump-mode evil-org py-isort py-autopep8 use-package zenburn-theme highlight-symbol linum-relative highlight-indent-guides crux markdown-mode+ magit elpy flycheck company-lsp lsp-ui lsp-mode expand-region multiple-cursors rainbow-delimiters undo-tree helm ivy fill-column-indicator))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
-
-; theme.
-;; (load-theme 'spacemacs-light t)
-(if (display-graphic-p)
-    (load-theme 'zenburn)
-  (load-theme 'spacemacs-light t))
+ '(default ((t (:background nil))))
+ '(org-level-1 ((t (:inherit default :weight bold :foreground "#655370" :font "Lucida Grande" :height 1.2 :foreground "#2aa198" :bold))))
+ '(org-level-2 ((t (:inherit default :weight bold :foreground "#655370" :font "Lucida Grande" :height 1.2 :foreground "#5faf00" :bold))))
+ '(org-level-3 ((t (:inherit default :weight bold :foreground "#655370" :font "Lucida Grande" :height 1.2 :foreground "#268bd2" :bold))))
+ '(org-level-4 ((t (:inherit default :weight bold :foreground "#655370" :font "Lucida Grande" :height 1.2 :foreground "#800080" :bold))))
+ '(variable-pitch ((t (:family "Helvetica Neue" :height 150 :weight normal)))))
