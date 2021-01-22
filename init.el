@@ -1,24 +1,8 @@
+;; melpa
 (require 'package)
-(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
-                    (not (gnutls-available-p))))
-       (proto (if no-ssl "http" "https")))
-  (when no-ssl
-    (warn "\
-Your version of Emacs does not support SSL connections,
-which is unsafe because it allows man-in-the-middle attacks.
-There are two things you can do about this warning:
-1. Install an Emacs version that does support SSL and be safe.
-2. Remove this warning from your init file so you won't see it again."))
-  ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
-  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
-  ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
-  (when (< emacs-major-version 24)
-    ;; For important compatibility libraries like cl-lib
-    (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
-
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (add-to-list 'package-archives
-             '("melpa-stable" . "https://stable.melpa.org/packages/"))
-
+             '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 (package-initialize)
 
 ;; key bindings
@@ -32,6 +16,7 @@ There are two things you can do about this warning:
 
 ; backup
 (setq backup-directory-alist `(("." . "~/.saves")))
+(setq auto-save-list-file-prefix "~/.saves/.saves-")
 (setq backup-by-copying t)
 (setq delete-old-versions t
   kept-new-versions 20
@@ -235,12 +220,13 @@ This command does not push text to `kill-ring'."
 (define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
 
 ; projectile
-(projectile-mode +1)
-(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-(setq projectile-auto-discover nil)
-(setq projectile-sort-order 'recentf)
-(setq projectile-completion-system 'ivy)
-(setq projectile-file-exists-remote-cache-expire nil)
+;; (require 'projectile)
+;; (projectile-mode 1)
+;; (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+;; (setq projectile-auto-discover nil)
+;; (setq projectile-sort-order 'recentf)
+;; (setq projectile-completion-system 'ivy)
+;; (setq projectile-file-exists-remote-cache-expire nil)
 
 
 ; theme.
@@ -250,8 +236,20 @@ This command does not push text to `kill-ring'."
     (load-theme 'zenburn t)
 (load-theme 'spacemacs-light t))
 
-(if (display-graphic-p)
-    (load "~/.emacs.d/org.el"))
+;; (if (display-graphic-p)
+;;     (load "~/.emacs.d/org.el"))
+
+;; Disable some useless stuffs.
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(setq inhibit-startup-screen t)
+(toggle-scroll-bar -1)
+(setq-default visible-bell t)
+(blink-cursor-mode 0)
+
+;; prevent down-arrow from adding empty lines to the bottom of the buffer
+;; (which is the default behaviour)
+(setq next-line-add-newlines nil)
 
 ;;;;;;;;;;;;;; Added by program ;;;;;;;;;;;;
 (custom-set-variables
