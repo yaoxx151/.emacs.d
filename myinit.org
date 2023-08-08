@@ -1,0 +1,403 @@
+#+STARTIP: overview
+* Disable useless things
+#+BEGIN_SRC emacs-lisp
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(setq inhibit-startup-screen t)
+(setq inhibit-startup-message t)
+(toggle-scroll-bar -1)
+(setq-default visible-bell t)
+(blink-cursor-mode 0)
+(fset 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+
+* Disable keys
+#+BEGIN_SRC emacs-lisp
+(global-unset-key (kbd "C-x C-b"))
+(global-unset-key (kbd "C-z")) ; Don't hit it and suspend it in terminal
+(setq inhibit-startup-screen t) ; Disable init screen
+#+END_SRC
+
+* Mac
+** Mac key bindings
+#+BEGIN_SRC emacs-lisp
+(when (eq system-type 'darwin) ;; mac specific settings
+  (setq mac-command-modifier 'meta) ; make cmd key do Meta
+  (setq mac-option-modifier 'super) ; make opt key do Super
+  (setq mac-control-modifier 'meta) ; make Control key do Control
+  (setq ns-function-modifier 'hyper)  ; make Fn key do Hyper
+  (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
+)
+#+END_SRC
+
+** Handle copy and paste in OSX
+#+BEGIN_SRC emacs-lisp
+(defun copy-from-osx ()
+  "Handle copy/paste intelligently on osx."
+  (let ((pbpaste (purecopy "/usr/bin/pbpaste")))
+    (if (and (eq system-type 'darwin)
+             (file-exists-p pbpaste))
+        (let ((tramp-mode nil)
+              (default-directory "~"))
+          (shell-command-to-string pbpaste)))))
+
+(defun paste-to-osx (text &optional push)
+  (let ((process-connection-type nil))
+    (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+      (process-send-string proc text)
+      (process-send-eof proc))))
+
+(setq interprogram-cut-function 'paste-to-osx
+      interprogram-paste-function 'copy-from-osx)
+#+END_SRC
+
+* Backup
+#+BEGIN_SRC emacs-lisp
+(setq backup-directory-alist `(("." . "~/.saves")))
+(setq auto-save-list-file-prefix "~/.saves/.saves-")
+(setq backup-by-copying t)
+(setq delete-old-versions t
+  kept-new-versions 20
+  kept-old-versions 10
+  version-control t)
+#+END_SRC
+
+* Whitespace
+#+BEGIN_SRC emacs-lisp
+  (use-package whitespace
+  :ensure t
+  :init
+  (progn
+  (add-hook 'prog-mode-hook 'whitespace-mode)
+  (add-hook 'latex-mode-hook 'whitespace-mode)
+  (remove-hook 'before-save-hook 'delete-trailing-whitespace)
+  (setq whitespace-line-column nil)
+  (setq show-trailing-whitespace t)
+  (setq whitespace-style
+		'(face
+		  tabs trailing space-before-tab space-after-tab
+		  ; tabs spaces trailing space-before-tab space-after-tab
+	  tab-mark))))
+#+END_SRC
+* Ivy
+#+BEGIN_SRC emacs-lisp
+(use-package ivy
+:ensure t
+:config
+(ivy-mode 1)
+(setq ivy-count-format "%d/%d ")
+(setq enable-recursive-minibuffers t)
+(global-set-key "\C-s" 'swiper)
+)
+#+END_SRC
+
+helm-M-x only
+#+BEGIN_SRC emacs-lisp
+(use-package helm
+:ensure t
+:config
+(global-set-key (kbd "M-x") 'helm-M-x))
+#+END_SRC
+
+* Undo tree
+#+BEGIN_SRC emacs-lisp
+(use-package undo-tree
+:ensure t
+:init
+(global-undo-tree-mode)
+(global-set-key (kbd "C-z") 'undo-tree-undo)
+(global-set-key (kbd "C-y") 'undo-tree-redo))
+#+END_SRC
+
+* Flycheck
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck
+:ensure t
+:init
+(add-hook 'prog-mode-hook 'flycheck-mode))
+#+END_SRC
+* Company
+#+BEGIN_SRC emacs-lisp
+(use-package company
+:ensure t
+:config
+(add-hook 'prog-mode-hook 'company-mode)
+(remove-hook 'text-mode-hook 'company-mode)
+(setq company-idle-delay 0)
+(setq company-minimum-prefix-length 3))
+#+END_SRC
+* Spell check
+#+BEGIN_SRC emacs-lisp
+(setq ispell-program-name "/usr/local/bin/hunspell")
+(setq ispell-hunspell-dict-paths-alist
+'(("en_US" "/Applications/dict-en-20230701_lo/en_US.aff")))
+(setq ispell-local-dictionary "en_US")
+(setq ispell-local-dictionary-alist
+;; Please note the list `("-d" "en_US")` contains ACTUAL parameters passed to hunspell
+;; You could use `("-d" "en_US,en_US-med")` to check with multiple dictionaries
+'(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)))
+
+(global-set-key (kbd "C-c o") 'ispell-word)
+(add-hook 'prog-mode-hook 'flyspell-prog-mode)
+(add-hook 'text-mode-hook 'flyspell-mode)
+(add-hook 'org-mode-hook 'flyspell-mode)
+(add-hook 'latex-mode-hook 'flyspell-mode)
+;; (setq ispell-program-name "/usr/local/bin/ispell")
+#+END_SRC
+* Yasnippet
+#+BEGIN_SRC emacs-lisp
+(use-package yasnippet
+:ensure t
+:init
+(add-hook 'prog-mode-hook #'yas-minor-mode))
+#+END_SRC
+
+* Org
+#+BEGIN_SRC emacs-lisp
+(add-hook 'org-mode-hook 'visual-line-mode)
+(add-hook 'org-mode-hook (lambda () (linum-mode -1)))
+(electric-indent-mode -1)
+; Make them work in terminal
+
+; make tab work in Org-mode code block
+(setq org-src-tab-acts-natively t)
+(add-hook 'latex-mode-hook 'visual-line-mode)
+; (add-hook 'latex-mode-hook 'linum-relative-mode)
+#+END_SRC
+* Python
+#+BEGIN_SRC emacs-lisp
+  (setq py-python-command "python3")
+  (setq python-shell-interpreter "python3")
+  (use-package elpy
+    :ensure t
+    :custom (elpy-rpc-backend "jedi")
+    :config
+    (elpy-enable))
+  ;; (use-package virtualenvwrapper
+  ;;   :ensure t
+  ;;   :config
+  ;;   (venv-initialize-interactive-shells)
+  ;;   (venv-initialize-eshell))
+#+END_SRC
+* Theme
+#+BEGIN_SRC emacs-lisp
+;; (if (display-graphic-p)
+;;      ;; (disable-theme 'spacemacs-light)
+;;     ;; (load-theme 'spacemacs-light t)
+;;     (load-theme 'zenburn t)
+;; (load-theme 'spacemacs-light t))
+
+(use-package spacemacs-theme
+  :defer t
+  :init (load-theme 'spacemacs-light t))
+
+;; (if (display-graphic-p)
+;;     (load "~/.emacs.d/org.el"))
+#+END_SRC
+* Misc
+** Automatically switch focus to newly splitted buffer
+#+BEGIN_SRC emacs-lisp
+(global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
+(global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
+#+END_SRC
+** Highlight current word
+#+BEGIN_SRC emacs-lisp
+(use-package highlight-symbol
+:ensure t
+:init
+(add-hook 'prog-mode-hook 'highlight-symbol-mode))
+#+END_SRC
+
+** Shell
+#+BEGIN_SRC emacs-lisp
+(setq explicit-shell-file-name "/bin/zsh")
+#+END_SRC
+** Tramp
+#+BEGIN_SRC emacs-lisp
+(setq tramp-default-method "ssh")
+#+END_SRC
+** Column width
+#+BEGIN_SRC emacs-lisp
+(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+(add-hook 'latex-mode-hook 'display-fill-column-indicator-mode)
+#+END_SRC
+** Paren match
+#+BEGIN_SRC emacs-lisp
+(add-hook 'prog-mode-hook 'show-paren-mode)
+#+END_SRC
+** Comment
+#+BEGIN_SRC emacs-lisp
+(defun comment-or-uncomment-region-or-line ()
+    "Comments or uncomments the region or the current line if there's no active region."
+    (interactive)
+    (let (beg end)
+        (if (region-active-p)
+            (setq beg (region-beginning) end (region-end))
+            (setq beg (line-beginning-position) end (line-end-position)))
+        (comment-or-uncomment-region beg end)
+        (next-line)))
+(global-set-key (kbd "M-;") 'comment-or-uncomment-region-or-line)
+#+END_SRC
+
+** Go to line
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "C-c g") 'goto-line)
+#+END_SRC
+
+** Highlight indent
+#+BEGIN_SRC emacs-lisp
+  (use-package highlight-indent-guides
+  :ensure t
+  :init
+  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+  (setq highlight-indent-guides-method 'character)
+  (setq highlight-indent-guides-auto-enabled nil))
+  ;; (set-face-foreground 'highlight-indent-guides-character-face "#C0C0C0"))
+#+END_SRC
+
+** Don't put delete words into pasteboard
+#+BEGIN_SRC emacs-lisp
+(defun my-delete-word (arg)
+  "Delete characters forward until encountering the end of a word.
+With argument, do this that many times.
+This command does not push text to `kill-ring'."
+  (interactive "p")
+  (delete-region
+   (point)
+   (progn
+     (forward-word arg)
+     (point))))
+
+(defun my-backward-delete-word (arg)
+  "Delete characters backward until encountering the beginning of a word.
+With argument, do this that many times.
+This command does not push text to `kill-ring'."
+  (interactive "p")
+  (my-delete-word (- arg)))
+
+; bind them to emacs's default shortcut keys:
+(global-set-key (kbd "M-<DEL>") 'my-backward-delete-word)
+
+#+END_SRC
+
+** Prevent down-arrow from adding empty lines to the bottom of the buffer
+#+BEGIN_SRC emacs-lisp
+(setq next-line-add-newlines nil)
+#+END_SRC
+** Hightlight current line
+#+BEGIN_SRC emacs-lisp
+  ;; (global-hl-line-mode +1)
+(require 'hl-line)
+(add-hook 'prog-mode-hook 'hl-line-mode)
+(set-face-background hl-line-face "#DCDCDC")
+#+END_SRC
+
+** Show line numbers
+#+BEGIN_SRC emacs-lisp
+    ;;  (global-linum-mode)
+  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+      ;; (setq linum-relative-current-symbol "")
+#+END_SRC
+
+** Deletes all the whitespace when you hit backspace or delete
+#+BEGIN_SRC emacs-lisp
+(global-hungry-delete-mode)
+#+END_SRC
+** Aggressive indent
+#+BEGIN_SRC emacs-lisp
+(global-aggressive-indent-mode 1)
+#+END_SRC
+** PATH
+#+BEGIN_SRC emacs-lisp
+(use-package exec-path-from-shell
+:ensure t
+:config
+(exec-path-from-shell-initialize)
+)
+#+END_SRC
+** Beacon mode
+#+BEGIN_SRC emacs-lisp
+(use-package beacon
+:ensure t
+:config
+(beacon-mode 1))
+#+END_SRC
+** Expand region
+#+BEGIN_SRC emacs-lisp
+(use-package expand-region
+:ensure t
+:config
+(global-set-key (kbd "C-c =") 'er/expand-region))
+#+END_SRC
+** Misc
+#+BEGIN_SRC emacs-lisp
+(setq save-interprogram-paste-before-kill t)
+#+END_SRC
+* Old
+#+BEGIN_SRC emacs-lisp
+; evil mode
+;;(add-to-list 'load-path "~/.emacs.d/evil")
+;; (require 'evil)
+;;(evil-mode 1)
+;; (evil-define-minor-mode-key 'motion 'visual-line-mode "j" 'evil-next-visual-line)
+;; (evil-define-minor-mode-key 'motion 'visual-line-mode "k" 'evil-previous-visual-line)
+
+;; Consider xx_xx in word
+;; (add-hook 'prog-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
+
+; Expand region.
+;; (require 'expand-region)
+;; (global-set-key (kbd "C-c C-y") 'er/expand-region)
+
+; crux
+;; (require 'crux)
+;; (global-set-key (kbd "C-k") #'crux-smart-kill-line)
+
+; helm.
+;; (helm-mode -1)
+;; (require 'helm)
+;; (global-set-key (kbd "M-x") 'helm-M-x)
+;; (global-set-key (kbd "C-x C-f") 'helm-find-files)
+;; (with-eval-after-load 'helm
+;;   (define-key helm-map (kbd "C-c p") 'ignore)
+;;   (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebind tab to run persistent action
+;;   (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB works in terminal
+;;   (define-key helm-map (kbd "C-z")  'helm-select-action))
+
+;; For python, import path
+;; (require 'exec-path-from-shell)
+;; (exec-path-from-shell-copy-env "PATH")
+;; (when (memq window-system '(mac ns x))
+;;   (exec-path-from-shell-initialize))
+
+;; autopep8
+;; (require 'py-autopep8)
+;; (add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
+
+;; isort
+;; (require 'py-isort)
+;; (add-hook 'before-save-hook 'py-isort-before-save)
+
+
+; ace jump.
+;; (autoload
+;;   'ace-jump-mode
+;;   "ace-jump-mode"
+;;   "Emacs quick move minor mode"
+;;   t)
+;; (define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
+
+;; (require 'multiple-cursors)
+;; (global-set-key (kbd "C-c C-c") 'mc/edit-lines)
+
+; projectile
+;; (require 'projectile)
+;; (projectile-mode 1)
+;; (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+;; (setq projectile-auto-discover nil)
+;; (setq projectile-sort-order 'recentf)
+;; (setq projectile-completion-system 'ivy)
+;; (setq projectile-file-exists-remote-cache-expire nil)
+
+
+#+END_SRC

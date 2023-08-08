@@ -8,3 +8,9 @@ elpa/*
 url/*
 eshell/*
 auto-save-list/*
+
+# Ignore everything but
+*
+!.gitignore
+!myinit.org
+!init.el
