@@ -15,7 +15,6 @@
 #+BEGIN_SRC emacs-lisp
 (global-unset-key (kbd "C-x C-b"))
 (global-unset-key (kbd "C-z")) ; Don't hit it and suspend it in terminal
-(setq inhibit-startup-screen t) ; Disable init screen
 #+END_SRC
 
 * Mac
@@ -118,13 +117,30 @@ helm-M-x only
 #+END_SRC
 * Company
 #+BEGIN_SRC emacs-lisp
-(use-package company
-:ensure t
-:config
-(add-hook 'prog-mode-hook 'company-mode)
-(remove-hook 'text-mode-hook 'company-mode)
-(setq company-idle-delay 0)
-(setq company-minimum-prefix-length 3))
+  (use-package company
+  :ensure t
+  :config
+  (add-hook 'prog-mode-hook 'company-mode)
+  (remove-hook 'text-mode-hook 'company-mode)
+  (setq company-idle-delay 0)
+  (setq company-minimum-prefix-length 3))
+
+
+  ;; (defun my/python-mode-hook ()
+  ;;   (add-to-list 'company-backends 'company-jedi))
+
+  ;; (add-hook 'python-mode-hook 'my/python-mode-hook)
+  ;; (use-package company-jedi
+  ;;     :ensure t
+  ;;     :config
+  ;;     (add-hook 'python-mode-hook 'jedi:setup)
+  ;;        )
+
+  ;; (defun my/python-mode-hook ()
+  ;;   (add-to-list 'company-backends 'company-jedi))
+
+  ;; (add-hook 'python-mode-hook 'my/python-mode-hook)
+
 #+END_SRC
 * Spell check
 #+BEGIN_SRC emacs-lisp
@@ -166,18 +182,39 @@ helm-M-x only
 #+END_SRC
 * Python
 #+BEGIN_SRC emacs-lisp
-  (setq py-python-command "python3")
-  (setq python-shell-interpreter "python3")
-  (use-package elpy
-    :ensure t
-    :custom (elpy-rpc-backend "jedi")
-    :config
-    (elpy-enable))
-  ;; (use-package virtualenvwrapper
+    (setq py-python-command "python3")
+
+    (setq python-shell-interpreter "python3")
+
+    (use-package elpy
+      :ensure t
+      :custom (elpy-rpc-backend "jedi")
+      :config
+      (elpy-enable))
+
+  ;; (use-package python-black
   ;;   :ensure t
   ;;   :config
-  ;;   (venv-initialize-interactive-shells)
-  ;;   (venv-initialize-eshell))
+  ;;   (add-hook 'python-mode-hook 'python-black-on-save-mode-enable-dwim))
+
+  (use-package py-autopep8
+    :ensure t
+    :config
+    (add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
+    (setq py-autopep8-options '("--max-line-length=80")))
+
+  ;; (use-package py-isort
+  ;;   :ensure t
+  ;;   :config
+  ;;   (add-hook 'python-mode-hook py-isort-enable-on-save)
+  ;;   (setq py-isort-options '("--lines=80")))
+
+  ;;   ;; (use-package virtualenvwrapper
+    ;; ;;
+    ;; :ensure t
+    ;;   :config
+    ;;   (venv-initialize-interactive-shells)
+    ;;   (venv-initialize-eshell))
 #+END_SRC
 * Theme
 #+BEGIN_SRC emacs-lisp
