@@ -1,5 +1,5 @@
 #+STARTIP: overview
-* Disable useless things
+* Disable things
 #+BEGIN_SRC emacs-lisp
   ; (tool-bar-mode -1)
   ; (toggle-scroll-bar -1)
@@ -12,15 +12,34 @@
 
   (setq-default visible-bell t)
   (blink-cursor-mode 0)
-  (fset 'yes-or-no-p 'y-or-n-p)
-#+END_SRC
-
-* Disable keys
-#+BEGIN_SRC emacs-lisp
+  ;; Useless keys
   (global-unset-key (kbd "C-x C-b"))
   (global-unset-key (kbd "C-z")) ; Don't hit it and suspend it in terminal
 #+END_SRC
+* Scroll and Click
+#+BEGIN_SRC emacs-lisp
+  ; Click and scroll in terminal.
+  (unless (display-graphic-p)
+    ;; activate mouse-based scrolling
+    (xterm-mouse-mode 1)
+    (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
+    (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
+  ;; Scroll better
+  ;; ;; Vertical Scroll
+  (setq scroll-step 1)
+  (setq scroll-margin 1)
+  (setq scroll-conservatively 100000)
+  (setq scroll-up-aggressively 0.01)
+  (setq scroll-down-aggressively 0.01)
+  (setq auto-window-vscroll nil)
+  (setq fast-but-imprecise-scrolling nil)
+  (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
+  (setq mouse-wheel-progressive-speed nil)
+  ;; Horizontal Scroll
+  (setq hscroll-step 1)
+  (setq hscroll-margin 1)
 
+#+END_SRC
 * Mac
 ** Handle copy and paste in OSX
 #+BEGIN_SRC emacs-lisp
@@ -72,13 +91,45 @@
 #+END_SRC
 * Ivy/Helm
 #+BEGIN_SRC emacs-lisp
+      ;; (use-package ivy
+      ;; :ensure t
+      ;; :config
+      ;; (ivy-mode 1)
+      ;; (setq ivy-count-format "%d/%d ")
+      ;; (setq enable-recursive-minibuffers t)
+      ;; )
+
+  ;; https://github.com/MatthewZMD/.emacs.d?tab=readme-ov-file#ivy-amx-counsel-swiper
   (use-package ivy
-  :ensure t
-  :config
-  (ivy-mode 1)
-  (setq ivy-count-format "%d/%d ")
-  (setq enable-recursive-minibuffers t)
-  )
+    :diminish
+    :init
+    (use-package amx :defer t)
+    (use-package counsel :diminish :config (counsel-mode 1))
+    (use-package swiper :defer t)
+    (ivy-mode 1)
+    :bind
+    (("C-s" . swiper-isearch)
+     ("C-z s" . counsel-rg)
+     ("C-z b" . counsel-buffer-or-recentf)
+     ("C-z C-b" . counsel-ibuffer)
+     ("M-y" . counsel-yank-pop)
+     (:map ivy-minibuffer-map
+	 ("M-RET" . ivy-immediate-done))
+     (:map counsel-find-file-map
+	 ("C-~" . counsel-goto-local-home)))
+    :custom
+    ;; (ivy-use-virtual-buffers t)
+    ;; (ivy-use-virtual-buffers nil)
+    (ivy-height 10)
+    (ivy-on-del-error-function nil)
+    (ivy-magic-slash-non-match-action 'ivy-magic-slash-non-match-create)
+    (ivy-count-format "%d/%d")
+    (ivy-wrap t)
+    :config
+    (defun counsel-goto-local-home ()
+	"Go to the $HOME of the local machine."
+	(interactive)
+      (ivy--cd "~/")))
 #+END_SRC
 
 helm-M-x only
@@ -88,26 +139,34 @@ helm-M-x only
   :config
   (global-set-key (kbd "M-x") 'helm-M-x))
 
-  ; For search.
-  (use-package helm-swoop
-  :ensure t
-  :config
-  (global-set-key (kbd "C-s") 'helm-swoop)
-  ;; Save buffer when helm-multi-swoop-edit complete
-  (setq helm-multi-swoop-edit-save t)
-  ;; If this value is t, split window inside the current window
-  (setq helm-swoop-split-with-multiple-windows t))
+  ;; ; For search.
+  ;; (use-package helm-swoop
+  ;; :ensure t
+  ;; :config
+  ;; (global-set-key (kbd "C-s") 'helm-swoop)
+  ;; ;; Save buffer when helm-multi-swoop-edit complete
+  ;; (setq helm-multi-swoop-edit-save t)
+  ;; ;; If this value is t, split window inside the current window
+  ;; (setq helm-swoop-split-with-multiple-windows t))
 
 #+END_SRC
 
 * Undo tree
 #+BEGIN_SRC emacs-lisp
+    ;; (use-package undo-tree
+    ;; :ensure t
+    ;; :init
+    ;; (global-undo-tree-mode)
+    ;; (global-set-key (kbd "C-z") 'undo-tree-undo))
+
   (use-package undo-tree
-  :ensure t
-  :init
-  (global-undo-tree-mode)
-  (global-set-key (kbd "C-z") 'undo-tree-undo)
-  (global-set-key (kbd "C-y") 'undo-tree-redo))
+    :defer t
+    :diminish undo-tree-mode
+    :init (global-undo-tree-mode)
+    :custom
+    (undo-tree-visualizer-diff t)
+    (undo-tree-history-directory-alist `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
+    (undo-tree-visualizer-timestamps t))
 #+END_SRC
 
 * Flycheck
@@ -217,11 +276,101 @@ helm-M-x only
 #+END_SRC
 * Theme
 #+BEGIN_SRC emacs-lisp
-  (use-package spacemacs-theme
-    :defer t
-    :init (load-theme 'spacemacs-light t))
+  ;; (use-package spacemacs-theme
+  ;;   :defer t
+  ;;   :init (load-theme 'spacemacs-light t))
+
+  (use-package doom-themes
+    :ensure t
+    :config
+    ;; Global settings (defaults)
+    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+	  doom-themes-enable-italic t) ; if nil, italics is universally disabled
+      (load-theme 'doom-feather-light t))
 #+END_SRC
 * Misc
+** Font
+#+BEGIN_SRC emacs-lisp
+  ;; Input Mono, Monaco Style, Line Height 1.3 download from http://input.fontbureau.com/
+  ;; (defvar font-list '(("Input" . 11) ("Hack" . 12) ("Consolas" . 12) ("Love LetterTW" . 12.5))
+  ;;   "List of fonts and sizes.  The first one available will be used.")
+#+END_SRC
+
+** Recentf
+#+BEGIN_SRC emacs-lisp
+(use-package recentf
+  :ensure nil
+  :hook (after-init . recentf-mode)
+  :custom
+  (recentf-auto-cleanup "05:00am")
+  (recentf-max-saved-items 200)
+  (recentf-exclude '((expand-file-name package-user-dir)
+                     ".cache"
+                     ".cask"
+                     ".elfeed"
+                     "bookmarks"
+                     "cache"
+                     "ido.*"
+                     "persp-confs"
+                     "recentf"
+                     "undo-tree-hist"
+                     "url"
+                     "COMMIT_EDITMSG\\'")))
+
+;; When buffer is closed, saves the cursor location
+(save-place-mode 1)
+
+;; Set history-length longer
+(setq-default history-length 500)
+#+END_SRC
+
+** Crux
+#+BEGIN_SRC emacs-lisp
+  (use-package crux
+  :bind
+  (("C-a" . crux-move-beginning-of-line)
+     ("C-x 4 t" . crux-transpose-windows)
+     ("C-x K" . crux-kill-other-buffers)
+     ("C-k" . crux-smart-kill-line))
+    :config
+    (crux-with-region-or-buffer indent-region)
+    (crux-with-region-or-buffer untabify)
+    (crux-with-region-or-point-to-eol kill-ring-save)
+    (defalias 'rename-file-and-buffer #'crux-rename-file-and-buffer))
+#+END_SRC
+** Smartparens
+#+BEGIN_SRC emacs-lisp
+  (use-package smartparens
+    :hook (prog-mode . smartparens-mode)
+    :diminish smartparens-mode
+    :bind
+    (:map smartparens-mode-map
+	  ("C-M-f" . sp-forward-sexp)
+	  ("C-M-b" . sp-backward-sexp)
+	  ("C-M-a" . sp-backward-down-sexp)
+	  ("C-M-e" . sp-up-sexp)
+	  ("C-M-w" . sp-copy-sexp)
+	  ("C-M-k" . sp-change-enclosing)
+	  ("M-k" . sp-kill-sexp)
+	  ("C-M-<backspace>" . sp-splice-sexp-killing-backward)
+	  ("C-S-<backspace>" . sp-splice-sexp-killing-around)
+	  ("C-]" . sp-select-next-thing-exchange))
+    :custom
+    (sp-escape-quotes-after-insert nil)
+    :config
+    ;; Stop pairing single quotes in elisp
+    (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
+    (sp-local-pair 'org-mode "[" nil :actions nil))
+#+END_SRC
+
+** Auto-reload init files
+#+BEGIN_SRC emacs-lisp
+  (defun reload-init-file ()
+    (interactive)
+    (load-file user-init-file))
+  ;; (global-set-key (kbd "C-c C-l") 'reload-init-file)    ; Reload .emacs file
+#+END_SRC
+#+end_SRC
 ** Automatically switch focus to newly splitted buffer
 #+BEGIN_SRC emacs-lisp
   (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
@@ -238,6 +387,11 @@ helm-M-x only
 ** Shell
 #+BEGIN_SRC emacs-lisp
   (setq explicit-shell-file-name "/bin/zsh")
+
+  (use-package exec-path-from-shell
+    :if (memq window-system '(mac ns x))
+    :config
+    (exec-path-from-shell-initialize))
 #+END_SRC
 ** Tramp
 #+BEGIN_SRC emacs-lisp
@@ -300,25 +454,39 @@ helm-M-x only
 #+END_SRC
 ** Hightlight current line
 #+BEGIN_SRC emacs-lisp
-  ;; (global-hl-line-mode +1)
-  (require 'hl-line)
-  (add-hook 'prog-mode-hook 'hl-line-mode)
+  (global-hl-line-mode +1)
+    ;; (require 'hl-line)
+    ;; (add-hook 'prog-mode-hook 'hl-line-mode)
   (set-face-background hl-line-face "#DCDCDC")
+
+  ;; highlight only a single virtual line
+  (setq hl-line-range-function
+	'(lambda()
+	   (save-excursion
+	     (cons
+	      (progn
+		(beginning-of-visual-line)
+		(point))
+	      (progn
+		(beginning-of-visual-line 2)
+		(point))))))
 #+END_SRC
 
 ** Show line numbers
 #+BEGIN_SRC emacs-lisp
   ;;  (global-linum-mode)
   (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  ;; Display column numbers in modeline
+  (column-number-mode 1)
   ;; (setq linum-relative-current-symbol "")
 #+END_SRC
 
 ** Deletes all the whitespace when you hit backspace or delete
 #+BEGIN_SRC emacs-lisp
-  (use-package hungry-delete
-  :ensure t
-  :config
-  (global-hungry-delete-mode))
+  ;; (use-package hungry-delete
+  ;; :ensure t
+  ;; :config
+  ;; (global-hungry-delete-mode))
 #+END_SRC
 ** Aggressive indent
 #+BEGIN_SRC emacs-lisp
@@ -349,9 +517,120 @@ helm-M-x only
   :config
   (global-set-key (kbd "C-c =") 'er/expand-region))
 #+END_SRC
+** Winner
+#+BEGIN_SRC emacs-lisp
+(use-package winner
+  :ensure nil
+  :custom
+  (winner-boring-buffers
+   '("*Completions*"
+     "*Compile-Log*"
+     "*inferior-lisp*"
+     "*Fuzzy Completions*"
+     "*Apropos*"
+     "*Help*"
+     "*cvs*"
+     "*Buffer List*"
+     "*Ibuffer*"
+     "*esh command on file*"))
+  :config
+  (winner-mode 1))
+#+END_SRC
+** Ace Window
+#+BEGIN_SRC emacs-lisp
+(use-package ace-window
+  :bind ("C-x C-o" . ace-window))
+#+END_SRC
+** UTF-8
+#+BEGIN_SRC emacs-lisp
+  (set-selection-coding-system 'utf-8)
+  (prefer-coding-system 'utf-8)
+  (set-language-environment "UTF-8")
+  (set-default-coding-systems 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (setq locale-coding-system 'utf-8)
+  ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
+  (when (display-graphic-p)
+    (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+#+END_SRC
+** Small configs
+#+BEGIN_SRC emacs-lisp
+  (fset 'yes-or-no-p 'y-or-n-p)
+  (setq use-dialog-box nil)
+
+  ;; Move the backup fies to user-emacs-directory/.backup
+  (setq backup-directory-alist `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
+
+  ;; Ask before killing emacs
+  (setq confirm-kill-emacs 'y-or-n-p)
+
+  ;; Automatically kill all active processes when closing Emacs
+  (setq confirm-kill-processes nil)
+
+  ;; Turn Off Cursor Alarms
+  (setq ring-bell-function 'ignore)
+
+  ;; Show Keystrokes in Progress Instantly
+  (setq echo-keystrokes 0.1)
+
+  ;; Don't Lock Files
+  (setq-default create-lockfiles nil)
+
+  ;; Better Compilation
+  (setq-default compilation-always-kill t) ; kill compilation process before starting another
+
+  (setq-default compilation-ask-about-save nil) ; save all buffers on `compile'
+
+  (setq-default compilation-scroll-output t)
+
+  ;; ad-handle-definition warnings are generated when functions are redefined with `defadvice',
+  ;; they are not helpful.
+  (setq ad-redefinition-action 'accept)
+
+  ;; Move Custom-Set-Variables to Different File
+  (setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
+  (load custom-file 'noerror)
+
+  ;; So Long mitigates slowness due to extremely long lines.
+  ;; Currently available in Emacs master branch *only*!
+  (when (fboundp 'global-so-long-mode)
+    (global-so-long-mode))
+
+  ;; Add a newline automatically at the end of the file upon save.
+  (setq require-final-newline t)
+
+  ;; Enable `erase-buffer' function
+  (put 'erase-buffer 'disabled nil)
+
+#+END_SRC
 ** Misc
 #+BEGIN_SRC emacs-lisp
   (setq save-interprogram-paste-before-kill t)
+
+  ;; Adjust font size like web browsers
+  (global-set-key (kbd "C-=") #'text-scale-increase)
+  (global-set-key (kbd "C-+") #'text-scale-increase)
+  (global-set-key (kbd "C--") #'text-scale-decrease)
+
+  ;; Save all buffers.
+  (defun save-all-buffers ()
+    "Instead of `save-buffer', save all opened buffers by calling `save-some-buffers' with ARG t."
+    (interactive)
+    (save-some-buffers t))
+  (global-set-key (kbd "C-x C-s") nil)
+  (global-set-key (kbd "C-x C-s") #'save-all-buffers)
+
+  ;; Stop ivy from displaying recentf files.
+  (setq ivy-use-virtual-buffers nil)
+
+  ;; Jump to visual line, not physical line
+  (global-set-key (kbd "C-e") 'end-of-visual-line)
+  (global-set-key (kbd "C-a") 'beginning-of-visual-line)
+
+  ;; Visual line don't break the word
+  (setq-default word-wrap t)
+
 #+END_SRC
 * Old
 #+BEGIN_SRC emacs-lisp
