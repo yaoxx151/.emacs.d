@@ -1,20 +1,31 @@
 #+STARTIP: overview
 * Disable things
 #+BEGIN_SRC emacs-lisp
-  ; (tool-bar-mode -1)
-  ; (toggle-scroll-bar -1)
+					  ; (tool-bar-mode -1)
+					  ; (toggle-scroll-bar -1)
   (setq inhibit-startup-screen t)
+  (setq initial-major-mode 'text-mode)
   (setq inhibit-startup-message t)
-  (if (display-graphic-p)
-      (progn
-	(tool-bar-mode -1)
-	(scroll-bar-mode -1)))
+  ;; (if (display-graphic-p)
+  ;;     (progn
+  ;;       (tool-bar-mode -1)
+  ;;       (scroll-bar-mode -1)))
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  (menu-bar-mode -1)
 
   (setq-default visible-bell t)
   (blink-cursor-mode 0)
+
+  ;; Icon of filetype.
+  (setq ns-use-proxy-icon nil)
+
   ;; Useless keys
-  (global-unset-key (kbd "C-x C-b"))
+  ;; (global-unset-key (kbd "C-x C-b"))
   (global-unset-key (kbd "C-z")) ; Don't hit it and suspend it in terminal
+  (global-set-key (kbd "M-z") nil)
+  (global-set-key (kbd "M-m") nil)
+  (global-set-key (kbd "C-x C-z") nil)
 #+END_SRC
 * Scroll and Click
 #+BEGIN_SRC emacs-lisp
@@ -40,9 +51,9 @@
   (setq hscroll-margin 1)
 
 #+END_SRC
-* Mac
-** Handle copy and paste in OSX
+* MacOS
 #+BEGIN_SRC emacs-lisp
+; Handle copy and paste in OSX
   (defun copy-from-osx ()
     "Handle copy/paste intelligently on osx."
     (let ((pbpaste (purecopy "/usr/bin/pbpaste")))
@@ -89,7 +100,31 @@
 	  tabs trailing space-before-tab space-after-tab ; tabs spaces trailing space-before-tab space-after-tab
 	  tab-mark))))
 #+END_SRC
-* Ivy/Helm
+* Ibuffer
+#+BEGIN_SRC emacs-lisp
+  (use-package ibuffer
+    :ensure nil
+    :bind ("C-x C-b" . ibuffer)
+    :init
+    (use-package ibuffer-vc
+      :commands (ibuffer-vc-set-filter-groups-by-vc-root)
+      :custom
+      (ibuffer-vc-skip-if-remote 'nil))
+    :custom
+    (ibuffer-formats
+     '((mark modified read-only locked " "
+	     (name 35 35 :left :elide)
+	     " "
+	     (size 9 -1 :right)
+	     " "
+	     (mode 16 16 :left :elide)
+	     " " filename-and-process)
+       (mark " "
+	     (name 16 -1)
+	     " " filename))))
+#+END_SRC
+
+* Ivy
 #+BEGIN_SRC emacs-lisp
       ;; (use-package ivy
       ;; :ensure t
@@ -132,8 +167,9 @@
       (ivy--cd "~/")))
 #+END_SRC
 
-helm-M-x only
+* Helm
 #+BEGIN_SRC emacs-lisp
+; helm-M-x only
   (use-package helm
   :ensure t
   :config
@@ -148,7 +184,6 @@ helm-M-x only
   ;; (setq helm-multi-swoop-edit-save t)
   ;; ;; If this value is t, split window inside the current window
   ;; (setq helm-swoop-split-with-multiple-windows t))
-
 #+END_SRC
 
 * Undo tree
@@ -183,8 +218,16 @@ helm-M-x only
   :config
   (add-hook 'prog-mode-hook 'company-mode)
   (remove-hook 'text-mode-hook 'company-mode)
-  (setq company-idle-delay 0)
-  (setq company-minimum-prefix-length 3))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-tooltip-align-annotations t)
+  (company-require-match 'never)
+  ;; Don't use company in the following modes
+  (company-global-modes '(not shell-mode eaf-mode text-mode-hook latex-mode-hook))
+  ;; Trigger completion immediately.
+  (company-idle-delay 0.1)
+  ;; Number the candidates (use M-1, M-2 etc to select completions).
+  (company-show-numbers t))
 
   ;; (defun my/python-mode-hook ()
   ;;   (add-to-list 'company-backends 'company-jedi))
@@ -223,9 +266,30 @@ helm-M-x only
 * Yasnippet
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
-  :ensure t
-  :init
-  (add-hook 'prog-mode-hook #'yas-minor-mode))
+    :diminish yas-minor-mode
+    :init
+    (use-package yasnippet-snippets :after yasnippet)
+    :hook ((prog-mode LaTeX-mode org-mode markdown-mode) . yas-minor-mode)
+    :bind
+    ;; (:map yas-minor-mode-map ("C-c C-n" . yas-expand-from-trigger-key))
+    (:map yas-keymap
+	  (("TAB" . smarter-yas-expand-next-field)
+	   ([(tab)] . smarter-yas-expand-next-field)))
+    :config
+    (yas-reload-all)
+    (defun smarter-yas-expand-next-field ()
+      "Try to `yas-expand' then `yas-next-field' at current cursor position."
+      (interactive)
+      (let ((old-point (point))
+	    (old-tick (buffer-chars-modified-tick)))
+	(yas-expand)
+	(when (and (eq old-point (point))
+		   (eq old-tick (buffer-chars-modified-tick)))
+	  (ignore-errors (yas-next-field))))))
+    ;; (use-package yasnippet
+    ;; :ensure t
+    ;; :init
+    ;; (add-hook 'prog-mode-hook #'yas-minor-mode))
 #+END_SRC
 
 * Org
@@ -242,61 +306,64 @@ helm-M-x only
 #+END_SRC
 * Python
 #+BEGIN_SRC emacs-lisp
-  (setq py-python-command "python3")
 
-  (setq python-shell-interpreter "python3")
+  (use-package python-mode
+    :ensure nil
+    :after flycheck
+    :mode "\\.py\\'"
+    :custom
+    (python-indent-offset 2)
+    (flycheck-python-pycompile-executable "python3")
+    (python-shell-interpreter "python3"))
 
-  (use-package python-black
-    :ensure t
-    :config
-    (add-hook 'python-mode-hook 'python-black-on-save-mode))
 
-  (use-package py-isort
-    :ensure t
-    :config
-    (add-hook 'before-save-hook 'py-isort-before-save))
+    (setq py-python-command "python3")
+    (setq python-shell-interpreter "python3")
 
-    ;; (use-package elpy
-    ;;   :ensure t
-    ;;   :init
-    ;;   (elpy-enable)
-    ;;   (setq elpy-rpc-virtualenv-path 'current))
+    (use-package python-black
+      :ensure t
+      :config
+      (add-hook 'python-mode-hook 'python-black-on-save-mode))
 
-    ;; (use-package py-autopep8
-    ;;   :ensure t
-    ;;   :config
-    ;;   (add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
-    ;;   (setq py-autopep8-options '("--max-line-length=80")))
+    (use-package py-isort
+      :ensure t
+      :config
+      (add-hook 'before-save-hook 'py-isort-before-save))
 
-    ;; (use-package virtualenvwrapper
-    ;; :ensure t
-    ;;   :config
-    ;;   (venv-initialize-interactive-shells)
-    ;;   (venv-initialize-eshell))
+      ;; (use-package elpy
+      ;;   :ensure t
+      ;;   :init
+      ;;   (elpy-enable)
+      ;;   (setq elpy-rpc-virtualenv-path 'current))
+
+      ;; (use-package py-autopep8
+      ;;   :ensure t
+      ;;   :config
+      ;;   (add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
+      ;;   (setq py-autopep8-options '("--max-line-length=80")))
+
+      ;; (use-package virtualenvwrapper
+      ;; :ensure t
+      ;;   :config
+      ;;   (venv-initialize-interactive-shells)
+      ;;   (venv-initialize-eshell))
 #+END_SRC
 * Theme
 #+BEGIN_SRC emacs-lisp
   ;; (use-package spacemacs-theme
   ;;   :defer t
   ;;   :init (load-theme 'spacemacs-light t))
-
   (use-package doom-themes
     :ensure t
     :config
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
 	  doom-themes-enable-italic t) ; if nil, italics is universally disabled
-      (load-theme 'doom-feather-light t))
+    (if (display-graphic-p)
+	(load-theme 'doom-ayu-light t)
+      (load-theme 'doom-feather-light t)))
 #+END_SRC
-* Misc
-** Font
-#+BEGIN_SRC emacs-lisp
-  ;; Input Mono, Monaco Style, Line Height 1.3 download from http://input.fontbureau.com/
-  ;; (defvar font-list '(("Input" . 11) ("Hack" . 12) ("Consolas" . 12) ("Love LetterTW" . 12.5))
-  ;;   "List of fonts and sizes.  The first one available will be used.")
-#+END_SRC
-
-** Recentf
+* Recentf
 #+BEGIN_SRC emacs-lisp
 (use-package recentf
   :ensure nil
@@ -324,7 +391,58 @@ helm-M-x only
 (setq-default history-length 500)
 #+END_SRC
 
-** Crux
+* Dired
+#+BEGIN_SRC emacs-lisp
+(use-package dired
+  :ensure nil
+  :bind
+  (("C-x C-j" . dired-jump))
+  :custom
+  ;; Always delete and copy recursively
+  (dired-listing-switches "-lah")
+  (dired-recursive-deletes 'always)
+  (dired-recursive-copies 'always)
+  ;; Auto refresh Dired, but be quiet about it
+  (global-auto-revert-non-file-buffers t)
+  (auto-revert-verbose nil)
+  ;; Quickly copy/move file in Dired
+  (dired-dwim-target t)
+  ;; Move files to trash when deleting
+  (delete-by-moving-to-trash t)
+  ;; Load the newest version of a file
+  (load-prefer-newer t)
+  ;; Detect external file changes and auto refresh file
+  (auto-revert-use-notify nil)
+  (auto-revert-interval 3) ; Auto revert every 3 sec
+  :config
+  ;; Enable global auto-revert
+  (global-auto-revert-mode t)
+  ;; Reuse same dired buffer, to prevent numerous buffers while navigating in dired
+  (put 'dired-find-alternate-file 'disabled nil)
+  :hook
+  (dired-mode . (lambda ()
+                  (local-set-key (kbd "<mouse-2>") #'dired-find-alternate-file)
+                  (local-set-key (kbd "RET") #'dired-find-alternate-file)
+                  (local-set-key (kbd "^")
+                                 (lambda () (interactive) (find-alternate-file ".."))))))
+#+END_SRC
+* Projectile
+#+BEGIN_SRC emacs-lisp
+(use-package projectile
+  :ensure t
+  :bind
+  ("C-x p" . projectile-command-map)
+  :custom
+  (projectile-completion-system 'ivy)
+  :config
+  (projectile-mode 1)
+  ;; Open dired on the directory when swtiching project.
+  (setq projectile-switch-project-action #'projectile-dired)
+
+  (setq projectile-indexing-method 'alien)
+  (setq projectile-sort-order 'recently-active))
+#+END_SRC
+* Crux
 #+BEGIN_SRC emacs-lisp
   (use-package crux
   :bind
@@ -338,7 +456,7 @@ helm-M-x only
     (crux-with-region-or-point-to-eol kill-ring-save)
     (defalias 'rename-file-and-buffer #'crux-rename-file-and-buffer))
 #+END_SRC
-** Smartparens
+* Smartparens
 #+BEGIN_SRC emacs-lisp
   (use-package smartparens
     :hook (prog-mode . smartparens-mode)
@@ -363,28 +481,7 @@ helm-M-x only
     (sp-local-pair 'org-mode "[" nil :actions nil))
 #+END_SRC
 
-** Auto-reload init files
-#+BEGIN_SRC emacs-lisp
-  (defun reload-init-file ()
-    (interactive)
-    (load-file user-init-file))
-  ;; (global-set-key (kbd "C-c C-l") 'reload-init-file)    ; Reload .emacs file
-#+END_SRC
-#+end_SRC
-** Automatically switch focus to newly splitted buffer
-#+BEGIN_SRC emacs-lisp
-  (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
-  (global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
-#+END_SRC
-** Highlight current word
-#+BEGIN_SRC emacs-lisp
-  (use-package highlight-symbol
-  :ensure t
-  :init
-  (add-hook 'prog-mode-hook 'highlight-symbol-mode))
-#+END_SRC
-
-** Shell
+* Shell
 #+BEGIN_SRC emacs-lisp
   (setq explicit-shell-file-name "/bin/zsh")
 
@@ -393,26 +490,17 @@ helm-M-x only
     :config
     (exec-path-from-shell-initialize))
 #+END_SRC
-** Tramp
+* Tramp
 #+BEGIN_SRC emacs-lisp
   (setq tramp-default-method "ssh")
 #+END_SRC
-** Column width
+* Column width
 #+BEGIN_SRC emacs-lisp
   (setq-default display-fill-column-indicator-column 87) ; 88 linewidth
   (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
   (add-hook 'latex-mode-hook 'display-fill-column-indicator-mode)
 #+END_SRC
-** Paren match
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'prog-mode-hook 'show-paren-mode)
-#+END_SRC
-** Go to line
-#+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "C-c g") 'goto-line)
-#+END_SRC
-
-** Highlight indent
+* Highlight indent
 #+BEGIN_SRC emacs-lisp
   (use-package highlight-indent-guides
   :ensure t
@@ -423,36 +511,15 @@ helm-M-x only
   ;; (set-face-foreground 'highlight-indent-guides-character-face "#C0C0C0"))
 #+END_SRC
 
-** Don't put deleted words into pasteboard
+* Highlight current word
 #+BEGIN_SRC emacs-lisp
-  (defun my-delete-word (arg)
-    "Delete characters forward until encountering the end of a word.
-  With argument, do this that many times.
-  This command does not push text to `kill-ring'."
-    (interactive "p")
-    (delete-region
-     (point)
-     (progn
-       (forward-word arg)
-       (point))))
-
-  (defun my-backward-delete-word (arg)
-    "Delete characters backward until encountering the beginning of a word.
-  With argument, do this that many times.
-  This command does not push text to `kill-ring'."
-    (interactive "p")
-    (my-delete-word (- arg)))
-
-  ; bind them to emacs's default shortcut keys:
-  (global-set-key (kbd "M-<DEL>") 'my-backward-delete-word)
-
+  (use-package highlight-symbol
+  :ensure t
+  :init
+  (add-hook 'prog-mode-hook 'highlight-symbol-mode))
 #+END_SRC
 
-** Prevent down-arrow from adding empty lines to the bottom of the buffer
-#+BEGIN_SRC emacs-lisp
-  (setq next-line-add-newlines nil)
-#+END_SRC
-** Hightlight current line
+* Hightlight current line
 #+BEGIN_SRC emacs-lisp
   (global-hl-line-mode +1)
     ;; (require 'hl-line)
@@ -472,30 +539,14 @@ helm-M-x only
 		(point))))))
 #+END_SRC
 
-** Show line numbers
-#+BEGIN_SRC emacs-lisp
-  ;;  (global-linum-mode)
-  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-  ;; Display column numbers in modeline
-  (column-number-mode 1)
-  ;; (setq linum-relative-current-symbol "")
-#+END_SRC
-
-** Deletes all the whitespace when you hit backspace or delete
-#+BEGIN_SRC emacs-lisp
-  ;; (use-package hungry-delete
-  ;; :ensure t
-  ;; :config
-  ;; (global-hungry-delete-mode))
-#+END_SRC
-** Aggressive indent
+* Aggressive indent
 #+BEGIN_SRC emacs-lisp
   (use-package aggressive-indent
   :ensure t
   :config
   (global-aggressive-indent-mode 1))
 #+END_SRC
-** PATH
+* PATH
 #+BEGIN_SRC emacs-lisp
   (use-package exec-path-from-shell
   :ensure t
@@ -503,21 +554,22 @@ helm-M-x only
   (exec-path-from-shell-initialize)
   )
 #+END_SRC
-** Beacon mode
+* Beacon mode
 #+BEGIN_SRC emacs-lisp
   (use-package beacon
   :ensure t
   :config
   (beacon-mode 1))
 #+END_SRC
-** Expand region
+* Expand region
 #+BEGIN_SRC emacs-lisp
   (use-package expand-region
   :ensure t
   :config
   (global-set-key (kbd "C-c =") 'er/expand-region))
 #+END_SRC
-** Winner
+* Winner
+Restore previous window layouts.
 #+BEGIN_SRC emacs-lisp
 (use-package winner
   :ensure nil
@@ -536,12 +588,12 @@ helm-M-x only
   :config
   (winner-mode 1))
 #+END_SRC
-** Ace Window
+* Ace Window
 #+BEGIN_SRC emacs-lisp
 (use-package ace-window
   :bind ("C-x C-o" . ace-window))
 #+END_SRC
-** UTF-8
+* UTF-8
 #+BEGIN_SRC emacs-lisp
   (set-selection-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
@@ -554,7 +606,7 @@ helm-M-x only
   (when (display-graphic-p)
     (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 #+END_SRC
-** Small configs
+* Small configs
 #+BEGIN_SRC emacs-lisp
   (fset 'yes-or-no-p 'y-or-n-p)
   (setq use-dialog-box nil)
@@ -577,13 +629,6 @@ helm-M-x only
   ;; Don't Lock Files
   (setq-default create-lockfiles nil)
 
-  ;; Better Compilation
-  (setq-default compilation-always-kill t) ; kill compilation process before starting another
-
-  (setq-default compilation-ask-about-save nil) ; save all buffers on `compile'
-
-  (setq-default compilation-scroll-output t)
-
   ;; ad-handle-definition warnings are generated when functions are redefined with `defadvice',
   ;; they are not helpful.
   (setq ad-redefinition-action 'accept)
@@ -603,10 +648,62 @@ helm-M-x only
   ;; Enable `erase-buffer' function
   (put 'erase-buffer 'disabled nil)
 
-#+END_SRC
-** Misc
-#+BEGIN_SRC emacs-lisp
+  ;; Don't put deleted word into the paste buffer.
+  (defun my-delete-word (arg)
+    "Delete characters forward until encountering the end of a word.
+  With argument, do this that many times.
+  This command does not push text to `kill-ring'."
+    (interactive "p")
+    (delete-region
+     (point)
+     (progn
+       (forward-word arg)
+       (point))))
+
+  (defun my-backward-delete-word (arg)
+    "Delete characters backward until encountering the beginning of a word.
+  With argument, do this that many times.
+  This command does not push text to `kill-ring'."
+    (interactive "p")
+    (my-delete-word (- arg)))
+  (global-set-key (kbd "M-<DEL>") 'my-backward-delete-word)
+
+  ;; Prevent down-arrow from adding empty lines to the bottom of the buffer
+  (setq next-line-add-newlines nil)
+
+  ;; Line numbers
+  ;;  (global-linum-mode)
+  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  ;; Display column numbers in modeline
+  (column-number-mode 1)
+  ;; (setq linum-relative-current-symbol "")
+
+  (set-cursor-color "#404040")
+  (setq-default cursor-type 'bar)
+
   (setq save-interprogram-paste-before-kill t)
+
+  ;; Stop ivy from displaying recentf files.
+  (setq ivy-use-virtual-buffers nil)
+
+  ;; Visual line don't break the word
+  (setq-default word-wrap t)
+
+  ;; Automatically switch focus to newly splitted buffer
+  (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
+  (global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
+
+  ;; ;; Paren match
+  (add-hook 'prog-mode-hook 'show-paren-mode)
+
+#+END_SRC
+* Self-defined commands
+#+BEGIN_SRC emacs-lisp
+  ;; Auto-reload init files
+  (defun reload-init-file ()
+    (interactive)
+    (load-file user-init-file))
+  (global-set-key (kbd "C-c C-l") 'reload-init-file)    ; Reload .emacs file
 
   ;; Adjust font size like web browsers
   (global-set-key (kbd "C-=") #'text-scale-increase)
@@ -621,15 +718,45 @@ helm-M-x only
   (global-set-key (kbd "C-x C-s") nil)
   (global-set-key (kbd "C-x C-s") #'save-all-buffers)
 
-  ;; Stop ivy from displaying recentf files.
-  (setq ivy-use-virtual-buffers nil)
-
   ;; Jump to visual line, not physical line
   (global-set-key (kbd "C-e") 'end-of-visual-line)
   (global-set-key (kbd "C-a") 'beginning-of-visual-line)
 
-  ;; Visual line don't break the word
-  (setq-default word-wrap t)
+  ;; Make.
+  (defun my-make-in-current-directory ()
+    "Go to the current directory and run make."
+    (interactive)
+    (let ((default-directory (if (buffer-file-name)
+				 (file-name-directory (buffer-file-name))
+			       default-directory)))
+      (compile "make; open *.pdf")))
+
+  (global-set-key (kbd "C-c m") 'my-make-in-current-directory)
+
+  ;; go to line
+  (global-set-key (kbd "C-c g") 'goto-line)
+
+  ;; redo
+  (global-set-key (kbd "C-z") 'undo-tree-redo)
+
+  ;; MiniBuffer Functions
+  (defun abort-minibuffer-using-mouse ()
+    "Abort the minibuffer when using the mouse."
+    (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
+      (abort-recursive-edit)))
+
+  (add-hook 'mouse-leave-buffer-hook 'abort-minibuffer-using-mouse)
+  ;; keep the point out of the minibuffer
+  (setq-default minibuffer-prompt-properties '(read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt))
+
+
+  ;; Edit this file.
+  (defun edit-configs ()
+    "Opens the README.org file."
+    (interactive)
+    (find-file "~/.emacs.d/myinit.org"))
+
+  (global-set-key (kbd "C-c e") #'edit-configs)
 
 #+END_SRC
 * Old
@@ -696,4 +823,12 @@ helm-M-x only
 ;;         (comment-or-uncomment-region beg end)
 ;;         (next-line)))
 ;; (global-set-key (kbd "M-;") 'comment-or-uncomment-region-or-line)
+
+;; Deletes all the whitespace when you hit backspace or delete
+;;#+BEGIN_SRC emacs-lisp
+  ;; (use-package hungry-delete
+  ;; :ensure t
+  ;; :config
+  ;; (global-hungry-delete-mode))
+#+END_SRC
 #+END_SRC
