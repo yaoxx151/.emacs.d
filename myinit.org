@@ -1,17 +1,12 @@
 #+STARTIP: overview
 * Disable things
 #+BEGIN_SRC emacs-lisp
-					  ; (tool-bar-mode -1)
-					  ; (toggle-scroll-bar -1)
   (setq inhibit-startup-screen t)
   (setq initial-major-mode 'text-mode)
   (setq inhibit-startup-message t)
-  ;; (if (display-graphic-p)
-  ;;     (progn
-  ;;       (tool-bar-mode -1)
-  ;;       (scroll-bar-mode -1)))
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
+  (when (display-graphic-p)
+	(tool-bar-mode -1)
+	(scroll-bar-mode -1))
   (menu-bar-mode -1)
 
   (setq-default visible-bell t)
@@ -19,13 +14,12 @@
 
   ;; Icon of filetype.
   (setq ns-use-proxy-icon nil)
-
   ;; Useless keys
-  ;; (global-unset-key (kbd "C-x C-b"))
   (global-unset-key (kbd "C-z")) ; Don't hit it and suspend it in terminal
   (global-set-key (kbd "M-z") nil)
   (global-set-key (kbd "M-m") nil)
   (global-set-key (kbd "C-x C-z") nil)
+  (global-set-key (kbd "C-x m") nil)
 #+END_SRC
 * Scroll and Click
 #+BEGIN_SRC emacs-lisp
@@ -126,16 +120,9 @@
 
 * Ivy
 #+BEGIN_SRC emacs-lisp
-      ;; (use-package ivy
-      ;; :ensure t
-      ;; :config
-      ;; (ivy-mode 1)
-      ;; (setq ivy-count-format "%d/%d ")
-      ;; (setq enable-recursive-minibuffers t)
-      ;; )
-
   ;; https://github.com/MatthewZMD/.emacs.d?tab=readme-ov-file#ivy-amx-counsel-swiper
   (use-package ivy
+    :ensure t
     :diminish
     :init
     (use-package amx :defer t)
@@ -188,16 +175,14 @@
 
 * Undo tree
 #+BEGIN_SRC emacs-lisp
-    ;; (use-package undo-tree
-    ;; :ensure t
-    ;; :init
-    ;; (global-undo-tree-mode)
-    ;; (global-set-key (kbd "C-z") 'undo-tree-undo))
-
   (use-package undo-tree
+    :ensure t
     :defer t
     :diminish undo-tree-mode
-    :init (global-undo-tree-mode)
+    :init
+    (global-undo-tree-mode)
+    (global-set-key (kbd "C-/") 'undo-tree-undo)
+    (global-set-key (kbd "C-z") 'undo-tree-redo)
     :custom
     (undo-tree-visualizer-diff t)
     (undo-tree-history-directory-alist `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
@@ -266,9 +251,11 @@
 * Yasnippet
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
+    :ensure t
     :diminish yas-minor-mode
     :init
     (use-package yasnippet-snippets :after yasnippet)
+    :ensure t
     :hook ((prog-mode LaTeX-mode org-mode markdown-mode) . yas-minor-mode)
     :bind
     ;; (:map yas-minor-mode-map ("C-c C-n" . yas-expand-from-trigger-key))
@@ -295,7 +282,7 @@
 * Org
 #+BEGIN_SRC emacs-lisp
   (add-hook 'org-mode-hook 'visual-line-mode)
-  (add-hook 'org-mode-hook (lambda () (linum-mode -1)))
+  (add-hook 'org-mode-hook (lambda () (global-display-line-numbers-mode -1)))
   (electric-indent-mode -1)
   ; Make tab work in Org-mode code block.
   (setq org-src-tab-acts-natively t)
@@ -445,6 +432,7 @@
 * Crux
 #+BEGIN_SRC emacs-lisp
   (use-package crux
+  :ensure t
   :bind
   (("C-a" . crux-move-beginning-of-line)
      ("C-x 4 t" . crux-transpose-windows)
@@ -572,7 +560,7 @@
 Restore previous window layouts.
 #+BEGIN_SRC emacs-lisp
 (use-package winner
-  :ensure nil
+  :ensure t
   :custom
   (winner-boring-buffers
    '("*Completions*"
@@ -590,8 +578,9 @@ Restore previous window layouts.
 #+END_SRC
 * Ace Window
 #+BEGIN_SRC emacs-lisp
-(use-package ace-window
-  :bind ("C-x C-o" . ace-window))
+  (use-package ace-window
+    :ensure t
+    :bind ("C-x C-o" . ace-window))
 #+END_SRC
 * UTF-8
 #+BEGIN_SRC emacs-lisp
@@ -736,9 +725,6 @@ Restore previous window layouts.
   ;; go to line
   (global-set-key (kbd "C-c g") 'goto-line)
 
-  ;; redo
-  (global-set-key (kbd "C-z") 'undo-tree-redo)
-
   ;; MiniBuffer Functions
   (defun abort-minibuffer-using-mouse ()
     "Abort the minibuffer when using the mouse."
@@ -758,77 +744,26 @@ Restore previous window layouts.
 
   (global-set-key (kbd "C-c e") #'edit-configs)
 
-#+END_SRC
-* Old
-#+BEGIN_SRC emacs-lisp
-; evil mode
-;;(add-to-list 'load-path "~/.emacs.d/evil")
-;; (require 'evil)
-;;(evil-mode 1)
-;; (evil-define-minor-mode-key 'motion 'visual-line-mode "j" 'evil-next-visual-line)
-;; (evil-define-minor-mode-key 'motion 'visual-line-mode "k" 'evil-previous-visual-line)
+  ;; Copy file to server.
+  (defun sync-current-file-to-server ()
+    "Sync the current file to a remote server using rsync."
+    (interactive)
+    (message "Sync...")
+    (let ((source-file (buffer-file-name))
+	  (remote-server "merlini18n")
+	  (remote-path "/root/llm_wm"))
+      (shell-command (format "rsync -avz %s %s:%s"
+			     source-file remote-server remote-path))
+      (message "File synced.")))
 
-;; Consider xx_xx in word
-;; (add-hook 'prog-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
+  (global-set-key (kbd "C-c s") 'sync-current-file-to-server)
 
+  ;; Open current directory.
+  (defun open-current-directory ()
+    "Open the current directory."
+    (interactive)
+    (shell-command "open ."))
 
-; crux
-;; (require 'crux)
-;; (global-set-key (kbd "C-k") #'crux-smart-kill-line)
+  (global-set-key (kbd "C-c d") 'open-current-directory)
 
-; helm.
-;; (helm-mode -1)
-;; (require 'helm)
-;; (global-set-key (kbd "M-x") 'helm-M-x)
-;; (global-set-key (kbd "C-x C-f") 'helm-find-files)
-;; (with-eval-after-load 'helm
-;;   (define-key helm-map (kbd "C-c p") 'ignore)
-;;   (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebind tab to run persistent action
-;;   (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB works in terminal
-;;   (define-key helm-map (kbd "C-z")  'helm-select-action))
-
-;; For python, import path
-;; (require 'exec-path-from-shell)
-;; (exec-path-from-shell-copy-env "PATH")
-;; (when (memq window-system '(mac ns x))
-;;   (exec-path-from-shell-initialize))
-
-; ace jump.
-;; (autoload
-;;   'ace-jump-mode
-;;   "ace-jump-mode"
-;;   "Emacs quick move minor mode"
-;;   t)
-;; (define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
-
-;; (require 'multiple-cursors)
-;; (global-set-key (kbd "C-c C-c") 'mc/edit-lines)
-
-; projectile
-;; (require 'projectile)
-;; (projectile-mode 1)
-;; (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-;; (setq projectile-auto-discover nil)
-;; (setq projectile-sort-order 'recentf)
-;; (setq projectile-completion-system 'ivy)
-;; (setq projectile-file-exists-remote-cache-expire nil)
-
-;; (defun comment-or-uncomment-region-or-line ()
-;;     "Comments or uncomments the region or the current line if there's no active region."
-;;     (interactive)
-;;     (let (beg end)
-;;         (if (region-active-p)
-;;             (setq beg (region-beginning) end (region-end))
-;;             (setq beg (line-beginning-position) end (line-end-position)))
-;;         (comment-or-uncomment-region beg end)
-;;         (next-line)))
-;; (global-set-key (kbd "M-;") 'comment-or-uncomment-region-or-line)
-
-;; Deletes all the whitespace when you hit backspace or delete
-;;#+BEGIN_SRC emacs-lisp
-  ;; (use-package hungry-delete
-  ;; :ensure t
-  ;; :config
-  ;; (global-hungry-delete-mode))
-#+END_SRC
 #+END_SRC
