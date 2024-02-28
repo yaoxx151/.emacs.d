@@ -125,9 +125,9 @@
     :ensure t
     :diminish
     :init
-    (use-package amx :defer t)
-    (use-package counsel :diminish :config (counsel-mode 1))
-    (use-package swiper :defer t)
+    (use-package amx :ensure t :defer t)
+    (use-package counsel :ensure t :diminish :config (counsel-mode 1))
+    (use-package swiper :ensure t :defer t)
     (ivy-mode 1)
     :bind
     (("C-s" . swiper-isearch)
@@ -254,8 +254,7 @@
     :ensure t
     :diminish yas-minor-mode
     :init
-    (use-package yasnippet-snippets :after yasnippet)
-    :ensure t
+    (use-package yasnippet-snippets :ensure t :after yasnippet)
     :hook ((prog-mode LaTeX-mode org-mode markdown-mode) . yas-minor-mode)
     :bind
     ;; (:map yas-minor-mode-map ("C-c C-n" . yas-expand-from-trigger-key))
