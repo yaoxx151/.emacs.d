@@ -1,5 +1,5 @@
 #+STARTIP: overview
-* Disable things
+* Disable useless stuffs
 #+BEGIN_SRC emacs-lisp
   (setq inhibit-startup-screen t)
   (setq initial-major-mode 'text-mode)
@@ -16,10 +16,51 @@
   (setq ns-use-proxy-icon nil)
   ;; Useless keys
   (global-unset-key (kbd "C-z")) ; Don't hit it and suspend it in terminal
-  (global-set-key (kbd "M-z") nil)
-  (global-set-key (kbd "M-m") nil)
-  (global-set-key (kbd "C-x C-z") nil)
-  (global-set-key (kbd "C-x m") nil)
+  (global-unset-key (kbd "M-z"))
+  (global-unset-key (kbd "M-m"))
+  (global-unset-key (kbd "C-x C-z"))
+  (global-unset-key (kbd "C-x m"))
+  (global-unset-key (kbd "C-x C-u"))
+  (global-unset-key (kbd "C-x C-l"))
+#+END_SRC
+* Keybinding
+#+BEGIN_SRC emacs-lisp
+  ; Map Mac's command key to Meta only in GUI. In item2, set command to option might cause trouble for copy/paste.
+  (setq mac-command-modifier 'meta)
+  ;; Make motion easier.
+  (global-set-key (kbd "M-n") 'next-line)
+  (global-set-key (kbd "M-p") 'previous-line)
+  (global-set-key (kbd "C-x t") 'beginning-of-buffer)
+  (global-set-key (kbd "C-x e") 'end-of-buffer)
+  (global-set-key (kbd "C-x \\") 'sort-lines)
+  (global-set-key (kbd "C-x g") 'goto-line)
+  ;; For terminal compatible
+  (with-eval-after-load 'helm
+    (global-set-key (kbd "C-x C-m") 'helm-M-x)
+    (global-set-key (kbd "C-c C-m") 'helm-M-x))
+  ;; Adjust font size like web browsers
+  (global-set-key (kbd "C-=") #'text-scale-increase)
+  (global-set-key (kbd "C-+") #'text-scale-increase)
+  (global-set-key (kbd "C--") #'text-scale-decrease)
+  ;; Jump to visual line, not physical line
+  (global-set-key (kbd "C-e") 'end-of-visual-line)
+  (global-set-key (kbd "C-a") 'beginning-of-visual-line)
+  (global-set-key (kbd "M-e") 'end-of-visual-line)
+  (global-set-key (kbd "M-a") 'beginning-of-visual-line)
+  ;; Cure bad habits.
+  (global-set-key (kbd "M->") (lambda ()
+			       (interactive)
+			       (message "Use C-x e, dude.")))
+  (global-set-key (kbd "M-<") (lambda ()
+			       (interactive)
+			       (message "Use C-x t, dude.")))
+  (global-set-key (kbd "M-x") (lambda ()
+			       (interactive)
+			       (message "Use C-x C-m, dude.")))
+
+  ;; Alias.
+  (defalias 'vce 'vc-ediff)
+  (defalias 'kob 'crux-kill-other-buffers)
 #+END_SRC
 * Scroll and Click
 #+BEGIN_SRC emacs-lisp
@@ -43,6 +84,7 @@
   ;; Horizontal Scroll
   (setq hscroll-step 1)
   (setq hscroll-margin 1)
+  (setq scroll-preserve-screen-position t)
 
 #+END_SRC
 * MacOS
@@ -97,7 +139,7 @@
 * Ibuffer
 #+BEGIN_SRC emacs-lisp
   (use-package ibuffer
-    :ensure nil
+    :ensure t
     :bind ("C-x C-b" . ibuffer)
     :init
     (use-package ibuffer-vc
@@ -131,14 +173,14 @@
     (ivy-mode 1)
     :bind
     (("C-s" . swiper-isearch)
-     ("C-z s" . counsel-rg)
-     ("C-z b" . counsel-buffer-or-recentf)
-     ("C-z C-b" . counsel-ibuffer)
+     ("C-r" . swiper-isearch-backward)
+     ("C-c s" . swiper-isearch-thing-at-point)
+     ("C-c b" . counsel-buffer-or-recentf)
      ("M-y" . counsel-yank-pop)
      (:map ivy-minibuffer-map
 	 ("M-RET" . ivy-immediate-done))
-     (:map counsel-find-file-map
-	 ("C-~" . counsel-goto-local-home)))
+     (:map ivy-minibuffer-map
+	 ("C-q" . ivy-immediate-done)))
     :custom
     ;; (ivy-use-virtual-buffers t)
     ;; (ivy-use-virtual-buffers nil)
@@ -156,21 +198,21 @@
 
 * Helm
 #+BEGIN_SRC emacs-lisp
-; helm-M-x only
-  (use-package helm
-  :ensure t
-  :config
-  (global-set-key (kbd "M-x") 'helm-M-x))
+  ; helm-M-x only
+    (use-package helm
+    :ensure t)
+    ;; :config
+    ;; (global-set-key (kbd "M-x") 'helm-M-x))
 
-  ;; ; For search.
-  ;; (use-package helm-swoop
-  ;; :ensure t
-  ;; :config
-  ;; (global-set-key (kbd "C-s") 'helm-swoop)
-  ;; ;; Save buffer when helm-multi-swoop-edit complete
-  ;; (setq helm-multi-swoop-edit-save t)
-  ;; ;; If this value is t, split window inside the current window
-  ;; (setq helm-swoop-split-with-multiple-windows t))
+    ;; ; For search.
+    ;; (use-package helm-swoop
+    ;; :ensure t
+    ;; :config
+    ;; (global-set-key (kbd "C-s") 'helm-swoop)
+    ;; ;; Save buffer when helm-multi-swoop-edit complete
+    ;; (setq helm-multi-swoop-edit-save t)
+    ;; ;; If this value is t, split window inside the current window
+    ;; (setq helm-swoop-split-with-multiple-windows t))
 #+END_SRC
 
 * Undo tree
@@ -241,7 +283,7 @@
   ;; You could use `("-d" "en_US,en_US-med")` to check with multiple dictionaries
   '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)))
 
-  (global-set-key (kbd "C-c o") 'ispell-word)
+  (global-set-key (kbd "C-c l") 'ispell-word)
   (add-hook 'prog-mode-hook 'flyspell-prog-mode)
   (add-hook 'text-mode-hook 'flyspell-mode)
   (add-hook 'org-mode-hook 'flyspell-mode)
@@ -412,40 +454,30 @@
                   (local-set-key (kbd "^")
                                  (lambda () (interactive) (find-alternate-file ".."))))))
 #+END_SRC
-* Projectile
-#+BEGIN_SRC emacs-lisp
-(use-package projectile
-  :ensure t
-  :bind
-  ("C-x p" . projectile-command-map)
-  :custom
-  (projectile-completion-system 'ivy)
-  :config
-  (projectile-mode 1)
-  ;; Open dired on the directory when swtiching project.
-  (setq projectile-switch-project-action #'projectile-dired)
-
-  (setq projectile-indexing-method 'alien)
-  (setq projectile-sort-order 'recently-active))
-#+END_SRC
 * Crux
 #+BEGIN_SRC emacs-lisp
   (use-package crux
   :ensure t
   :bind
   (("C-a" . crux-move-beginning-of-line)
-     ("C-x 4 t" . crux-transpose-windows)
-     ("C-x K" . crux-kill-other-buffers)
-     ("C-k" . crux-smart-kill-line))
-    :config
-    (crux-with-region-or-buffer indent-region)
-    (crux-with-region-or-buffer untabify)
-    (crux-with-region-or-point-to-eol kill-ring-save)
-    (defalias 'rename-file-and-buffer #'crux-rename-file-and-buffer))
+   ("C-x K" . crux-kill-other-buffers)
+   ("C-k" . crux-smart-kill-line)
+   ("C-o" . crux-smart-open-line)
+   ("M-o" . crux-smart-open-line-above)
+   ("C-c f" . crux-recentf-find-file)
+   ("C-c d" . crux-duplicate-current-line-or-region)
+   ("C-c t" . crux-visit-term-buffer)
+   )
+  :config
+  (crux-with-region-or-buffer indent-region)
+  (crux-with-region-or-buffer untabify)
+  (crux-with-region-or-point-to-eol kill-ring-save)
+  (defalias 'rename-file-and-buffer #'crux-rename-file-and-buffer))
 #+END_SRC
 * Smartparens
 #+BEGIN_SRC emacs-lisp
   (use-package smartparens
+    :ensure t
     :hook (prog-mode . smartparens-mode)
     :diminish smartparens-mode
     :bind
@@ -453,13 +485,7 @@
 	  ("C-M-f" . sp-forward-sexp)
 	  ("C-M-b" . sp-backward-sexp)
 	  ("C-M-a" . sp-backward-down-sexp)
-	  ("C-M-e" . sp-up-sexp)
-	  ("C-M-w" . sp-copy-sexp)
-	  ("C-M-k" . sp-change-enclosing)
-	  ("M-k" . sp-kill-sexp)
-	  ("C-M-<backspace>" . sp-splice-sexp-killing-backward)
-	  ("C-S-<backspace>" . sp-splice-sexp-killing-around)
-	  ("C-]" . sp-select-next-thing-exchange))
+	  ("C-M-e" . sp-up-sexp))
     :custom
     (sp-escape-quotes-after-insert nil)
     :config
@@ -473,6 +499,7 @@
   (setq explicit-shell-file-name "/bin/zsh")
 
   (use-package exec-path-from-shell
+    :ensure t
     :if (memq window-system '(mac ns x))
     :config
     (exec-path-from-shell-initialize))
@@ -661,7 +688,7 @@ Restore previous window layouts.
 
   ;; Line numbers
   ;;  (global-linum-mode)
-  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  ;; (add-hook 'prog-mode-hook 'display-line-numbers-mode)
   ;; Display column numbers in modeline
   (column-number-mode 1)
   ;; (setq linum-relative-current-symbol "")
@@ -684,34 +711,27 @@ Restore previous window layouts.
   ;; ;; Paren match
   (add-hook 'prog-mode-hook 'show-paren-mode)
 
+  ;; `C-n` inserts newlines if at the end of the buffer.
+  (setq next-line-add-newlines t)
+
 #+END_SRC
-* Self-defined commands
+* Self-defined function
 #+BEGIN_SRC emacs-lisp
   ;; Auto-reload init files
-  (defun reload-init-file ()
+  (defun my/reload-init-file ()
     (interactive)
     (load-file user-init-file))
-  (global-set-key (kbd "C-c C-l") 'reload-init-file)    ; Reload .emacs file
-
-  ;; Adjust font size like web browsers
-  (global-set-key (kbd "C-=") #'text-scale-increase)
-  (global-set-key (kbd "C-+") #'text-scale-increase)
-  (global-set-key (kbd "C--") #'text-scale-decrease)
 
   ;; Save all buffers.
-  (defun save-all-buffers ()
+  (defun my/save-all-buffers ()
     "Instead of `save-buffer', save all opened buffers by calling `save-some-buffers' with ARG t."
     (interactive)
     (save-some-buffers t))
-  (global-set-key (kbd "C-x C-s") nil)
-  (global-set-key (kbd "C-x C-s") #'save-all-buffers)
-
-  ;; Jump to visual line, not physical line
-  (global-set-key (kbd "C-e") 'end-of-visual-line)
-  (global-set-key (kbd "C-a") 'beginning-of-visual-line)
+  (global-unset-key (kbd "C-x C-s"))
+  (global-set-key (kbd "C-x C-s") #'my/save-all-buffers)
 
   ;; Make.
-  (defun my-make-in-current-directory ()
+  (defun my/make-in-current-directory ()
     "Go to the current directory and run make."
     (interactive)
     (let ((default-directory (if (buffer-file-name)
@@ -719,13 +739,10 @@ Restore previous window layouts.
 			       default-directory)))
       (compile "make; open *.pdf")))
 
-  (global-set-key (kbd "C-c m") 'my-make-in-current-directory)
-
-  ;; go to line
-  (global-set-key (kbd "C-c g") 'goto-line)
+  (global-set-key (kbd "C-c m") 'my/make-in-current-directory)
 
   ;; MiniBuffer Functions
-  (defun abort-minibuffer-using-mouse ()
+  (defun my/abort-minibuffer-using-mouse ()
     "Abort the minibuffer when using the mouse."
     (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
       (abort-recursive-edit)))
@@ -734,35 +751,54 @@ Restore previous window layouts.
   ;; keep the point out of the minibuffer
   (setq-default minibuffer-prompt-properties '(read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt))
 
-
   ;; Edit this file.
-  (defun edit-configs ()
+  (defun my/edit-configs ()
     "Opens the README.org file."
     (interactive)
     (find-file "~/.emacs.d/myinit.org"))
 
-  (global-set-key (kbd "C-c e") #'edit-configs)
+  (global-set-key (kbd "C-c e") #'my/edit-configs)
 
   ;; Copy file to server.
-  (defun sync-current-file-to-server ()
-    "Sync the current file to a remote server using rsync."
-    (interactive)
-    (message "Sync...")
-    (let ((source-file (buffer-file-name))
-	  (remote-server "merlini18n")
-	  (remote-path "/root/llm_wm"))
-      (shell-command (format "rsync -avz %s %s:%s"
-			     source-file remote-server remote-path))
-      (message "File synced.")))
+  ;; (defun my/sync-current-file-to-server ()
+  ;;   "Sync the current file to a remote server using rsync."
+  ;;   (interactive)
+  ;;   (message "Sync...")
+  ;;   (let ((source-file (buffer-file-name))
+  ;; 	(remote-server "merlini18n")
+  ;; 	(remote-path "/root/llm_wm"))
+  ;;     (shell-command (format "rsync -avz %s %s:%s"
+  ;; 			   source-file remote-server remote-path))
+  ;;     (message "File synced.")))
 
-  (global-set-key (kbd "C-c s") 'sync-current-file-to-server)
+  ;; (global-set-key (kbd "C-c C-s") 'my/sync-current-file-to-server)
 
   ;; Open current directory.
-  (defun open-current-directory ()
+  (defun my/open-current-directory ()
     "Open the current directory."
     (interactive)
     (shell-command "open ."))
 
-  (global-set-key (kbd "C-c d") 'open-current-directory)
+  (global-set-key (kbd "C-c o") 'my/open-current-directory)
 
+  ;; Comment
+  (defun my/comment-or-uncomment-region-or-line ()
+    "Comments or uncomments the region or the current line if there's no active region."
+    (interactive)
+    (let (beg end)
+      (if (region-active-p)
+	  (setq beg (region-beginning) end (region-end))
+	(setq beg (line-beginning-position) end (line-end-position)))
+      (comment-or-uncomment-region beg end)
+      (next-line)))
+
+  (global-set-key (kbd "C-c c") 'my/comment-or-uncomment-region-or-line)
 #+END_SRC
+
+
+
+
+
+
+
+
