@@ -25,19 +25,23 @@
 #+END_SRC
 * Keybinding
 #+BEGIN_SRC emacs-lisp
-  ; Map Mac's command key to Meta only in GUI. In item2, set command to option might cause trouble for copy/paste.
+  ; Map Mac's command key to Meta only in GUI.
   (setq mac-command-modifier 'meta)
   ;; Make motion easier.
   (global-set-key (kbd "M-n") 'next-line)
   (global-set-key (kbd "M-p") 'previous-line)
+  ;; Other keys.
+  (global-set-key (kbd "C-x \\") 'sort-lines)
+  (global-set-key (kbd "C-c g") 'goto-line)
+  (global-set-key (kbd "C-x k") 'kill-this-buffer) ;; Don't ask.
+  ;; Stevey's suggestion.
   (global-set-key (kbd "C-x t") 'beginning-of-buffer)
   (global-set-key (kbd "C-x e") 'end-of-buffer)
-  (global-set-key (kbd "C-x \\") 'sort-lines)
-  (global-set-key (kbd "C-x g") 'goto-line)
-  ;; For terminal compatible
+  (global-unset-key (kbd "C-c m")) ; Original: `compile`.
+  (global-set-key (kbd "C-x c") 'recompile)
   (with-eval-after-load 'helm
-    (global-set-key (kbd "C-x C-m") 'helm-M-x)
-    (global-set-key (kbd "C-c C-m") 'helm-M-x))
+    (global-set-key (kbd "C-x m") 'helm-M-x)
+    (global-set-key (kbd "C-c m") 'helm-M-x))
   ;; Adjust font size like web browsers
   (global-set-key (kbd "C-=") #'text-scale-increase)
   (global-set-key (kbd "C-+") #'text-scale-increase)
@@ -56,7 +60,7 @@
 			       (message "Use C-x t, dude.")))
   (global-set-key (kbd "M-x") (lambda ()
 			       (interactive)
-			       (message "Use C-x C-m, dude.")))
+			       (message "Use C-x m, dude.")))
 
   ;; Alias.
   (defalias 'vce 'vc-ediff)
@@ -175,7 +179,6 @@
     (("C-s" . swiper-isearch)
      ("C-r" . swiper-isearch-backward)
      ("C-c s" . swiper-isearch-thing-at-point)
-     ("C-c b" . counsel-buffer-or-recentf)
      ("M-y" . counsel-yank-pop)
      (:map ivy-minibuffer-map
 	 ("M-RET" . ivy-immediate-done))
@@ -290,6 +293,21 @@
   (add-hook 'latex-mode-hook 'flyspell-mode)
   ;; (setq ispell-program-name "/usr/local/bin/ispell")
 #+END_SRC
+* Magit
+#+BEGIN_SRC emacs-lisp
+(use-package magit
+  :ensure t
+  :bind
+  (("C-x g" . magit-status)
+   (:map magit-status-mode-map
+         ("M-RET" . magit-diff-visit-file-other-window)))
+  :config
+  (defun magit-log-follow-current-file ()
+    "A wrapper around `magit-log-buffer-file' with `--follow' argument."
+    (interactive)
+    (magit-log-buffer-file t)))
+#+END_SRC emacs-lisp
+
 * Yasnippet
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
@@ -340,7 +358,7 @@
     :after flycheck
     :mode "\\.py\\'"
     :custom
-    (python-indent-offset 2)
+    (python-indent-offset 4)
     (flycheck-python-pycompile-executable "python3")
     (python-shell-interpreter "python3"))
 
@@ -376,6 +394,18 @@
       ;;   (venv-initialize-interactive-shells)
       ;;   (venv-initialize-eshell))
 #+END_SRC
+* Dump Jump
+#+BEGIN_SRC emacs-lisp
+(use-package dumb-jump
+  :ensure t
+  :bind
+  (:map prog-mode-map
+        (("C-c C-o" . dumb-jump-go-other-window)
+         ("C-c C-j" . dumb-jump-go)
+         ("C-c C-i" . dumb-jump-go-prompt)))
+  :custom (dumb-jump-selector 'ivy))
+#+END_SRC emacs-lisp
+
 * Theme
 #+BEGIN_SRC emacs-lisp
   ;; (use-package spacemacs-theme
@@ -460,12 +490,14 @@
   :ensure t
   :bind
   (("C-a" . crux-move-beginning-of-line)
+   ("M-a" . crux-move-beginning-of-line)
    ("C-x K" . crux-kill-other-buffers)
    ("C-k" . crux-smart-kill-line)
    ("C-o" . crux-smart-open-line)
    ("M-o" . crux-smart-open-line-above)
    ("C-c f" . crux-recentf-find-file)
    ("C-c d" . crux-duplicate-current-line-or-region)
+   ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
    ("C-c t" . crux-visit-term-buffer)
    )
   :config
@@ -660,7 +692,7 @@ Restore previous window layouts.
   ;; Add a newline automatically at the end of the file upon save.
   (setq require-final-newline t)
 
-  ;; Enable `erase-buffer' function
+  ;; Enable `erase-buffer' function.
   (put 'erase-buffer 'disabled nil)
 
   ;; Don't put deleted word into the paste buffer.
@@ -701,18 +733,21 @@ Restore previous window layouts.
   ;; Stop ivy from displaying recentf files.
   (setq ivy-use-virtual-buffers nil)
 
-  ;; Visual line don't break the word
+  ;; Visual line don't break the word.
   (setq-default word-wrap t)
 
   ;; Automatically switch focus to newly splitted buffer
   (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
   (global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
 
-  ;; ;; Paren match
+  ;; Paren match.
   (add-hook 'prog-mode-hook 'show-paren-mode)
 
   ;; `C-n` inserts newlines if at the end of the buffer.
   (setq next-line-add-newlines t)
+
+  ;; Column goal.
+  (put 'set-goal-column 'disabled nil)
 
 #+END_SRC
 * Self-defined function
@@ -731,15 +766,15 @@ Restore previous window layouts.
   (global-set-key (kbd "C-x C-s") #'my/save-all-buffers)
 
   ;; Make.
-  (defun my/make-in-current-directory ()
-    "Go to the current directory and run make."
-    (interactive)
-    (let ((default-directory (if (buffer-file-name)
-				 (file-name-directory (buffer-file-name))
-			       default-directory)))
-      (compile "make; open *.pdf")))
+  ;; (defun my/make-in-current-directory ()
+  ;;   "Go to the current directory and run make."
+  ;;   (interactive)
+  ;;   (let ((default-directory (if (buffer-file-name)
+  ;; 			       (file-name-directory (buffer-file-name))
+  ;; 			     default-directory)))
+  ;;     (compile "make; open *.pdf")))
 
-  (global-set-key (kbd "C-c m") 'my/make-in-current-directory)
+  ;; (global-set-key (kbd "C-c m") 'my/make-in-current-directory)
 
   ;; MiniBuffer Functions
   (defun my/abort-minibuffer-using-mouse ()
@@ -794,6 +829,11 @@ Restore previous window layouts.
 
   (global-set-key (kbd "C-c c") 'my/comment-or-uncomment-region-or-line)
 #+END_SRC
+
+
+
+
+
 
 
 
