@@ -25,9 +25,9 @@
 #+END_SRC
 * Keybinding
 #+BEGIN_SRC emacs-lisp
-  ; Map Mac's command key to Meta only in GUI.
+  ; Map Mac's command key to Meta only in GUI. Do it in iTerm2 config.
   (setq mac-command-modifier 'meta)
-  ;; Make motion easier.
+  ;; Make motion easier. Bound extra keys from Stevey's suggestions.
   (global-set-key (kbd "M-n") 'next-line)
   (global-set-key (kbd "M-p") 'previous-line)
   ;; Other keys.
@@ -35,22 +35,22 @@
   (global-set-key (kbd "C-c g") 'goto-line)
   (global-set-key (kbd "C-x k") 'kill-this-buffer) ;; Don't ask.
   ;; Stevey's suggestion.
+  (global-set-key (kbd "C-q") 'backward-kill-word) ;; Stevey's unpopular opinion. Faster to reach. Can kill your applicaton on windows.
   (global-set-key (kbd "C-x t") 'beginning-of-buffer)
   (global-set-key (kbd "C-x e") 'end-of-buffer)
   (global-unset-key (kbd "C-c m")) ; Original: `compile`.
-  (global-set-key (kbd "C-x c") 'recompile)
+  (global-set-key (kbd "C-c r") 'recompile)
   (with-eval-after-load 'helm
     (global-set-key (kbd "C-x m") 'helm-M-x)
     (global-set-key (kbd "C-c m") 'helm-M-x))
-  ;; Adjust font size like web browsers
-  (global-set-key (kbd "C-=") #'text-scale-increase)
-  (global-set-key (kbd "C-+") #'text-scale-increase)
-  (global-set-key (kbd "C--") #'text-scale-decrease)
-  ;; Jump to visual line, not physical line
-  (global-set-key (kbd "C-e") 'end-of-visual-line)
+  ;; Adjust font size like web browsers. Doesn't work in terminal.
+  (global-set-key (kbd "C-+") 'text-scale-increase)
+  (global-set-key (kbd "C--") 'text-scale-decrease)
+  ;; Jump to visual line.
   (global-set-key (kbd "C-a") 'beginning-of-visual-line)
-  (global-set-key (kbd "M-e") 'end-of-visual-line)
   (global-set-key (kbd "M-a") 'beginning-of-visual-line)
+  (global-set-key (kbd "C-e") 'end-of-visual-line)
+  (global-set-key (kbd "M-e") 'end-of-visual-line)
   ;; Cure bad habits.
   (global-set-key (kbd "M->") (lambda ()
 			       (interactive)
@@ -64,7 +64,9 @@
 
   ;; Alias.
   (defalias 'vce 'vc-ediff)
-  (defalias 'kob 'crux-kill-other-buffers)
+  (defalias 'reinit 'my/reload-init-file)
+  (defalias 'undov 'undo-tree-visualize)
+
 #+END_SRC
 * Scroll and Click
 #+BEGIN_SRC emacs-lisp
@@ -226,12 +228,18 @@
     :diminish undo-tree-mode
     :init
     (global-undo-tree-mode)
+    (global-set-key (kbd "C-z") 'undo-tree-undo)
     (global-set-key (kbd "C-/") 'undo-tree-undo)
-    (global-set-key (kbd "C-z") 'undo-tree-redo)
+    (global-set-key (kbd "M-z") 'undo-tree-redo)
     :custom
     (undo-tree-visualizer-diff t)
     (undo-tree-history-directory-alist `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
-    (undo-tree-visualizer-timestamps t))
+    (undo-tree-visualizer-timestamps t)
+    :config
+    (unbind-key (kbd "C-x u") undo-tree-map)) ; Unbind visualize key.
+
+  (eval-after-load 'undo-tree
+    '(unbind-key (kbd "C-x u"))) ; Somehow you need both to unbind. Why emacs keybinding in modes and package is so confusing?
 #+END_SRC
 
 * Flycheck
@@ -489,9 +497,7 @@
   (use-package crux
   :ensure t
   :bind
-  (("C-a" . crux-move-beginning-of-line)
-   ("M-a" . crux-move-beginning-of-line)
-   ("C-x K" . crux-kill-other-buffers)
+  (("C-x K" . crux-kill-other-buffers)
    ("C-k" . crux-smart-kill-line)
    ("C-o" . crux-smart-open-line)
    ("M-o" . crux-smart-open-line-above)
@@ -743,38 +749,35 @@ Restore previous window layouts.
   ;; Paren match.
   (add-hook 'prog-mode-hook 'show-paren-mode)
 
-  ;; `C-n` inserts newlines if at the end of the buffer.
-  (setq next-line-add-newlines t)
-
-  ;; Column goal.
-  (put 'set-goal-column 'disabled nil)
-
 #+END_SRC
 * Self-defined function
 #+BEGIN_SRC emacs-lisp
+  ;; Column goal.
+  (defun my/toggle-goal-column ()
+    "Toggle goal column mode."
+    (interactive)
+    (if goal-column
+	(progn
+	  (setq goal-column nil)
+	  (message "Unset goal column"))
+      (progn
+	(setq goal-column (current-column))
+	(message "Set goal column at %d" goal-column))))
+
+  (global-set-key (kbd "C-x C-u") 'my/toggle-goal-column)
+
   ;; Auto-reload init files
   (defun my/reload-init-file ()
     (interactive)
     (load-file user-init-file))
 
-  ;; Save all buffers.
+      ;; Save all buffers.
   (defun my/save-all-buffers ()
     "Instead of `save-buffer', save all opened buffers by calling `save-some-buffers' with ARG t."
     (interactive)
     (save-some-buffers t))
   (global-unset-key (kbd "C-x C-s"))
-  (global-set-key (kbd "C-x C-s") #'my/save-all-buffers)
-
-  ;; Make.
-  ;; (defun my/make-in-current-directory ()
-  ;;   "Go to the current directory and run make."
-  ;;   (interactive)
-  ;;   (let ((default-directory (if (buffer-file-name)
-  ;; 			       (file-name-directory (buffer-file-name))
-  ;; 			     default-directory)))
-  ;;     (compile "make; open *.pdf")))
-
-  ;; (global-set-key (kbd "C-c m") 'my/make-in-current-directory)
+  (global-set-key (kbd "C-x C-s") 'my/save-all-buffers)
 
   ;; MiniBuffer Functions
   (defun my/abort-minibuffer-using-mouse ()
@@ -783,62 +786,27 @@ Restore previous window layouts.
       (abort-recursive-edit)))
 
   (add-hook 'mouse-leave-buffer-hook 'abort-minibuffer-using-mouse)
-  ;; keep the point out of the minibuffer
-  (setq-default minibuffer-prompt-properties '(read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt))
+      ;; keep the point out of the minibuffer
+      (setq-default minibuffer-prompt-properties '(read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt))
 
   ;; Edit this file.
   (defun my/edit-configs ()
     "Opens the README.org file."
-    (interactive)
-    (find-file "~/.emacs.d/myinit.org"))
+	(interactive)
+	(find-file "~/.emacs.d/myinit.org"))
 
-  (global-set-key (kbd "C-c e") #'my/edit-configs)
-
-  ;; Copy file to server.
-  ;; (defun my/sync-current-file-to-server ()
-  ;;   "Sync the current file to a remote server using rsync."
-  ;;   (interactive)
-  ;;   (message "Sync...")
-  ;;   (let ((source-file (buffer-file-name))
-  ;; 	(remote-server "merlini18n")
-  ;; 	(remote-path "/root/llm_wm"))
-  ;;     (shell-command (format "rsync -avz %s %s:%s"
-  ;; 			   source-file remote-server remote-path))
-  ;;     (message "File synced.")))
-
-  ;; (global-set-key (kbd "C-c C-s") 'my/sync-current-file-to-server)
-
-  ;; Open current directory.
-  (defun my/open-current-directory ()
-    "Open the current directory."
-    (interactive)
-    (shell-command "open ."))
-
-  (global-set-key (kbd "C-c o") 'my/open-current-directory)
+      (global-set-key (kbd "C-c e") 'my/edit-configs)
 
   ;; Comment
   (defun my/comment-or-uncomment-region-or-line ()
-    "Comments or uncomments the region or the current line if there's no active region."
-    (interactive)
-    (let (beg end)
-      (if (region-active-p)
-	  (setq beg (region-beginning) end (region-end))
-	(setq beg (line-beginning-position) end (line-end-position)))
-      (comment-or-uncomment-region beg end)
-      (next-line)))
+	"Comments or uncomments the region or the current line if there's no active region."
+	(interactive)
+	(let (beg end)
+	  (if (region-active-p)
+	      (setq beg (region-beginning) end (region-end))
+	    (setq beg (line-beginning-position) end (line-end-position)))
+	  (comment-or-uncomment-region beg end)
+	  (next-line)))
 
   (global-set-key (kbd "C-c c") 'my/comment-or-uncomment-region-or-line)
 #+END_SRC
-
-
-
-
-
-
-
-
-
-
-
-
-
