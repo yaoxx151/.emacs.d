@@ -1,21 +1,29 @@
 #+STARTIP: overview
 * Disable useless stuffs
 #+BEGIN_SRC emacs-lisp
+  ;; Define system.
+  (defconst *sys/linux*
+    (eq system-type 'gnu/linux)
+    "Are we running on a GNU/Linux system?")
+
+  (defconst *sys/mac*
+      (eq system-type 'darwin)
+    "Are we running on a Mac system?")
+
+    ;; Disable usless thing.
   (setq inhibit-startup-screen t)
   (setq initial-major-mode 'text-mode)
   (setq inhibit-startup-message t)
   (when (display-graphic-p)
-	(tool-bar-mode -1)
-	(scroll-bar-mode -1))
+    (tool-bar-mode -1)
+    (scroll-bar-mode -1))
   (menu-bar-mode -1)
-
   (setq-default visible-bell t)
   (blink-cursor-mode 0)
+  (setq ns-use-proxy-icon nil) ;; Icon of filetype.
 
-  ;; Icon of filetype.
-  (setq ns-use-proxy-icon nil)
-  ;; Useless keys
-  (global-unset-key (kbd "C-z")) ; Don't hit it and suspend it in terminal
+  ;; Useless keys.
+  (global-unset-key (kbd "C-z")) ; Don't hit it and suspend it in terminal.
   (global-unset-key (kbd "M-z"))
   (global-unset-key (kbd "M-m"))
   (global-unset-key (kbd "C-x C-z"))
@@ -26,7 +34,8 @@
 * Keybinding
 #+BEGIN_SRC emacs-lisp
   ; Map Mac's command key to Meta only in GUI. Do it in iTerm2 config.
-  (setq mac-command-modifier 'meta)
+  (if *sys/mac*
+      (setq mac-command-modifier 'meta))
   ;; Make motion easier. Bound extra keys from Stevey's suggestions.
   (global-set-key (kbd "M-n") 'next-line)
   (global-set-key (kbd "M-p") 'previous-line)
@@ -35,7 +44,6 @@
   (global-set-key (kbd "C-c g") 'goto-line)
   (global-set-key (kbd "C-x k") 'kill-this-buffer) ;; Don't ask.
   ;; Stevey's suggestion.
-  (global-set-key (kbd "C-q") 'backward-kill-word) ;; Stevey's unpopular opinion. Faster to reach. Can kill your applicaton on windows.
   (global-set-key (kbd "C-x t") 'beginning-of-buffer)
   (global-set-key (kbd "C-x e") 'end-of-buffer)
   (global-unset-key (kbd "C-c m")) ; Original: `compile`.
@@ -51,6 +59,11 @@
   (global-set-key (kbd "M-a") 'beginning-of-visual-line)
   (global-set-key (kbd "C-e") 'end-of-visual-line)
   (global-set-key (kbd "M-e") 'end-of-visual-line)
+
+  ;; Automatically switch focus to newly splitted buffer.
+  (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
+  (global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
+
   ;; Cure bad habits.
   (global-set-key (kbd "M->") (lambda ()
 			       (interactive)
@@ -68,16 +81,103 @@
   (defalias 'undov 'undo-tree-visualize)
 
 #+END_SRC
+* Self-defined function
+#+BEGIN_SRC emacs-lisp
+  ;; Don't put deleted word into the paste buffer.
+  (defun my/delete-word (arg)
+    "Delete characters forward until encountering the end of a word.
+  With argument, do this that many times.
+  This command does not push text to `kill-ring'."
+    (interactive "p")
+    (delete-region
+     (point)
+     (progn
+       (forward-word arg)
+       (point))))
+
+  (defun my/backward-delete-word (arg)
+    "Delete characters backward until encountering the beginning of a word.
+  With argument, do this that many times.
+  This command does not push text to `kill-ring'."
+    (interactive "p")
+    (my/delete-word (- arg)))
+
+  (global-set-key (kbd "M-<DEL>") 'my/backward-delete-word)
+  (global-set-key (kbd "C-q") 'my/backward-delete-word) ;; Stevey's unpopular opinion. Faster to reach. Can kill your applicaton on windows.
+
+  ;; Scroll window up/down by 8 lines.
+  (global-set-key (kbd "C-<down>") (kbd "C-u 8 C-v"))
+  (global-set-key (kbd "C-<up>") (kbd "C-u 8 M-v"))
+
+  ;; Column goal.
+  (defun my/toggle-goal-column ()
+    "Toggle goal column mode."
+    (interactive)
+    (if goal-column
+	(progn
+	  (setq goal-column nil)
+	  (message "Unset goal column"))
+      (progn
+	(setq goal-column (current-column))
+	(message "Set goal column at %d" goal-column))))
+
+  (global-set-key (kbd "C-x C-u") 'my/toggle-goal-column)
+
+  ;; Auto-reload init files.
+  (defun my/reload-init-file ()
+    (interactive)
+    (load-file user-init-file))
+
+  ;; Save all buffers.
+  (defun my/save-all-buffers ()
+    "Instead of `save-buffer', save all opened buffers by calling `save-some-buffers' with ARG t."
+    (interactive)
+    (save-some-buffers t))
+
+  (global-unset-key (kbd "C-x C-s"))
+  (global-set-key (kbd "C-x C-s") 'my/save-all-buffers)
+
+  ;; MiniBuffer Functions.
+  (defun my/abort-minibuffer-using-mouse ()
+    "Abort the minibuffer when using the mouse."
+    (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
+      (abort-recursive-edit)))
+
+  (add-hook 'mouse-leave-buffer-hook 'abort-minibuffer-using-mouse)
+      ;; keep the point out of the minibuffer
+      (setq-default minibuffer-prompt-properties '(read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt))
+
+  ;; Edit this file.
+  (defun my/edit-configs ()
+    "Opens the README.org file."
+    (interactive)
+    (find-file "~/.emacs.d/myinit.org"))
+
+  (global-set-key (kbd "C-c e") 'my/edit-configs)
+
+  ;; Comment.
+  (defun my/comment-or-uncomment-region-or-line ()
+    "Comments or uncomments the region or the current line if there's no active region."
+    (interactive)
+    (let (beg end)
+      (if (region-active-p)
+	  (setq beg (region-beginning) end (region-end))
+	(setq beg (line-beginning-position) end (line-end-position)))
+      (comment-or-uncomment-region beg end)
+      (next-line)))
+
+  (global-set-key (kbd "C-c c") 'my/comment-or-uncomment-region-or-line)
+#+END_SRC
 * Scroll and Click
 #+BEGIN_SRC emacs-lisp
   ; Click and scroll in terminal.
   (unless (display-graphic-p)
-    ;; activate mouse-based scrolling
+    ;; activate mouse-based scrolling.
     (xterm-mouse-mode 1)
     (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
     (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
-  ;; Scroll better
-  ;; ;; Vertical Scroll
+
+  ;; Vertical Scroll
   (setq scroll-step 1)
   (setq scroll-margin 1)
   (setq scroll-conservatively 100000)
@@ -87,6 +187,7 @@
   (setq fast-but-imprecise-scrolling nil)
   (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
   (setq mouse-wheel-progressive-speed nil)
+
   ;; Horizontal Scroll
   (setq hscroll-step 1)
   (setq hscroll-margin 1)
@@ -95,15 +196,15 @@
 #+END_SRC
 * MacOS
 #+BEGIN_SRC emacs-lisp
-; Handle copy and paste in OSX
+  ; Handle copy and paste in OSX.
   (defun copy-from-osx ()
     "Handle copy/paste intelligently on osx."
     (let ((pbpaste (purecopy "/usr/bin/pbpaste")))
       (if (and (eq system-type 'darwin)
 	       (file-exists-p pbpaste))
-	  (let ((tramp-mode nil)
-		(default-directory "~"))
-	    (shell-command-to-string pbpaste)))))
+	    (let ((tramp-mode nil)
+		  (default-directory "~"))
+	      (shell-command-to-string pbpaste)))))
 
   (defun paste-to-osx (text &optional push)
     (let ((process-connection-type nil))
@@ -111,8 +212,9 @@
 	(process-send-string proc text)
 	(process-send-eof proc))))
 
-  (setq interprogram-cut-function 'paste-to-osx
-	interprogram-paste-function 'copy-from-osx)
+  (if *sys/mac*
+      (setq interprogram-cut-function 'paste-to-osx
+	    interprogram-paste-function 'copy-from-osx))
 #+END_SRC
 
 * Backup
@@ -206,18 +308,6 @@
   ; helm-M-x only
     (use-package helm
     :ensure t)
-    ;; :config
-    ;; (global-set-key (kbd "M-x") 'helm-M-x))
-
-    ;; ; For search.
-    ;; (use-package helm-swoop
-    ;; :ensure t
-    ;; :config
-    ;; (global-set-key (kbd "C-s") 'helm-swoop)
-    ;; ;; Save buffer when helm-multi-swoop-edit complete
-    ;; (setq helm-multi-swoop-edit-save t)
-    ;; ;; If this value is t, split window inside the current window
-    ;; (setq helm-swoop-split-with-multiple-windows t))
 #+END_SRC
 
 * Undo tree
@@ -228,9 +318,8 @@
     :diminish undo-tree-mode
     :init
     (global-undo-tree-mode)
-    (global-set-key (kbd "C-z") 'undo-tree-undo)
     (global-set-key (kbd "C-/") 'undo-tree-undo)
-    (global-set-key (kbd "M-z") 'undo-tree-redo)
+    (global-set-key (kbd "C-z") 'undo-tree-redo)
     :custom
     (undo-tree-visualizer-diff t)
     (undo-tree-history-directory-alist `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
@@ -505,6 +594,8 @@
    ("C-c d" . crux-duplicate-current-line-or-region)
    ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
    ("C-c t" . crux-visit-term-buffer)
+   :map prog-mode-map
+   ("C-a" . 'crux-move-beginning-of-line) ; Programming only.
    )
   :config
   (crux-with-region-or-buffer indent-region)
@@ -527,7 +618,7 @@
     :custom
     (sp-escape-quotes-after-insert nil)
     :config
-    ;; Stop pairing single quotes in elisp
+    ;; Stop pairing single quotes in elisp.
     (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
     (sp-local-pair 'org-mode "[" nil :actions nil))
 #+END_SRC
@@ -560,7 +651,6 @@
   (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
   (setq highlight-indent-guides-method 'character)
   (setq highlight-indent-guides-auto-enabled nil))
-  ;; (set-face-foreground 'highlight-indent-guides-character-face "#C0C0C0"))
 #+END_SRC
 
 * Highlight current word
@@ -664,29 +754,25 @@ Restore previous window layouts.
   (fset 'yes-or-no-p 'y-or-n-p)
   (setq use-dialog-box nil)
 
-  ;; Move the backup fies to user-emacs-directory/.backup
+  ;; Move the backup fies to user-emacs-directory/.backup.
   (setq backup-directory-alist `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
 
-  ;; Ask before killing emacs
-  (setq confirm-kill-emacs 'y-or-n-p)
-
-  ;; Automatically kill all active processes when closing Emacs
+  ;; Automatically kill all active processes when closing Emacs.
   (setq confirm-kill-processes nil)
 
-  ;; Turn Off Cursor Alarms
+  ;; Turn Off Cursor Alarms.
   (setq ring-bell-function 'ignore)
 
-  ;; Show Keystrokes in Progress Instantly
+  ;; Show Keystrokes in Progress Instantly.
   (setq echo-keystrokes 0.1)
 
-  ;; Don't Lock Files
+  ;; Don't Lock Files.
   (setq-default create-lockfiles nil)
 
-  ;; ad-handle-definition warnings are generated when functions are redefined with `defadvice',
-  ;; they are not helpful.
+  ;; ad-handle-definition warnings are generated when functions are redefined with `defadvice', they are not helpful.
   (setq ad-redefinition-action 'accept)
 
-  ;; Move Custom-Set-Variables to Different File
+  ;; Move Custom-Set-Variables to Different File.
   (setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
   (load custom-file 'noerror)
 
@@ -701,27 +787,7 @@ Restore previous window layouts.
   ;; Enable `erase-buffer' function.
   (put 'erase-buffer 'disabled nil)
 
-  ;; Don't put deleted word into the paste buffer.
-  (defun my-delete-word (arg)
-    "Delete characters forward until encountering the end of a word.
-  With argument, do this that many times.
-  This command does not push text to `kill-ring'."
-    (interactive "p")
-    (delete-region
-     (point)
-     (progn
-       (forward-word arg)
-       (point))))
-
-  (defun my-backward-delete-word (arg)
-    "Delete characters backward until encountering the beginning of a word.
-  With argument, do this that many times.
-  This command does not push text to `kill-ring'."
-    (interactive "p")
-    (my-delete-word (- arg)))
-  (global-set-key (kbd "M-<DEL>") 'my-backward-delete-word)
-
-  ;; Prevent down-arrow from adding empty lines to the bottom of the buffer
+  ;; Prevent down-arrow from adding empty lines to the bottom of the buffer.
   (setq next-line-add-newlines nil)
 
   ;; Line numbers
@@ -742,71 +808,7 @@ Restore previous window layouts.
   ;; Visual line don't break the word.
   (setq-default word-wrap t)
 
-  ;; Automatically switch focus to newly splitted buffer
-  (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
-  (global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
-
   ;; Paren match.
   (add-hook 'prog-mode-hook 'show-paren-mode)
 
-#+END_SRC
-* Self-defined function
-#+BEGIN_SRC emacs-lisp
-  ;; Column goal.
-  (defun my/toggle-goal-column ()
-    "Toggle goal column mode."
-    (interactive)
-    (if goal-column
-	(progn
-	  (setq goal-column nil)
-	  (message "Unset goal column"))
-      (progn
-	(setq goal-column (current-column))
-	(message "Set goal column at %d" goal-column))))
-
-  (global-set-key (kbd "C-x C-u") 'my/toggle-goal-column)
-
-  ;; Auto-reload init files
-  (defun my/reload-init-file ()
-    (interactive)
-    (load-file user-init-file))
-
-      ;; Save all buffers.
-  (defun my/save-all-buffers ()
-    "Instead of `save-buffer', save all opened buffers by calling `save-some-buffers' with ARG t."
-    (interactive)
-    (save-some-buffers t))
-  (global-unset-key (kbd "C-x C-s"))
-  (global-set-key (kbd "C-x C-s") 'my/save-all-buffers)
-
-  ;; MiniBuffer Functions
-  (defun my/abort-minibuffer-using-mouse ()
-    "Abort the minibuffer when using the mouse."
-    (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
-      (abort-recursive-edit)))
-
-  (add-hook 'mouse-leave-buffer-hook 'abort-minibuffer-using-mouse)
-      ;; keep the point out of the minibuffer
-      (setq-default minibuffer-prompt-properties '(read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt))
-
-  ;; Edit this file.
-  (defun my/edit-configs ()
-    "Opens the README.org file."
-	(interactive)
-	(find-file "~/.emacs.d/myinit.org"))
-
-      (global-set-key (kbd "C-c e") 'my/edit-configs)
-
-  ;; Comment
-  (defun my/comment-or-uncomment-region-or-line ()
-	"Comments or uncomments the region or the current line if there's no active region."
-	(interactive)
-	(let (beg end)
-	  (if (region-active-p)
-	      (setq beg (region-beginning) end (region-end))
-	    (setq beg (line-beginning-position) end (line-end-position)))
-	  (comment-or-uncomment-region beg end)
-	  (next-line)))
-
-  (global-set-key (kbd "C-c c") 'my/comment-or-uncomment-region-or-line)
 #+END_SRC
