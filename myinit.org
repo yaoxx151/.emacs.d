@@ -75,10 +75,15 @@
 			       (interactive)
 			       (message "Use C-x m, dude.")))
 
+  ; Somehow they don't bind later in `use-package`.
+  (global-set-key (kbd "C-c o") 'dumb-jump-go-other-window)
+  (global-set-key (kbd "C-c b") 'goto-last-change)
+
   ;; Alias.
   (defalias 'vce 'vc-ediff)
   (defalias 'reinit 'my/reload-init-file)
   (defalias 'undov 'undo-tree-visualize)
+  (defalias 'dj 'dumb-jump-go-other-window)
 
 #+END_SRC
 * Self-defined function
@@ -108,6 +113,8 @@
   ;; Scroll window up/down by 8 lines.
   (global-set-key (kbd "C-<down>") (kbd "C-u 8 C-v"))
   (global-set-key (kbd "C-<up>") (kbd "C-u 8 M-v"))
+  (global-set-key (kbd "M-n") (kbd "C-u 8 C-v"))
+  (global-set-key (kbd "M-p") (kbd "C-u 8 M-v"))
 
   ;; Column goal.
   (defun my/toggle-goal-column ()
@@ -291,6 +298,7 @@
     :custom
     ;; (ivy-use-virtual-buffers t)
     ;; (ivy-use-virtual-buffers nil)
+    (setq ivy-display-style 'fancy)
     (ivy-height 10)
     (ivy-on-del-error-function nil)
     (ivy-magic-slash-non-match-action 'ivy-magic-slash-non-match-create)
@@ -318,8 +326,9 @@
     :diminish undo-tree-mode
     :init
     (global-undo-tree-mode)
+    (global-set-key (kbd "C-z") 'undo-tree-undo)
     (global-set-key (kbd "C-/") 'undo-tree-undo)
-    (global-set-key (kbd "C-z") 'undo-tree-redo)
+    (global-set-key (kbd "C-c z") 'undo-tree-redo)
     :custom
     (undo-tree-visualizer-diff t)
     (undo-tree-history-directory-alist `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
@@ -491,16 +500,22 @@
       ;;   (venv-initialize-interactive-shells)
       ;;   (venv-initialize-eshell))
 #+END_SRC
-* Dump Jump
+* Dumb Jump
 #+BEGIN_SRC emacs-lisp
 (use-package dumb-jump
   :ensure t
-  :bind
-  (:map prog-mode-map
-        (("C-c C-o" . dumb-jump-go-other-window)
-         ("C-c C-j" . dumb-jump-go)
-         ("C-c C-i" . dumb-jump-go-prompt)))
+  ;:bind
+  ;(:map prog-mode-map
+  ;     (("C-c C-o" . dumb-jump-go-other-window)
+  ;       ("C-c C-j" . dumb-jump-go)
+  ;       ("C-c C-i" . dumb-jump-go-prompt)))
   :custom (dumb-jump-selector 'ivy))
+#+END_SRC emacs-lisp
+
+* goto-chg
+#+BEGIN_SRC emacs-lisp
+  (use-package goto-chg
+    :ensure t)
 #+END_SRC emacs-lisp
 
 * Theme
@@ -514,9 +529,15 @@
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
 	  doom-themes-enable-italic t) ; if nil, italics is universally disabled
+    ;; (if (display-graphic-p)
+    ;;     (load-theme 'doom-ayu-light t)
+      (load-theme 'doom-feather-light t))
+
+  (use-package zenburn-theme
+    :ensure t
+    :config
     (if (display-graphic-p)
-	(load-theme 'doom-ayu-light t)
-      (load-theme 'doom-feather-light t)))
+	(load-theme 'zenburn t)))
 #+END_SRC
 * Recentf
 #+BEGIN_SRC emacs-lisp
@@ -595,13 +616,13 @@
    ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
    ("C-c t" . crux-visit-term-buffer)
    :map prog-mode-map
-   ("C-a" . 'crux-move-beginning-of-line) ; Programming only.
+   ("C-a" . crux-move-beginning-of-line) ; Programming only.
    )
   :config
   (crux-with-region-or-buffer indent-region)
   (crux-with-region-or-buffer untabify)
   (crux-with-region-or-point-to-eol kill-ring-save)
-  (defalias 'rename-file-and-buffer #'crux-rename-file-and-buffer))
+  (defalias 'rename-file-and-buffer 'crux-rename-file-and-buffer))
 #+END_SRC
 * Smartparens
 #+BEGIN_SRC emacs-lisp
@@ -666,7 +687,7 @@
   (global-hl-line-mode +1)
     ;; (require 'hl-line)
     ;; (add-hook 'prog-mode-hook 'hl-line-mode)
-  (set-face-background hl-line-face "#DCDCDC")
+    ;; (set-face-background hl-line-face "#DCDCDC")
 
   ;; highlight only a single virtual line
   (setq hl-line-range-function
@@ -797,9 +818,7 @@ Restore previous window layouts.
   (column-number-mode 1)
   ;; (setq linum-relative-current-symbol "")
 
-  (set-cursor-color "#404040")
-  (setq-default cursor-type 'bar)
-
+  ;; Save whatever’s in the current system clipboard before replacing it with the Emacs' text.
   (setq save-interprogram-paste-before-kill t)
 
   ;; Stop ivy from displaying recentf files.
@@ -810,5 +829,15 @@ Restore previous window layouts.
 
   ;; Paren match.
   (add-hook 'prog-mode-hook 'show-paren-mode)
+
+  ;; Automatically update a buffer if a file changes on disk.
+  (global-auto-revert-mode 1)
+  (add-hook 'dired-mode-hook 'auto-revert-mode) ;; Refresh dired too.
+
+  ;; Give context to cursor.
+  (setq scroll-margin 4)
+
+  ;; Show unfinished keystrokes early.
+  (setq echo-keystrokes 0.1)
 
 #+END_SRC
