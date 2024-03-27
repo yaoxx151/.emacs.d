@@ -1,16 +1,7 @@
 #+STARTIP: overview
 * Disable useless stuffs
 #+BEGIN_SRC emacs-lisp
-  ;; Define system.
-  (defconst *sys/linux*
-    (eq system-type 'gnu/linux)
-    "Are we running on a GNU/Linux system?")
-
-  (defconst *sys/mac*
-      (eq system-type 'darwin)
-    "Are we running on a Mac system?")
-
-    ;; Disable usless thing.
+  ;; Useless thing.
   (setq inhibit-startup-screen t)
   (setq initial-major-mode 'text-mode)
   (setq inhibit-startup-message t)
@@ -31,18 +22,26 @@
   (global-unset-key (kbd "C-x C-u"))
   (global-unset-key (kbd "C-x C-l"))
 #+END_SRC
-* Keybinding
+* Keybindings
 #+BEGIN_SRC emacs-lisp
+  ;; Define system.
+  (defconst *sys/linux*
+    (eq system-type 'gnu/linux)
+    "Are we running on a GNU/Linux system?")
+
+  (defconst *sys/mac*
+      (eq system-type 'darwin)
+    "Are we running on a Mac system?")
+
   ; Map Mac's command key to Meta only in GUI. Do it in iTerm2 config.
   (if *sys/mac*
       (setq mac-command-modifier 'meta))
-  ;; Make motion easier. Bound extra keys from Stevey's suggestions.
-  (global-set-key (kbd "M-n") 'next-line)
-  (global-set-key (kbd "M-p") 'previous-line)
-  ;; Other keys.
+
+  ;; keys.
   (global-set-key (kbd "C-x \\") 'sort-lines)
   (global-set-key (kbd "C-c g") 'goto-line)
   (global-set-key (kbd "C-x k") 'kill-this-buffer) ;; Don't ask.
+
   ;; Stevey's suggestion.
   (global-set-key (kbd "C-x t") 'beginning-of-buffer)
   (global-set-key (kbd "C-x e") 'end-of-buffer)
@@ -51,14 +50,14 @@
   (with-eval-after-load 'helm
     (global-set-key (kbd "C-x m") 'helm-M-x)
     (global-set-key (kbd "C-c m") 'helm-M-x))
+
   ;; Adjust font size like web browsers. Doesn't work in terminal.
-  (global-set-key (kbd "C-+") 'text-scale-increase)
+  (global-set-key (kbd "C-=") 'text-scale-increase)
   (global-set-key (kbd "C--") 'text-scale-decrease)
+
   ;; Jump to visual line.
   (global-set-key (kbd "C-a") 'beginning-of-visual-line)
-  (global-set-key (kbd "M-a") 'beginning-of-visual-line)
   (global-set-key (kbd "C-e") 'end-of-visual-line)
-  (global-set-key (kbd "M-e") 'end-of-visual-line)
 
   ;; Automatically switch focus to newly splitted buffer.
   (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
@@ -76,17 +75,16 @@
 			       (message "Use C-x m, dude.")))
 
   ; Somehow they don't bind later in `use-package`.
-  (global-set-key (kbd "C-c o") 'dumb-jump-go-other-window)
+  (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
   (global-set-key (kbd "C-c b") 'goto-last-change)
 
-  ;; Alias.
+  ;; Aliases.
   (defalias 'vce 'vc-ediff)
   (defalias 'reinit 'my/reload-init-file)
   (defalias 'undov 'undo-tree-visualize)
-  (defalias 'dj 'dumb-jump-go-other-window)
 
 #+END_SRC
-* Self-defined function
+* Self-defined functions
 #+BEGIN_SRC emacs-lisp
   ;; Don't put deleted word into the paste buffer.
   (defun my/delete-word (arg)
@@ -156,7 +154,7 @@
 
   ;; Edit this file.
   (defun my/edit-configs ()
-    "Opens the README.org file."
+    "Opens this file."
     (interactive)
     (find-file "~/.emacs.d/myinit.org"))
 
@@ -175,15 +173,8 @@
 
   (global-set-key (kbd "C-c c") 'my/comment-or-uncomment-region-or-line)
 #+END_SRC
-* Scroll and Click
+* Scroll
 #+BEGIN_SRC emacs-lisp
-  ; Click and scroll in terminal.
-  (unless (display-graphic-p)
-    ;; activate mouse-based scrolling.
-    (xterm-mouse-mode 1)
-    (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
-    (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
-
   ;; Vertical Scroll
   (setq scroll-step 1)
   (setq scroll-margin 1)
@@ -200,6 +191,12 @@
   (setq hscroll-margin 1)
   (setq scroll-preserve-screen-position t)
 
+  ; Click and scroll in terminal.
+  (unless (display-graphic-p)
+    ;; activate mouse-based scrolling.
+    (xterm-mouse-mode 1)
+    (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
+    (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
 #+END_SRC
 * MacOS
 #+BEGIN_SRC emacs-lisp
@@ -364,22 +361,6 @@
   (company-idle-delay 0.1)
   ;; Number the candidates (use M-1, M-2 etc to select completions).
   (company-show-numbers t))
-
-  ;; (defun my/python-mode-hook ()
-  ;;   (add-to-list 'company-backends 'company-jedi))
-
-  ;; (add-hook 'python-mode-hook 'my/python-mode-hook)
-  ;; (use-package company-jedi
-  ;;     :ensure t
-  ;;     :config
-  ;;     (add-hook 'python-mode-hook 'jedi:setup)
-  ;;        )
-
-  ;; (defun my/python-mode-hook ()
-  ;;   (add-to-list 'company-backends 'company-jedi))
-
-  ;; (add-hook 'python-mode-hook 'my/python-mode-hook)
-
 #+END_SRC
 * Spell check
 #+BEGIN_SRC emacs-lisp
@@ -458,7 +439,6 @@
 #+END_SRC
 * Python
 #+BEGIN_SRC emacs-lisp
-
   (use-package python-mode
     :ensure nil
     :after flycheck
@@ -481,34 +461,11 @@
       :ensure t
       :config
       (add-hook 'before-save-hook 'py-isort-before-save))
-
-      ;; (use-package elpy
-      ;;   :ensure t
-      ;;   :init
-      ;;   (elpy-enable)
-      ;;   (setq elpy-rpc-virtualenv-path 'current))
-
-      ;; (use-package py-autopep8
-      ;;   :ensure t
-      ;;   :config
-      ;;   (add-hook 'python-mode-hook 'py-autopep8-enable-on-save)
-      ;;   (setq py-autopep8-options '("--max-line-length=80")))
-
-      ;; (use-package virtualenvwrapper
-      ;; :ensure t
-      ;;   :config
-      ;;   (venv-initialize-interactive-shells)
-      ;;   (venv-initialize-eshell))
 #+END_SRC
 * Dumb Jump
 #+BEGIN_SRC emacs-lisp
 (use-package dumb-jump
   :ensure t
-  ;:bind
-  ;(:map prog-mode-map
-  ;     (("C-c C-o" . dumb-jump-go-other-window)
-  ;       ("C-c C-j" . dumb-jump-go)
-  ;       ("C-c C-i" . dumb-jump-go-prompt)))
   :custom (dumb-jump-selector 'ivy))
 #+END_SRC emacs-lisp
 
@@ -520,24 +477,21 @@
 
 * Theme
 #+BEGIN_SRC emacs-lisp
-  ;; (use-package spacemacs-theme
-  ;;   :defer t
-  ;;   :init (load-theme 'spacemacs-light t))
   (use-package doom-themes
     :ensure t
     :config
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
 	  doom-themes-enable-italic t) ; if nil, italics is universally disabled
-    ;; (if (display-graphic-p)
-    ;;     (load-theme 'doom-ayu-light t)
-      (load-theme 'doom-feather-light t))
-
-  (use-package zenburn-theme
-    :ensure t
-    :config
     (if (display-graphic-p)
-	(load-theme 'zenburn t)))
+	(load-theme 'doom-ayu-light t)
+      (load-theme 'doom-feather-light t)))
+
+  ;; (use-package zenburn-theme
+  ;;   :ensure t
+  ;;   :config
+  ;;   (if (display-graphic-p)
+  ;;       (load-theme 'zenburn t)))
 #+END_SRC
 * Recentf
 #+BEGIN_SRC emacs-lisp
@@ -664,32 +618,27 @@
   (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
   (add-hook 'latex-mode-hook 'display-fill-column-indicator-mode)
 #+END_SRC
-* Highlight indent
+* Highlight
 #+BEGIN_SRC emacs-lisp
+  ;; Highlight indent.
   (use-package highlight-indent-guides
   :ensure t
   :init
   (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
   (setq highlight-indent-guides-method 'character)
   (setq highlight-indent-guides-auto-enabled nil))
-#+END_SRC
 
-* Highlight current word
-#+BEGIN_SRC emacs-lisp
+  ;; Highlight current word.
   (use-package highlight-symbol
   :ensure t
   :init
   (add-hook 'prog-mode-hook 'highlight-symbol-mode))
-#+END_SRC
 
-* Hightlight current line
-#+BEGIN_SRC emacs-lisp
+  ;; Hightlight current line.
   (global-hl-line-mode +1)
-    ;; (require 'hl-line)
-    ;; (add-hook 'prog-mode-hook 'hl-line-mode)
-    ;; (set-face-background hl-line-face "#DCDCDC")
+  (set-face-background hl-line-face "#DCDCDC") ; Might look back in your theme.
 
-  ;; highlight only a single virtual line
+  ;; Highlight only a single virtual line.
   (setq hl-line-range-function
 	'(lambda()
 	   (save-excursion
@@ -751,12 +700,6 @@ Restore previous window layouts.
   :config
   (winner-mode 1))
 #+END_SRC
-* Ace Window
-#+BEGIN_SRC emacs-lisp
-  (use-package ace-window
-    :ensure t
-    :bind ("C-x C-o" . ace-window))
-#+END_SRC
 * UTF-8
 #+BEGIN_SRC emacs-lisp
   (set-selection-coding-system 'utf-8)
@@ -770,9 +713,12 @@ Restore previous window layouts.
   (when (display-graphic-p)
     (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 #+END_SRC
-* Small configs
+* Small Configs
 #+BEGIN_SRC emacs-lisp
+  ;; y or n.
   (fset 'yes-or-no-p 'y-or-n-p)
+
+  ;; No dialgue!
   (setq use-dialog-box nil)
 
   ;; Move the backup fies to user-emacs-directory/.backup.
@@ -811,12 +757,9 @@ Restore previous window layouts.
   ;; Prevent down-arrow from adding empty lines to the bottom of the buffer.
   (setq next-line-add-newlines nil)
 
-  ;; Line numbers
+  ;; Don't show line numbers.
   ;;  (global-linum-mode)
-  ;; (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-  ;; Display column numbers in modeline
   (column-number-mode 1)
-  ;; (setq linum-relative-current-symbol "")
 
   ;; Save whatever’s in the current system clipboard before replacing it with the Emacs' text.
   (setq save-interprogram-paste-before-kill t)
