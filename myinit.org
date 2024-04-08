@@ -9,6 +9,7 @@
     (tool-bar-mode -1)
     (scroll-bar-mode -1))
   (menu-bar-mode -1)
+  (set-fringe-style 0)
   (setq-default visible-bell t)
   (blink-cursor-mode 0)
   (setq ns-use-proxy-icon nil) ;; Icon of filetype.
@@ -47,10 +48,6 @@
   (global-set-key (kbd "C-x t") 'beginning-of-buffer)
   (global-set-key (kbd "C-x e") 'end-of-buffer)
   (global-unset-key (kbd "C-c m")) ; Original: `compile`.
-  (global-set-key (kbd "C-c r") 'recompile)
-  (with-eval-after-load 'helm
-    (global-set-key (kbd "C-x m") 'helm-M-x)
-    (global-set-key (kbd "C-c m") 'helm-M-x))
 
   ;; Adjust font size like web browsers. Doesn't work in terminal.
   (global-set-key (kbd "C-=") 'text-scale-increase)
@@ -83,10 +80,19 @@
   (defalias 'vce 'vc-ediff)
   (defalias 'rei 'my/reload-init-file)
   (defalias 'uvis 'undo-tree-visualize)
+  (defalias 'rc 'recompile)
 
 #+END_SRC
 * Self-defined functions
 #+BEGIN_SRC emacs-lisp
+  (defun my/other-window-backward (&optional n)
+    (interactive "p")
+    (if n
+      (other-window (- n))
+    (other-frame -1)))
+  (global-set-key (kbd "C-x n") 'other-window)
+  (global-set-key (kbd "C-x p") 'my/other-window-backward)
+
   ;; Don't put deleted word into the paste buffer.
   (defun my/delete-word (arg)
     "Delete characters forward until encountering the end of a word.
@@ -107,7 +113,7 @@
     (my/delete-word (- arg)))
 
   (global-set-key (kbd "M-<DEL>") 'my/backward-delete-word)
-  (global-set-key (kbd "C-q") 'my/backward-delete-word) ;; Stevey's unpopular opinion. Faster to reach. Can kill your applicaton on windows.
+  ;; (global-set-key (kbd "C-q") 'my/backward-delete-word) ;; Stevey's unpopular opinion. Faster to reach. Can kill your applicaton on windows.
 
   ;; Scroll window up/down by 8 lines.
   (global-set-key (kbd "C-<down>") (lambda () (interactive) (scroll-up 8)))
@@ -141,7 +147,7 @@
     (save-some-buffers t))
 
   (global-unset-key (kbd "C-x C-s"))
-  (global-set-key (kbd "C-x C-s") 'my/save-all-buffers)
+  (global-set-key (kbd "C-s") 'my/save-all-buffers)
 
   ;; MiniBuffer Functions.
   (defun my/abort-minibuffer-using-mouse ()
@@ -149,8 +155,8 @@
     (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
       (abort-recursive-edit)))
 
-  (add-hook 'mouse-leave-buffer-hook 'abort-minibuffer-using-mouse)
-      ;; keep the point out of the minibuffer
+  (add-hook 'mouse-leave-buffer-hook 'my/abort-minibuffer-using-mouse)
+      ;; Keep the point out of the minibuffer.
       (setq-default minibuffer-prompt-properties '(read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt))
 
   ;; Edit this file.
@@ -275,7 +281,7 @@
 
 * Ivy
 #+BEGIN_SRC emacs-lisp
-  ;; https://github.com/MatthewZMD/.emacs.d?tab=readme-ov-file#ivy-amx-counsel-swiper
+  ;; https://github.com/MatthewZMD/.emacs.d?tab=readme-ov-file#ivy-amx-counsel-swiper.
   (use-package ivy
     :ensure t
     :diminish
@@ -285,10 +291,11 @@
     (use-package swiper :ensure t :defer t)
     (ivy-mode 1)
     :bind
-    (("C-s" . swiper-isearch)
-     ("C-r" . swiper-isearch-backward)
+    (("C-q" . swiper-isearch)
+     ;; ("C-," . swiper-isearch-backward) ;; Don't need in swiper. Can just cycle back.
      ("C-c s" . swiper-isearch-thing-at-point)
      ("M-y" . counsel-yank-pop)
+     ("C-c i" . counsel-imenu)
      (:map ivy-minibuffer-map
 	 ("M-RET" . ivy-immediate-done))
      (:map ivy-minibuffer-map
@@ -311,9 +318,13 @@
 
 * Helm
 #+BEGIN_SRC emacs-lisp
-  ; helm-M-x only
-    (use-package helm
-    :ensure t)
+    ; helm-M-x only
+  (use-package helm
+    :ensure t
+    :init
+    ;; Stevey's suggestion.
+    (global-set-key (kbd "C-x m") 'helm-M-x)
+    (global-set-key (kbd "C-c m") 'helm-M-x))
 #+END_SRC
 
 * Undo tree
@@ -326,7 +337,7 @@
     (global-undo-tree-mode)
     (global-set-key (kbd "C-z") 'undo-tree-undo)
     (global-set-key (kbd "C-/") 'undo-tree-undo)
-    (global-set-key (kbd "C-c z") 'undo-tree-redo)
+    (global-set-key (kbd "C-r") 'undo-tree-redo)
     :custom
     (undo-tree-visualizer-diff t)
     (undo-tree-history-directory-alist `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
@@ -393,7 +404,20 @@
   (defun magit-log-follow-current-file ()
     "A wrapper around `magit-log-buffer-file' with `--follow' argument."
     (interactive)
-    (magit-log-buffer-file t)))
+    (magit-log-buffer-file t))
+  (setq magit-log-arguments '("-n256" "--graph" "--decorate" "--color")
+        ;; Show diff per word.
+        magit-diff-refine-hunk t)
+)
+
+(use-package git-gutter+
+  :ensure t
+  :config
+  (setq git-gutter+-disabled-modes '(org-mode tex-mode))
+  ;; Move between local changes.
+  (global-set-key (kbd "C-c p") 'git-gutter+-previous-hunk)
+  (global-set-key (kbd "C-c n") 'git-gutter+-next-hunk)
+)
 #+END_SRC emacs-lisp
 
 * Yasnippet
@@ -580,7 +604,7 @@
   (crux-with-region-or-point-to-eol kill-ring-save)
   (defalias 'rename-file-and-buffer 'crux-rename-file-and-buffer))
 #+END_SRC
-* Smartparens
+* Parens
 #+BEGIN_SRC emacs-lisp
   (use-package smartparens
     :ensure t
@@ -598,6 +622,11 @@
     ;; Stop pairing single quotes in elisp.
     (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
     (sp-local-pair 'org-mode "[" nil :actions nil))
+
+  (use-package rainbow-delimiters
+  :ensure t
+  :init
+  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 #+END_SRC
 
 * Shell
@@ -651,6 +680,14 @@
 	      (progn
 		(beginning-of-visual-line 2)
 		(point))))))
+
+  ;; Highlight blocks of code in bold.
+  (setq show-paren-style 'expression)
+  (set-face-attribute 'show-paren-match nil :weight 'extra-bold)
+
+  ;; Don't ask before killing compilation.
+  (setq compilation-ask-about-save nil
+        compilation-always-kill t)
 #+END_SRC
 
 * Aggressive indent
@@ -702,8 +739,15 @@ Restore previous window layouts.
   :config
   (winner-mode 1))
 #+END_SRC
-* UTF-8
+* Font
 #+BEGIN_SRC emacs-lisp
+  (set-face-attribute 'default nil
+		    :family "Source Code Pro"
+		    :height 150
+		    :weight 'medium
+		    :width 'normal)
+
+  ;; UTF-8.
   (set-selection-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
   (set-language-environment "UTF-8")
@@ -719,6 +763,9 @@ Restore previous window layouts.
 #+BEGIN_SRC emacs-lisp
   ;; y or n.
   (fset 'yes-or-no-p 'y-or-n-p)
+
+  ;; Ask before killing emacs.
+  (setq confirm-kill-emacs 'y-or-n-p)
 
   ;; No dialgue!
   (setq use-dialog-box nil)
@@ -784,5 +831,13 @@ Restore previous window layouts.
 
   ;; Show unfinished keystrokes early.
   (setq echo-keystrokes 0.1)
+
+  ;; Hide all modes in the mode line.
+  (setq-default mode-line-format (delq 'mode-line-modes mode-line-format))
+
+  ;; Show time.
+  (setq display-time-format "[%Y-%m-%d (%a) %H:%M]")
+  (setq display-time-default-load-average nil)
+  (display-time-mode 1)
 
 #+END_SRC
