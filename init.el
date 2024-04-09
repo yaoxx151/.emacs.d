@@ -10,6 +10,8 @@
   (package-refresh-contents)
   (package-install 'use-package))
 
+(package-refresh-contents) ;; Just in case.
+
 (org-babel-load-file (expand-file-name "~/.emacs.d/myinit.org"))
 
 
