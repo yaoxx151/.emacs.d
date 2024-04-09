@@ -426,14 +426,6 @@
 #+END_SRC emacs-lisp
 * My/Functions
 #+BEGIN_SRC emacs-lisp
-  (defun my/other-window-backward (&optional n)
-    (interactive "p")
-    (if n
-      (other-window (- n))
-    (other-frame -1)))
-  (global-set-key (kbd "C-x n") 'other-window)
-  (global-set-key (kbd "C-x p") 'my/other-window-backward)
-
   ;; Don't put deleted word into the paste buffer.
   (defun my/delete-word (arg)
     "Delete characters forward until encountering the end of a word.
@@ -703,22 +695,6 @@
   (exec-path-from-shell-initialize)
   )
 #+END_SRC
-* PDF Tools
-#+BEGIN_SRC emacs-lisp
-  (use-package pdf-tools-install
-    :ensure pdf-tools
-    :if (display-graphic-p)
-    :mode "\\.pdf\\'"
-    :commands (pdf-loader-install)
-    :custom
-    (TeX-view-program-selection '((output-pdf "pdf-tools")))
-    (TeX-view-program-list '(("pdf-tools" "TeX-pdf-tools-sync-view")))
-    :hook
-    (pdf-view-mode . (lambda () (display-line-numbers-mode -1)))
-    :config
-    (pdf-loader-install))
-#+END_SRC
-
 * Python
 #+BEGIN_SRC emacs-lisp
   (use-package python-mode
@@ -935,8 +911,4 @@ Restore previous window layouts.
 	(when (and (eq old-point (point))
 		   (eq old-tick (buffer-chars-modified-tick)))
 	  (ignore-errors (yas-next-field))))))
-    ;; (use-package yasnippet
-    ;; :ensure t
-    ;; :init
-    ;; (add-hook 'prog-mode-hook #'yas-minor-mode))
 #+END_SRC
