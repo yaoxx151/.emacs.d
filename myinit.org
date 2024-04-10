@@ -28,8 +28,10 @@
   :config
   (global-aggressive-indent-mode 1))
 #+END_SRC
-* AUCTeX
+* TeX
 #+BEGIN_SRC emacs-lisp
+(add-hook 'latex-mode-hook 'visual-line-mode)
+
 (use-package tex
   :ensure auctex
   :defer t
@@ -446,7 +448,7 @@
     (my/delete-word (- arg)))
 
   (global-set-key (kbd "M-<DEL>") 'my/backward-delete-word)
-  ;; (global-set-key (kbd "C-q") 'my/backward-delete-word) ;; Stevey's unpopular opinion. Faster to reach. Can kill your applicaton on windows.
+  (global-set-key (kbd "C-w") 'my/backward-delete-word) ;; Stevey's unpopular opinion. Faster to reach.
 
   ;; Scroll window up/down by 8 lines.
   (global-set-key (kbd "C-<down>") (lambda () (interactive) (scroll-up 8)))
@@ -535,6 +537,10 @@
   ;; Automatically switch focus to newly splitted buffer.
   (global-set-key (kbd "C-x 2") (lambda () (interactive)(split-window-vertically) (other-window 1)))
   (global-set-key (kbd "C-x 3") (lambda () (interactive)(split-window-horizontally) (other-window 1)))
+
+  ;; Because `C-w` is mapped to backward kill word following Stevey's suggestion.
+  (global-set-key (kbd "C-x w") 'kill-region)
+  (global-set-key (kbd "C-c w") 'kill-region)
 
   ;; Cure bad habits.
   (global-set-key (kbd "M->") (lambda ()
@@ -649,19 +655,14 @@
 
   ;; Tramp.
   (setq tramp-default-method "ssh")
-
 #+END_SRC
 * Org
 #+BEGIN_SRC emacs-lisp
   (add-hook 'org-mode-hook 'visual-line-mode)
-  (add-hook 'org-mode-hook (lambda () (global-display-line-numbers-mode -1)))
-  (electric-indent-mode -1)
   ; Make tab work in Org-mode code block.
   (setq org-src-tab-acts-natively t)
   ; Highlight code block.
   (setq org-src-fontify-natively t)
-  (add-hook 'latex-mode-hook 'visual-line-mode)
-  ; (add-hook 'latex-mode-hook 'linum-relative-mode)
 #+END_SRC
 * Parens
 #+BEGIN_SRC emacs-lisp
