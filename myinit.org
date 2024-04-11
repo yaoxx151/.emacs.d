@@ -7,19 +7,21 @@
     "Are we running on a GNU/Linux system?")
 
   (defconst *sys/mac*
-      (eq system-type 'darwin)
+    (eq system-type 'darwin)
     "Are we running on a Mac system?")
 
-  ; Map Mac's command key to Meta only in GUI. Do it in iTerm2 config.
+  ;; Map Mac's command key to Meta only in GUI. Do it in iTerm2 config.
   (if *sys/mac*
-      (setq mac-command-modifier 'meta))
+      (setq mac-command-modifier 'meta
+	    mac-right-command-modifier 'super))
 #+END_SRC
 * Ace-window
 #+BEGIN_SRC emacs-lisp
-(use-package ace-window
-  :ensure t
-  :bind ("C-o" . ace-window)
-  :bind ("C-x o" . ace-window))
+  (use-package ace-window
+    :ensure t
+    :bind
+    ("C-o" . ace-window)
+    ("C-x o" . ace-window))
 #+END_SRC
 * Aggressive Indent
 #+BEGIN_SRC emacs-lisp
@@ -30,28 +32,7 @@
 #+END_SRC
 * TeX
 #+BEGIN_SRC emacs-lisp
-(add-hook 'latex-mode-hook 'visual-line-mode)
-
-(use-package tex
-  :ensure auctex
-  :defer t
-  :custom
-  (TeX-auto-save t)
-  (TeX-parse-self t)
-  (TeX-master nil)
-  ;; to use pdfview with auctex
-  (TeX-view-program-selection '((output-pdf "pdf-tools"))
-                              TeX-source-correlate-start-server t)
-  (TeX-view-program-list '(("pdf-tools" "TeX-pdf-tools-sync-view")))
-  (TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
-  :hook
-  (LaTeX-mode . (lambda ()
-                  (turn-on-reftex)
-                  (setq reftex-plug-into-AUCTeX t)
-                  (reftex-isearch-minor-mode)
-                  (setq TeX-PDF-mode t)
-                  (setq TeX-source-correlate-method 'synctex)
-                  (setq TeX-source-correlate-start-server t))))
+  (add-hook 'latex-mode-hook 'visual-line-mode)
 #+END_SRC
 * Backup
 #+BEGIN_SRC emacs-lisp
@@ -165,7 +146,6 @@
     (tool-bar-mode -1)
     (scroll-bar-mode -1))
   (menu-bar-mode -1)
-  (set-fringe-style 0)
   (setq-default visible-bell t)
   (blink-cursor-mode 0)
   (setq ns-use-proxy-icon nil) ;; Icon of filetype.
@@ -206,7 +186,15 @@
 * Flycheck
 #+BEGIN_SRC emacs-lisp
   (use-package flycheck
-  :ensure t
+  :defer t
+  :diminish
+  :hook (after-init . global-flycheck-mode)
+  :commands (flycheck-add-mode)
+  :custom
+  (flycheck-global-modes
+   '(not outline-mode diff-mode shell-mode eshell-mode term-mode))
+  (flycheck-emacs-lisp-load-path 'inherit)
+  (flycheck-indication-mode (if (display-graphic-p) 'right-fringe 'right-margin))
   :init
   (add-hook 'prog-mode-hook 'flycheck-mode))
 #+END_SRC
@@ -283,9 +271,6 @@
   ;; Highlight blocks of code in bold.
   ;; (setq show-paren-style 'expression)
   ;; (set-face-attribute 'show-paren-match nil :weight 'extra-bold)
-
-  ;; Don't ask before killing compilation.
-  (setq compilation-ask-about-save nil)
 
   (use-package ivy
     :ensure t
@@ -569,6 +554,9 @@
 #+END_SRC
 * My/Small Configs
 #+BEGIN_SRC emacs-lisp
+  ;; C-p, C-n, etc uses visual lines.
+  (setq line-move-visual t)
+
   ;; y or n.
   (fset 'yes-or-no-p 'y-or-n-p)
 
@@ -650,19 +638,36 @@
 
   ;; Don't ask when killing a buffer with a live process.
   (setq kill-buffer-query-functions
-    (remq 'process-kill-buffer-query-function
-	  kill-buffer-query-functions))
+	(remq 'process-kill-buffer-query-function
+	      kill-buffer-query-functions))
 
   ;; Tramp.
   (setq tramp-default-method "ssh")
+
+  ;; Uses system trash rather than deleting forever.
+  (setq trash-directory "~/.Trash")
+  (setq delete-by-moving-to-trash t)
+
+  ;; Blank scratch.
+  (setq initial-scratch-message "")
+
+  ;; Better Compilation.
+  (setq-default compilation-always-kill t) ; Kill compilation process before starting another.
+  (setq-default compilation-ask-about-save nil) ; Save all buffers on `compile'.
+  (setq-default compilation-scroll-output t)
 #+END_SRC
 * Org
 #+BEGIN_SRC emacs-lisp
   (add-hook 'org-mode-hook 'visual-line-mode)
-  ; Make tab work in Org-mode code block.
+  ;; Make tab work in Org-mode code block.
+
   (setq org-src-tab-acts-natively t)
-  ; Highlight code block.
+  ;; Highlight code block.
+
   (setq org-src-fontify-natively t)
+
+  ;; Cause annoying indent.
+  (electric-indent-mode -1)
 #+END_SRC
 * Parens
 #+BEGIN_SRC emacs-lisp
@@ -766,9 +771,9 @@
   (setq hscroll-margin 1)
   (setq scroll-preserve-screen-position t)
 
-  ; Click and scroll in terminal.
+  ;; Click and scroll in terminal.
   (unless (display-graphic-p)
-    ;; activate mouse-based scrolling.
+    ;; Activate mouse-based scrolling.
     (xterm-mouse-mode 1)
     (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
     (global-set-key (kbd "<mouse-5>") 'scroll-up-line))

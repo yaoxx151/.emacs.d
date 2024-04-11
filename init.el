@@ -1,16 +1,24 @@
+;; Performance improvement following https://github.com/MatthewZMD/.emacs.d?tab=readme-ov-file#defer-garbage-collection.
+(setq gc-cons-threshold 100000000)
+
 (require 'package)
 (setq package-enable-at-startup nil)
 (add-to-list 'package-archives
 '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
 
-(setq gc-cons-threshold 100000000) ; https://github.com/MatthewZMD/.emacs.d?tab=readme-ov-file#defer-garbage-collection
 ;; Bootstrap `use-package'
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
 
-(package-refresh-contents) ;; Just in case.
+(eval-and-compile
+  (setq use-package-always-ensure t)
+  (setq use-package-expand-minimally t)
+  (setq use-package-compute-statistics t)
+  (setq use-package-enable-imenu-support t))
+
+;; (package-refresh-contents) ;; Just in case.
 
 (org-babel-load-file (expand-file-name "~/.emacs.d/myinit.org"))
 
