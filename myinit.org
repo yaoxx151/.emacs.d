@@ -1,6 +1,6 @@
 #+STARTIP: overview
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   ;; Define system.
   (defconst *sys/linux*
     (eq system-type 'gnu/linux)
@@ -14,24 +14,24 @@
   (if *sys/mac*
       (setq mac-command-modifier 'meta
 	    mac-right-command-modifier 'super))
-#+END_SRC
+#+end_src
 * Ace-window
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package ace-window
     :ensure t
     :bind
     ("C-o" . ace-window)
     ("C-x o" . ace-window))
-#+END_SRC
+#+end_src
 * Aggressive Indent
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package aggressive-indent
   :ensure t
   :config
   (global-aggressive-indent-mode 1))
-#+END_SRC
+#+end_src
 * Backup
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (setq backup-directory-alist `(("." . "~/.saves")))
   (setq auto-save-list-file-prefix "~/.saves/.saves-")
   (setq backup-by-copying t)
@@ -39,23 +39,23 @@
     kept-new-versions 20
     kept-old-versions 10
     version-control t)
-#+END_SRC
+#+end_src
 
 * Beacon Mode
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package beacon
   :ensure t
   :config
   (beacon-mode 1))
-#+END_SRC
+#+end_src
 * Column Width Indicator
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (setq-default display-fill-column-indicator-column 79) ; 80 linewidth
   (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
   (add-hook 'latex-mode-hook 'display-fill-column-indicator-mode)
-#+END_SRC
+#+end_src
 * Company
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package company
   :ensure t
   :config
@@ -74,9 +74,9 @@
 
   ;; M-/ for Hippe expand.
   (global-set-key [remap dabbrev-expand] 'hippie-expand)
-#+END_SRC
+#+end_src
 * Crux
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package crux
   :ensure t
   :bind
@@ -96,9 +96,9 @@
   (crux-with-region-or-buffer untabify)
   (crux-with-region-or-point-to-eol kill-ring-save)
   (defalias 'rename-file-and-buffer 'crux-rename-file-and-buffer))
-#+END_SRC
+#+end_src
 * Dired
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package dired
   :ensure nil
   :bind
@@ -131,9 +131,9 @@
                   (local-set-key (kbd "RET") #'dired-find-alternate-file)
                   (local-set-key (kbd "^")
                                  (lambda () (interactive) (find-alternate-file ".."))))))
-#+END_SRC
+#+end_src
 * Disable Useless Things
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   ;; Useless thing.
   (setq inhibit-startup-screen t)
   (setq initial-major-mode 'text-mode)
@@ -156,32 +156,32 @@
   (global-unset-key (kbd "C-x C-u"))
   (global-unset-key (kbd "C-x C-l"))
   (global-unset-key (kbd "C-x C-s")) ; Too much to type for saving, such a frequent cmd. Map to `C-s` instead.
-#+END_SRC
+#+end_src
 * Dumb Jump
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package dumb-jump
   :ensure t
   :custom (dumb-jump-selector 'ivy)
   :bind
   (:map prog-mode-map
     ("C-c C-o" . dumb-jump-go-other-window)))
-#+END_SRC emacs-lisp
+#+end_src emacs-lisp
 * Ediff
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package ediff
   :custom
   (ediff-split-window-function #'split-window-horizontally)
   (ediff-window-setup-function #'ediff-setup-windows-plain))
-#+END_SRC
+#+end_src
 * Expand Region
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package expand-region
   :ensure t
   :config
   (global-set-key (kbd "C-c =") 'er/expand-region))
-#+END_SRC
+#+end_src
 * Flycheck
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package flycheck
   :defer t
   :diminish
@@ -194,9 +194,9 @@
   (flycheck-indication-mode (if (display-graphic-p) 'right-fringe 'right-margin))
   :init
   (add-hook 'prog-mode-hook 'flycheck-mode))
-#+END_SRC
+#+end_src
 * Font
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (set-face-attribute 'default nil
 		    :family "Source Code Pro"
 		    :height 150
@@ -214,16 +214,16 @@
   ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
   (when (display-graphic-p)
     (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
-#+END_SRC
+#+end_src
 * Goto-chg
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package goto-chg
     :ensure t
     :init
     (global-set-key (kbd "C-c b") 'goto-last-change))
-#+END_SRC emacs-lisp
+#+end_src emacs-lisp
 * Helm
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   ;; helm-M-x only
   (use-package helm
     :ensure t
@@ -231,10 +231,10 @@
     ;; Stevey's suggestion.
     (global-set-key (kbd "C-x m") 'helm-M-x)
     (global-set-key (kbd "C-c m") 'helm-M-x))
-#+END_SRC
+#+end_src
 
 * Highlight
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   ;; Highlight indent.
   (use-package highlight-indent-guides
   :ensure t
@@ -301,9 +301,9 @@
 	"Go to the $HOME of the local machine."
 	(interactive)
       (ivy--cd "~/")))
-#+END_SRC
+#+end_src
 * Ibuffer
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package ibuffer
     :ensure t
     :bind ("C-x C-b" . ibuffer)
@@ -324,9 +324,9 @@
        (mark " "
 	     (name 16 -1)
 	     " " filename))))
-#+END_SRC
+#+end_src
 * Ivy
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   ;; https://github.com/MatthewZMD/.emacs.d?tab=readme-ov-file#ivy-amx-counsel-swiper.
   (use-package ivy
     :ensure t
@@ -360,9 +360,9 @@
 	"Go to the $HOME of the local machine."
 	(interactive)
       (ivy--cd "~/")))
-#+END_SRC
+#+end_src
 * MacOS
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   ; Handle copy and paste in OSX.
   (defun copy-from-osx ()
     "Handle copy/paste intelligently on osx."
@@ -382,9 +382,9 @@
   (if *sys/mac*
       (setq interprogram-cut-function 'paste-to-osx
 	    interprogram-paste-function 'copy-from-osx))
-#+END_SRC
+#+end_src
 * Magit
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package magit
   :ensure t
   :bind
@@ -407,17 +407,17 @@
   ;; Move between local changes.
   (global-set-key (kbd "C-c p") 'git-gutter+-previous-hunk)
   (global-set-key (kbd "C-c n") 'git-gutter+-next-hunk))
-#+END_SRC emacs-lisp
+#+end_src emacs-lisp
 * Multi-cursor
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package multiple-cursors
   :ensure t
   :init
   (global-set-key (kbd "C-c C-m") 'mc/edit-lines)
   )
-#+END_SRC
+#+end_src
 * My/Functions
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   ;; Don't put deleted word into the paste buffer.
   (defun my/delete-word (arg)
     "Delete characters forward until encountering the end of a word.
@@ -503,9 +503,9 @@
       (next-line)))
 
   (global-set-key (kbd "C-c c") 'my/comment-or-uncomment-region-or-line)
-#+END_SRC
+#+end_src
 * My/Keybindings
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   ;; Better keys.
   (global-set-key (kbd "C-c g") 'goto-line)
   (global-set-key (kbd "C-x k") 'kill-this-buffer) ;; Don't ask.
@@ -556,14 +556,14 @@
   (global-set-key (kbd "C-x ?") 'describe-key)
 
   ;; Aliases.
-  (defalias 'vce 'vc-ediff)
-  (defalias 'rei 'my/reload-init-file)
+  (defalias 'vce  'vc-ediff)
+  (defalias 'rei  'my/reload-init-file)
   (defalias 'uvis 'undo-tree-visualize)
-  (defalias 'rc 'recompile)
+  (defalias 'rc   'recompile)
 
-#+END_SRC
+#+end_src
 * My/Small Configs
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   ;; C-p, C-n, etc uses visual lines.
   (setq line-move-visual t)
 
@@ -662,9 +662,9 @@
   (setq-default compilation-always-kill t) ; Kill compilation process before starting another.
   (setq-default compilation-ask-about-save nil) ; Save all buffers on `compile'.
   (setq-default compilation-scroll-output t)
-#+END_SRC
+#+end_src
 * Org
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (add-hook 'org-mode-hook 'visual-line-mode)
 
   ;; Make tab work in Org-mode code block.
@@ -675,9 +675,9 @@
 
   ;; Cause annoying auto indent in org mode.
   (electric-indent-mode -1)
-#+END_SRC
+#+end_src
 * Parens
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package smartparens
     :ensure t
     :hook (prog-mode . smartparens-mode)
@@ -699,17 +699,17 @@
   :ensure t
   :init
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
-#+END_SRC
+#+end_src
 * PATH
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package exec-path-from-shell
   :ensure t
   :config
   (exec-path-from-shell-initialize)
   )
-#+END_SRC
+#+end_src
 * Python
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package python-mode
     :ensure nil
     :after flycheck
@@ -732,9 +732,9 @@
       :ensure t
       :config
       (add-hook 'before-save-hook 'py-isort-before-save))
-#+END_SRC
+#+end_src
 * Recentf
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package recentf
   :ensure nil
   :hook (after-init . recentf-mode)
@@ -759,9 +759,9 @@
 
 ;; Set history-length longer
 (setq-default history-length 500)
-#+END_SRC
+#+end_src
 * Scroll
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   ;; Vertical Scroll
   (setq scroll-step 1)
   (setq scroll-margin 1)
@@ -784,9 +784,9 @@
     (xterm-mouse-mode 1)
     (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
     (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
-#+END_SRC
+#+end_src
 * Shell
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (setq explicit-shell-file-name "/bin/zsh")
 
   (use-package exec-path-from-shell
@@ -794,9 +794,9 @@
     :if (memq window-system '(mac ns x))
     :config
     (exec-path-from-shell-initialize))
-#+END_SRC
+#+end_src
 * Spell Checker
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package flyspell
     :ensure nil
     :diminish
@@ -823,13 +823,13 @@
       :custom (flyspell-correct-interface 'flyspell-correct-ivy)))
 
   (add-hook 'prog-mode-hook 'flyspell-prog-mode)
-#+END_SRC
+#+end_src
 * TeX
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (add-hook 'latex-mode-hook 'visual-line-mode)
-#+END_SRC
+#+end_src
 * Theme
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package doom-themes
     :ensure t
     :config
@@ -846,9 +846,9 @@
   ;;   (if (display-graphic-p)
   ;;       (load-theme 'zenburn t)))
  (set-cursor-color "#404040")
-#+END_SRC
+#+end_src
 * Undo Tree
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package undo-tree
     :ensure t
     :defer t
@@ -867,9 +867,9 @@
 
   (eval-after-load 'undo-tree
     '(unbind-key (kbd "C-x u"))) ; Somehow you need both to unbind. Why emacs keybinding in modes and package is so confusing?
-#+END_SRC
+#+end_src
 * Whitespace
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package whitespace
   :ensure t
   :init
@@ -883,10 +883,10 @@
 	'(face
 	  tabs trailing space-before-tab space-after-tab ; tabs spaces trailing space-before-tab space-after-tab
 	  tab-mark))))
-#+END_SRC
+#+end_src
 * Winner
 Restore previous window layouts.
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (use-package winner
   :ensure t
   :custom
@@ -903,9 +903,9 @@ Restore previous window layouts.
      "*esh command on file*"))
   :config
   (winner-mode 1))
-#+END_SRC
+#+end_src
 * Yasnippet
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (use-package yasnippet
     :ensure t
     :diminish yas-minor-mode
@@ -928,4 +928,4 @@ Restore previous window layouts.
 	(when (and (eq old-point (point))
 		   (eq old-tick (buffer-chars-modified-tick)))
 	  (ignore-errors (yas-next-field))))))
-#+END_SRC
+#+end_src
