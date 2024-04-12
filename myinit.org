@@ -30,10 +30,6 @@
   :config
   (global-aggressive-indent-mode 1))
 #+END_SRC
-* TeX
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'latex-mode-hook 'visual-line-mode)
-#+END_SRC
 * Backup
 #+BEGIN_SRC emacs-lisp
   (setq backup-directory-alist `(("." . "~/.saves")))
@@ -148,7 +144,8 @@
   (menu-bar-mode -1)
   (setq-default visible-bell t)
   (blink-cursor-mode 0)
-  (setq ns-use-proxy-icon nil) ;; Icon of filetype.
+  (setq ns-use-proxy-icon nil) ; Icon of filetype.
+  (setq initial-scratch-message "")
 
   ;; Useless keys.
   (global-unset-key (kbd "C-z")) ; Don't hit it and suspend it in terminal.
@@ -158,7 +155,7 @@
   (global-unset-key (kbd "C-x m"))
   (global-unset-key (kbd "C-x C-u"))
   (global-unset-key (kbd "C-x C-l"))
-  (global-unset-key (kbd "C-x C-s")) ; Too much to type for saving, such a frequent cmd.
+  (global-unset-key (kbd "C-x C-s")) ; Too much to type for saving, such a frequent cmd. Map to `C-s` instead.
 #+END_SRC
 * Dumb Jump
 #+BEGIN_SRC emacs-lisp
@@ -227,7 +224,7 @@
 #+END_SRC emacs-lisp
 * Helm
 #+BEGIN_SRC emacs-lisp
-    ; helm-M-x only
+  ;; helm-M-x only
   (use-package helm
     :ensure t
     :init
@@ -411,6 +408,14 @@
   (global-set-key (kbd "C-c p") 'git-gutter+-previous-hunk)
   (global-set-key (kbd "C-c n") 'git-gutter+-next-hunk))
 #+END_SRC emacs-lisp
+* Multi-cursor
+#+BEGIN_SRC emacs-lisp
+  (use-package multiple-cursors
+  :ensure t
+  :init
+  (global-set-key (kbd "C-c C-m") 'mc/edit-lines)
+  )
+#+END_SRC
 * My/Functions
 #+BEGIN_SRC emacs-lisp
   ;; Don't put deleted word into the paste buffer.
@@ -504,8 +509,10 @@
   ;; Better keys.
   (global-set-key (kbd "C-c g") 'goto-line)
   (global-set-key (kbd "C-x k") 'kill-this-buffer) ;; Don't ask.
-  (global-set-key (kbd "M-c") 'kill-ring-save) ;; Copy.
-  (global-set-key (kbd "M-v") 'yank) ;; Paste. Original: scroll down.
+
+  ;; Conventional copy/paste.
+  (global-set-key (kbd "M-c") 'kill-ring-save)
+  (global-set-key (kbd "M-v") 'yank)
 
   ;; Stevey's suggestion.
   (global-set-key (kbd "C-x t") 'beginning-of-buffer)
@@ -541,9 +548,12 @@
 			       (interactive)
 			       (message "Use C-s, dude.")))
 
-  ; Somehow they don't bind later in `use-package`.
+  ;; Somehow they don't bind later in `use-package`. Need to install first.
   (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
   (global-set-key (kbd "C-c b") 'goto-last-change)
+
+  ;; Misc.
+  (global-set-key (kbd "C-x ?") 'describe-key)
 
   ;; Aliases.
   (defalias 'vce 'vc-ediff)
@@ -648,9 +658,6 @@
   (setq trash-directory "~/.Trash")
   (setq delete-by-moving-to-trash t)
 
-  ;; Blank scratch.
-  (setq initial-scratch-message "")
-
   ;; Better Compilation.
   (setq-default compilation-always-kill t) ; Kill compilation process before starting another.
   (setq-default compilation-ask-about-save nil) ; Save all buffers on `compile'.
@@ -659,14 +666,14 @@
 * Org
 #+BEGIN_SRC emacs-lisp
   (add-hook 'org-mode-hook 'visual-line-mode)
+
   ;; Make tab work in Org-mode code block.
-
   (setq org-src-tab-acts-natively t)
-  ;; Highlight code block.
 
+  ;; Highlight code block.
   (setq org-src-fontify-natively t)
 
-  ;; Cause annoying indent.
+  ;; Cause annoying auto indent in org mode.
   (electric-indent-mode -1)
 #+END_SRC
 * Parens
@@ -816,6 +823,10 @@
       :custom (flyspell-correct-interface 'flyspell-correct-ivy)))
 
   (add-hook 'prog-mode-hook 'flyspell-prog-mode)
+#+END_SRC
+* TeX
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'latex-mode-hook 'visual-line-mode)
 #+END_SRC
 * Theme
 #+BEGIN_SRC emacs-lisp
