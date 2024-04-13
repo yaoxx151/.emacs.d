@@ -82,12 +82,10 @@
   :bind
   (("C-x K" . crux-kill-other-buffers)
    ("C-k" . crux-smart-kill-line)
-   ("C-c o" . crux-smart-open-line)
-   ("M-o" . crux-smart-open-line-above)
+   ("M-o" . crux-smart-open-line)
    ("C-c f" . crux-recentf-find-file)
    ("C-c d" . crux-duplicate-current-line-or-region)
    ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
-   ("C-c t" . crux-visit-term-buffer)
    :map prog-mode-map
    ("C-a" . crux-move-beginning-of-line) ; Programming only.
    )
@@ -489,8 +487,6 @@
     (interactive)
     (find-file "~/.emacs.d/myinit.org"))
 
-  (global-set-key (kbd "C-c e") 'my/edit-configs)
-
   ;; Comment.
   (defun my/comment-or-uncomment-region-or-line ()
     "Comments or uncomments the region or the current line if there's no active region."
@@ -516,7 +512,9 @@
 
   ;; Stevey's suggestion.
   (global-set-key (kbd "C-x t") 'beginning-of-buffer)
+  (global-set-key (kbd "C-c t") 'beginning-of-buffer)
   (global-set-key (kbd "C-x e") 'end-of-buffer)
+  (global-set-key (kbd "C-c e") 'end-of-buffer)
 
   ;; Adjust font size like web browsers. Doesn't work in terminal.
   (global-set-key (kbd "C-=") 'text-scale-increase)
