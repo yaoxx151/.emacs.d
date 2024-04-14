@@ -280,43 +280,6 @@ System configs.
 	      (progn
 		(beginning-of-visual-line 2)
 		(point))))))
-
-  ;; Highlight blocks of code in bold.
-  ;; (setq show-paren-style 'expression)
-  ;; (set-face-attribute 'show-paren-match nil :weight 'extra-bold)
-
-  (use-package ivy
-    :ensure t
-    :diminish
-    :init
-    (use-package amx :ensure t :defer t)
-    (use-package counsel :ensure t :diminish :config (counsel-mode 1))
-    (use-package swiper :ensure t :defer t)
-    (ivy-mode 1)
-    :bind
-    (("C-q" . swiper-isearch)
-     ;; ("C-," . swiper-isearch-backward) ;; Don't need in swiper. Can just cycle back.
-     ("C-c s" . swiper-isearch-thing-at-point)
-     ("M-y" . counsel-yank-pop)
-     ("C-c i" . counsel-imenu)
-     (:map ivy-minibuffer-map
-	 ("M-RET" . ivy-immediate-done))
-     (:map ivy-minibuffer-map
-	 ("C-q" . ivy-immediate-done)))
-    :custom
-    ;; (ivy-use-virtual-buffers t)
-    ;; (ivy-use-virtual-buffers nil)
-    (setq ivy-display-style 'fancy)
-    (ivy-height 10)
-    (ivy-on-del-error-function nil)
-    (ivy-magic-slash-non-match-action 'ivy-magic-slash-non-match-create)
-    (ivy-count-format "%d/%d")
-    (ivy-wrap t)
-    :config
-    (defun counsel-goto-local-home ()
-	"Go to the $HOME of the local machine."
-	(interactive)
-      (ivy--cd "~/")))
 #+end_src
 * Ibuffer
 #+begin_src emacs-lisp
@@ -353,8 +316,7 @@ System configs.
     (use-package swiper :ensure t :defer t)
     (ivy-mode 1)
     :bind
-    (("C-q" . swiper-isearch)
-     ;; ("C-," . swiper-isearch-backward) ;; Don't need in swiper. Can just cycle back.
+    (("C-q" . swiper-isearch) ; Don't need reverse search in swiper. Can just cycle back.
      ("C-c s" . swiper-isearch-thing-at-point)
      ("M-y" . counsel-yank-pop)
      ("C-c i" . counsel-imenu)
@@ -427,7 +389,8 @@ System configs.
   (use-package multiple-cursors
   :ensure t
   :init
-  (global-set-key (kbd "C-c C-m") 'mc/edit-lines)
+  (global-set-key (kbd "C-c <return>") 'mc/edit-lines)
+  (global-set-key (kbd "C-c RET") 'mc/edit-lines)
   )
 #+end_src
 * My/Functions
@@ -452,7 +415,7 @@ System configs.
 
   (global-set-key (kbd "C-x C-u") 'my/toggle-goal-column)
 
-  ;; Auto-reload init files.
+  ;; Reload init files.
   (defun my/reload-init-file ()
     (interactive)
     (load-file user-init-file))
@@ -520,10 +483,6 @@ System configs.
   (global-set-key (kbd "C-x 2") (lambda () (interactive)(split-window-vertically) (other-window 1)))
   (global-set-key (kbd "C-x 3") (lambda () (interactive)(split-window-horizontally) (other-window 1)))
 
-  ;; Misc.
-  (global-set-key (kbd "C-c g") 'goto-line)
-  (global-set-key (kbd "C-x k") 'kill-this-buffer) ; Don't ask.
-
   ;; Cure bad habits.
   (global-set-key (kbd "M->") (lambda ()
 			       (interactive)
@@ -543,6 +502,8 @@ System configs.
   (global-set-key (kbd "C-c b") 'goto-last-change)
 
   ;; Misc.
+  (global-set-key (kbd "C-c g") 'goto-line)
+  (global-set-key (kbd "C-x k") 'kill-this-buffer) ; Don't ask.
   (global-set-key (kbd "C-x ?") 'describe-key)
 
   ;; Aliases.
@@ -651,6 +612,18 @@ System configs.
   (setq-default compilation-always-kill t) ; Kill compilation process before starting another.
   (setq-default compilation-ask-about-save nil) ; Save all buffers on `compile'.
   (setq-default compilation-scroll-output t)
+
+  ;; Move `custom-set-variables` to a different file.
+  (setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
+  (load custom-file 'noerror)
+
+  ;; Default some files to text-mode.
+  (add-to-list 'auto-mode-alist '("\\.in\\'" . text-mode))
+  (add-to-list 'auto-mode-alist '("\\.out\\'" . text-mode))
+  (add-to-list 'auto-mode-alist '("\\.args\\'" . text-mode))
+  (add-to-list 'auto-mode-alist '("\\.bb\\'" . shell-script-mode))
+  (add-to-list 'auto-mode-alist '("\\.bbclass\\'" . shell-script-mode))
+  (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . markdown-mode))
 #+end_src
 * Org
 #+begin_src emacs-lisp
