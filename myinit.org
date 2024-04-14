@@ -1,5 +1,23 @@
 #+STARTIP: overview
+Rebinding of basic commands:
+| Key             | Command                         |
+|-----------------+---------------------------------|
+| C-s             | save                            |
+| C-w             | delete word backward            |
+| C-i             | kill (just easy to press)       |
+| C-x m or C-c m  | M-x                             |
+| C-q             | search (q for query)            |
+| C-z             | undo                            |
+| C-r             | redo                            |
+| C-o             | switch window                   |
+| C-x t or C-c t  | beginning (t for top) of buffer |
+| C-x e or C-c t  | end of buffer                   |
+| M-p or C-<up>   | page up (only a few lines)      |
+| M-n or C-<down> | page down (only a few lines)    |
+| M-c             | copy                            |
+| M-v             | paste                           |
 
+System configs.
 #+begin_src emacs-lisp
   ;; Define system.
   (defconst *sys/linux*
@@ -341,9 +359,7 @@
      ("M-y" . counsel-yank-pop)
      ("C-c i" . counsel-imenu)
      (:map ivy-minibuffer-map
-	 ("M-RET" . ivy-immediate-done))
-     (:map ivy-minibuffer-map
-	 ("C-q" . ivy-immediate-done)))
+	 ("M-RET" . ivy-immediate-done)))
     :custom
     ;; (ivy-use-virtual-buffers t)
     ;; (ivy-use-virtual-buffers nil)
@@ -416,28 +432,6 @@
 #+end_src
 * My/Functions
 #+begin_src emacs-lisp
-  ;; Don't put deleted word into the paste buffer.
-  (defun my/delete-word (arg)
-    "Delete characters forward until encountering the end of a word.
-  With argument, do this that many times.
-  This command does not push text to `kill-ring'."
-    (interactive "p")
-    (delete-region
-     (point)
-     (progn
-       (forward-word arg)
-       (point))))
-
-  (defun my/backward-delete-word (arg)
-    "Delete characters backward until encountering the beginning of a word.
-  With argument, do this that many times.
-  This command does not push text to `kill-ring'."
-    (interactive "p")
-    (my/delete-word (- arg)))
-
-  (global-set-key (kbd "M-<DEL>") 'my/backward-delete-word)
-  (global-set-key (kbd "C-w") 'my/backward-delete-word) ;; Stevey's unpopular opinion. Faster to reach.
-
   ;; Scroll window up/down by 8 lines.
   (global-set-key (kbd "C-<down>") (lambda () (interactive) (scroll-up 8)))
   (global-set-key (kbd "C-<up>") (lambda () (interactive) (scroll-down 8)))
@@ -502,19 +496,17 @@
 #+end_src
 * My/Keybindings
 #+begin_src emacs-lisp
-  ;; Better keys.
-  (global-set-key (kbd "C-c g") 'goto-line)
-  (global-set-key (kbd "C-x k") 'kill-this-buffer) ;; Don't ask.
-
-  ;; Conventional copy/paste.
-  (global-set-key (kbd "M-c") 'kill-ring-save)
-  (global-set-key (kbd "M-v") 'yank)
-
   ;; Stevey's suggestion.
+  (global-set-key (kbd "C-w") 'backward-kill-word)
+  (global-set-key (kbd "C-i") 'kill-region) ; Because `C-w` is remapped to backward kill word.
   (global-set-key (kbd "C-x t") 'beginning-of-buffer)
   (global-set-key (kbd "C-c t") 'beginning-of-buffer)
   (global-set-key (kbd "C-x e") 'end-of-buffer)
   (global-set-key (kbd "C-c e") 'end-of-buffer)
+
+  ;; Conventional copy/paste.
+  (global-set-key (kbd "M-c") 'kill-ring-save)
+  (global-set-key (kbd "M-v") 'yank)
 
   ;; Adjust font size like web browsers. Doesn't work in terminal.
   (global-set-key (kbd "C-=") 'text-scale-increase)
@@ -528,9 +520,9 @@
   (global-set-key (kbd "C-x 2") (lambda () (interactive)(split-window-vertically) (other-window 1)))
   (global-set-key (kbd "C-x 3") (lambda () (interactive)(split-window-horizontally) (other-window 1)))
 
-  ;; Because `C-w` is mapped to backward kill word following Stevey's suggestion.
-  (global-set-key (kbd "C-x w") 'kill-region)
-  (global-set-key (kbd "C-c w") 'kill-region)
+  ;; Misc.
+  (global-set-key (kbd "C-c g") 'goto-line)
+  (global-set-key (kbd "C-x k") 'kill-this-buffer) ; Don't ask.
 
   ;; Cure bad habits.
   (global-set-key (kbd "M->") (lambda ()
@@ -554,11 +546,10 @@
   (global-set-key (kbd "C-x ?") 'describe-key)
 
   ;; Aliases.
-  (defalias 'vce  'vc-ediff)
-  (defalias 'rei  'my/reload-init-file)
-  (defalias 'uvis 'undo-tree-visualize)
-  (defalias 'rc   'recompile)
-
+  (defalias 'reload  'my/reload-init-file)
+  (defalias 'config  'my/edit-configs)
+  (defalias 'vce     'vc-ediff)
+  (defalias 'rc      'recompile)
 #+end_src
 * My/Small Configs
 #+begin_src emacs-lisp
@@ -706,6 +697,21 @@
   (exec-path-from-shell-initialize)
   )
 #+end_src
+* Projectile
+#+begin_src emacs-lisp
+  (use-package projectile
+    :ensure t
+    :after ivy
+    :bind (:map projectile-mode-map
+		("C-x p" . projectile-command-map))
+    :custom
+    (projectile-completion-system 'ivy)
+    :init
+    (projectile-mode +1)
+    (setq projectile-switch-project-action 'projectile-dired)
+    (setq projectile-find-dir-includes-top-level t))
+#+end_src
+
 * Python
 #+begin_src emacs-lisp
   (use-package python-mode
