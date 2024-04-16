@@ -1,21 +1,22 @@
 #+STARTIP: overview
 Rebinding of basic commands:
-| Key             | Command                         |
-|-----------------+---------------------------------|
-| C-s             | save                            |
-| C-w             | delete word backward            |
-| C-i             | kill (just easy to press)       |
-| C-x m or C-c m  | M-x                             |
-| C-q             | search (q for query)            |
-| C-z             | undo                            |
-| C-r             | redo                            |
-| C-o             | switch window                   |
-| C-x t or C-c t  | beginning (t for top) of buffer |
-| C-x e or C-c t  | end of buffer                   |
-| M-p or C-<up>   | page up (only a few lines)      |
-| M-n or C-<down> | page down (only a few lines)    |
-| M-c             | copy                            |
-| M-v             | paste                           |
+| Key             | Command                                                 |
+|-----------------+---------------------------------------------------------|
+| C-s             | save                                                    |
+| C-w             | delete word backward                                    |
+| C-i             | kill (just easy to press)                               |
+| C-x m or C-c m  | M-x                                                     |
+| C-q             | search (q for query)                                    |
+| C-z             | undo                                                    |
+| C-r             | redo                                                    |
+| C-o             | switch window                                           |
+| C-x t or C-c t  | beginning (t for top) of buffer                         |
+| C-x e or C-c t  | end of buffer                                           |
+| M-p or C-<up>   | page up (only a few lines)                              |
+| M-n or C-<down> | page down (only a few lines)                            |
+| M-c             | copy                                                    |
+| M-v             | paste                                                   |
+| C-/             | comment or uncomment (doesn't work in terminal somehow) |
 
 System configs.
 #+begin_src emacs-lisp
@@ -180,14 +181,18 @@ System configs.
   :custom (dumb-jump-selector 'ivy)
   :bind
   (:map prog-mode-map
-    ("C-c C-o" . dumb-jump-go-other-window)))
+    ("C-c C-o" . dumb-jump-go-other-window))
+  :init
+  (setq xref-show-definitions-function 'xref-show-definitions-completing-read)
+  :config
+  (add-hook 'xref-backend-functions 'dumb-jump-xref-activate))
 #+end_src emacs-lisp
 * Ediff
 #+begin_src emacs-lisp
 (use-package ediff
   :custom
-  (ediff-split-window-function #'split-window-horizontally)
-  (ediff-window-setup-function #'ediff-setup-windows-plain))
+  (ediff-split-window-function 'split-window-horizontally)
+  (ediff-window-setup-function 'ediff-setup-windows-plain))
 #+end_src
 * Expand Region
 #+begin_src emacs-lisp
@@ -455,7 +460,7 @@ System configs.
       (comment-or-uncomment-region beg end)
       (next-line)))
 
-  (global-set-key (kbd "C-c c") 'my/comment-or-uncomment-region-or-line)
+  (global-set-key (kbd "C-/") 'my/comment-or-uncomment-region-or-line)
 #+end_src
 * My/Keybindings
 #+begin_src emacs-lisp
@@ -627,16 +632,21 @@ System configs.
 #+end_src
 * Org
 #+begin_src emacs-lisp
+(use-package org
+  :ensure nil
+  :defer t
+  ; Unbind `C-i` to avoid overwriting for the globally set key that mapped to `kill-region`.
+  :bind (:map org-mode-map
+              ("C-i" . nil))
+  :config
   (add-hook 'org-mode-hook 'visual-line-mode)
-
+  :custom
   ;; Make tab work in Org-mode code block.
   (setq org-src-tab-acts-natively t)
-
   ;; Highlight code block.
   (setq org-src-fontify-natively t)
-
   ;; Cause annoying auto indent in org mode.
-  (electric-indent-mode -1)
+  (electric-indent-mode -1))
 #+end_src
 * Parens
 #+begin_src emacs-lisp
@@ -833,8 +843,10 @@ System configs.
     :init
     (global-undo-tree-mode)
     (global-set-key (kbd "C-z") 'undo-tree-undo)
-    (global-set-key (kbd "C-/") 'undo-tree-undo)
     (global-set-key (kbd "C-r") 'undo-tree-redo)
+    ; Unbind `C-/` to avoid overwriting for the globally set key mapped to comment.
+    :bind (:map undo-tree-map
+                ("C-/" . nil))
     :custom
     (undo-tree-visualizer-diff t)
     (undo-tree-history-directory-alist `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
