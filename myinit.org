@@ -1,22 +1,21 @@
 #+STARTIP: overview
 Rebinding of basic commands:
-| Key             | Command                                                 |
-|-----------------+---------------------------------------------------------|
-| C-s             | save                                                    |
-| C-w             | delete word backward                                    |
-| C-i             | kill (just easy to press)                               |
-| C-x m or C-c m  | M-x                                                     |
-| C-q             | search (q for query)                                    |
-| C-z             | undo                                                    |
-| C-r             | redo                                                    |
-| C-o             | switch window                                           |
-| C-x t or C-c t  | beginning (t for top) of buffer                         |
-| C-x e or C-c t  | end of buffer                                           |
-| M-p or C-<up>   | page up (only a few lines)                              |
-| M-n or C-<down> | page down (only a few lines)                            |
-| M-c             | copy                                                    |
-| M-v             | paste                                                   |
-| C-/             | comment or uncomment (doesn't work in terminal somehow) |
+| Key             | Command                                         |
+|-----------------+-------------------------------------------------|
+| C-s             | save                                            |
+| C-w             | backward delete word or region if selected      |
+| C-x m or C-c m  | M-x                                             |
+| C-q             | search (q for query)                            |
+| C-z             | undo                                            |
+| C-r             | redo                                            |
+| C-o             | switch window                                   |
+| C-x t or C-c t  | beginning (t for top) of buffer                 |
+| C-x e or C-c t  | end of buffer                                   |
+| M-p or C-<up>   | page up (only a few lines)                      |
+| M-n or C-<down> | page down (only a few lines)                    |
+| M-c             | copy                                            |
+| M-v             | paste                                           |
+| C-/             | comment or uncomment (doesn't work in terminal) |
 
 System configs.
 #+begin_src emacs-lisp
@@ -85,7 +84,8 @@ System configs.
   (company-tooltip-align-annotations t)
   (company-require-match 'never)
   ;; Don't use company in the following modes
-  (company-global-modes '(not shell-mode eaf-mode text-mode-hook latex-mode-hook))
+  (company-global-modes
+   '(not shell-mode eaf-mode text-mode-hook latex-mode-hook))
   ;; Trigger completion immediately.
   (company-idle-delay 0.1)
   ;; Number the candidates (use M-1, M-2 etc to select completions).
@@ -116,38 +116,42 @@ System configs.
 #+end_src
 * Dired
 #+begin_src emacs-lisp
-(use-package dired
-  :ensure nil
-  :bind
-  (("C-x C-j" . dired-jump))
-  :custom
-  ;; Always delete and copy recursively
-  (dired-listing-switches "-lah")
-  (dired-recursive-deletes 'always)
-  (dired-recursive-copies 'always)
-  ;; Auto refresh Dired, but be quiet about it
-  (global-auto-revert-non-file-buffers t)
-  (auto-revert-verbose nil)
-  ;; Quickly copy/move file in Dired
-  (dired-dwim-target t)
-  ;; Move files to trash when deleting
-  (delete-by-moving-to-trash t)
-  ;; Load the newest version of a file
-  (load-prefer-newer t)
-  ;; Detect external file changes and auto refresh file
-  (auto-revert-use-notify nil)
-  (auto-revert-interval 3) ; Auto revert every 3 sec
-  :config
-  ;; Enable global auto-revert
-  (global-auto-revert-mode t)
-  ;; Reuse same dired buffer, to prevent numerous buffers while navigating in dired
-  (put 'dired-find-alternate-file 'disabled nil)
-  :hook
-  (dired-mode . (lambda ()
-                  (local-set-key (kbd "<mouse-2>") #'dired-find-alternate-file)
-                  (local-set-key (kbd "RET") #'dired-find-alternate-file)
-                  (local-set-key (kbd "^")
-                                 (lambda () (interactive) (find-alternate-file ".."))))))
+  (use-package dired
+    :ensure nil
+    :bind
+    (("C-x C-j" . dired-jump))
+    :custom
+    ;; Always delete and copy recursively.
+    (dired-listing-switches "-lah")
+    (dired-recursive-deletes 'always)
+    (dired-recursive-copies 'always)
+    ;; Auto refresh Dired, but be quiet about it.
+    (global-auto-revert-non-file-buffers t)
+    (auto-revert-verbose nil)
+    ;; Quickly copy/move file in Dired.
+    (dired-dwim-target t)
+    ;; Move files to trash when deleting.
+    (delete-by-moving-to-trash t)
+    ;; Load the newest version of a file.
+    (load-prefer-newer t)
+    ;; Detect external file changes and auto refresh file.
+    (auto-revert-use-notify nil)
+    ;; Auto revert every 3 sec.
+    (auto-revert-interval 3)
+    :config
+    ;; Enable global auto-revert
+    (global-auto-revert-mode t)
+    ;; Reuse same dired buffer, to prevent numerous buffers while navigating in
+    ;; dired.
+    (put 'dired-find-alternate-file 'disabled nil)
+    :hook
+    (dired-mode . (lambda ()
+		    (local-set-key (kbd "<mouse-2>")
+				   'dired-find-alternate-file)
+		    (local-set-key (kbd "RET") #'dired-find-alternate-file)
+		    (local-set-key (kbd "^")
+				   (lambda () (interactive)
+				     (find-alternate-file ".."))))))
 #+end_src
 * Disable Useless Things
 #+begin_src emacs-lisp
@@ -172,7 +176,8 @@ System configs.
   (global-unset-key (kbd "C-x m"))
   (global-unset-key (kbd "C-x C-u"))
   (global-unset-key (kbd "C-x C-l"))
-  (global-unset-key (kbd "C-x C-s")) ; Too much to type for saving, such a frequent cmd. Map to `C-s` instead.
+  ;; Too much to type for saving. Map to `C-s` instead.
+  (global-unset-key (kbd "C-x C-s"))
 #+end_src
 * Dumb Jump
 #+begin_src emacs-lisp
@@ -212,7 +217,8 @@ System configs.
   (flycheck-global-modes
    '(not outline-mode diff-mode shell-mode eshell-mode term-mode))
   (flycheck-emacs-lisp-load-path 'inherit)
-  (flycheck-indication-mode (if (display-graphic-p) 'right-fringe 'right-margin))
+  (flycheck-indication-mode (if (display-graphic-p)
+				'right-fringe 'right-margin))
   :init
   (add-hook 'prog-mode-hook 'flycheck-mode))
 #+end_src
@@ -321,7 +327,7 @@ System configs.
     (use-package swiper :ensure t :defer t)
     (ivy-mode 1)
     :bind
-    (("C-q" . swiper-isearch) ; Don't need reverse search in swiper. Can just cycle back.
+    (("C-q" . swiper-isearch) ; No need for reverse search. Can just cycle back.
      ("C-c s" . swiper-isearch-thing-at-point)
      ("M-y" . counsel-yank-pop)
      ("C-c i" . counsel-imenu)
@@ -400,6 +406,16 @@ System configs.
 #+end_src
 * My/Functions
 #+begin_src emacs-lisp
+  ;; Backward kill word or the region if selected.
+  (defun my/backward-kill-word-or-kill-region ()
+    "Kill a word backward or the region if selected."
+    (interactive)
+    (if (region-active-p)
+	(kill-region (region-beginning) (region-end))
+      (backward-kill-word 1)))
+
+  (global-set-key (kbd "C-w") 'my/backward-kill-word-or-kill-region)
+
   ;; Scroll window up/down by 8 lines.
   (global-set-key (kbd "C-<down>") (lambda () (interactive) (scroll-up 8)))
   (global-set-key (kbd "C-<up>") (lambda () (interactive) (scroll-down 8)))
@@ -427,7 +443,8 @@ System configs.
 
   ;; Save all buffers.
   (defun my/save-all-buffers ()
-    "Instead of `save-buffer', save all opened buffers by calling `save-some-buffers' with ARG t."
+    "Instead of `save-buffer', save all opened buffers by calling
+    `save-some-buffers' with ARG t."
     (interactive)
     (save-some-buffers t))
 
@@ -441,7 +458,9 @@ System configs.
 
   (add-hook 'mouse-leave-buffer-hook 'my/abort-minibuffer-using-mouse)
       ;; Keep the point out of the minibuffer.
-      (setq-default minibuffer-prompt-properties '(read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt))
+      (setq-default minibuffer-prompt-properties
+		    '(read-only t point-entered minibuffer-avoid-prompt
+				face minibuffer-prompt))
 
   ;; Edit this file.
   (defun my/edit-configs ()
@@ -451,7 +470,8 @@ System configs.
 
   ;; Comment.
   (defun my/comment-or-uncomment-region-or-line ()
-    "Comments or uncomments the region or the current line if there's no active region."
+    "Comments or uncomments the region or the current line if there's no
+     active region."
     (interactive)
     (let (beg end)
       (if (region-active-p)
@@ -465,8 +485,6 @@ System configs.
 * My/Keybindings
 #+begin_src emacs-lisp
   ;; Stevey's suggestion.
-  (global-set-key (kbd "C-w") 'backward-kill-word)
-  (global-set-key (kbd "C-i") 'kill-region) ; Because `C-w` is remapped to backward kill word.
   (global-set-key (kbd "C-x t") 'beginning-of-buffer)
   (global-set-key (kbd "C-c t") 'beginning-of-buffer)
   (global-set-key (kbd "C-x e") 'end-of-buffer)
@@ -485,8 +503,11 @@ System configs.
   (global-set-key (kbd "C-e") 'end-of-visual-line)
 
   ;; Automatically switch focus to newly splitted buffer.
-  (global-set-key (kbd "C-x 2") (lambda () (interactive)(split-window-vertically) (other-window 1)))
-  (global-set-key (kbd "C-x 3") (lambda () (interactive)(split-window-horizontally) (other-window 1)))
+  (global-set-key (kbd "C-x 2") (lambda () (interactive)
+				  (split-window-vertically) (other-window 1)))
+  (global-set-key (kbd "C-x 3") (lambda () (interactive)
+				  (split-window-horizontally)
+				  (other-window 1)))
 
   ;; Cure bad habits.
   (global-set-key (kbd "M->") (lambda ()
@@ -532,7 +553,8 @@ System configs.
   (setq use-dialog-box nil)
 
   ;; Move the backup fies to user-emacs-directory/.backup.
-  (setq backup-directory-alist `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
+  (setq backup-directory-alist
+    `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
 
   ;; Automatically kill all active processes when closing Emacs.
   (setq confirm-kill-processes nil)
@@ -546,7 +568,8 @@ System configs.
   ;; Don't Lock Files.
   (setq-default create-lockfiles nil)
 
-  ;; ad-handle-definition warnings are generated when functions are redefined with `defadvice', they are not helpful.
+  ;; ad-handle-definition warnings are generated when functions are
+  ;; redefined with `defadvice', they are not helpful.
   (setq ad-redefinition-action 'accept)
 
   ;; Move Custom-Set-Variables to Different File.
@@ -571,7 +594,8 @@ System configs.
   ;;  (global-linum-mode)
   (column-number-mode 1)
 
-  ;; Save whatever’s in the current system clipboard before replacing it with the Emacs' text.
+  ;; Save whatever’s in the current system clipboard before replacing it with
+  ;; the Emacs' text.
   (setq save-interprogram-paste-before-kill t)
 
   ;; Stop ivy from displaying recentf files.
@@ -585,7 +609,7 @@ System configs.
 
   ;; Automatically update a buffer if a file changes on disk.
   (global-auto-revert-mode 1)
-  (add-hook 'dired-mode-hook 'auto-revert-mode) ;; Refresh dired too.
+  (add-hook 'dired-mode-hook 'auto-revert-mode) ; Refresh dired too.
 
   ;; Give context to cursor.
   (setq scroll-margin 4)
@@ -614,13 +638,18 @@ System configs.
   (setq delete-by-moving-to-trash t)
 
   ;; Better Compilation.
-  (setq-default compilation-always-kill t) ; Kill compilation process before starting another.
-  (setq-default compilation-ask-about-save nil) ; Save all buffers on `compile'.
+  ;; Kill compilation process before starting another.
+  (setq-default compilation-always-kill t)
+  ;; Save all buffers on `compile'.
+  (setq-default compilation-ask-about-save nil)
   (setq-default compilation-scroll-output t)
 
   ;; Move `custom-set-variables` to a different file.
   (setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
   (load custom-file 'noerror)
+
+  ;; Switch to help buffers automatically.
+  (setq help-window-select t)
 
   ;; Default some files to text-mode.
   (add-to-list 'auto-mode-alist '("\\.in\\'" . text-mode))
@@ -632,21 +661,29 @@ System configs.
 #+end_src
 * Org
 #+begin_src emacs-lisp
-(use-package org
-  :ensure nil
-  :defer t
-  ; Unbind `C-i` to avoid overwriting for the globally set key that mapped to `kill-region`.
-  :bind (:map org-mode-map
-              ("C-i" . nil))
-  :config
-  (add-hook 'org-mode-hook 'visual-line-mode)
-  :custom
-  ;; Make tab work in Org-mode code block.
-  (setq org-src-tab-acts-natively t)
-  ;; Highlight code block.
-  (setq org-src-fontify-natively t)
-  ;; Cause annoying auto indent in org mode.
-  (electric-indent-mode -1))
+  (use-package org
+    :ensure nil
+    :defer t
+    :bind ((:map org-mode-map
+	   ;; Unbind `C-i`.
+	   ("C-i" . nil)
+           ;; Don't know why tab doesn't fold/unfold heading if using
+           ;; `use-package` to config org setting (it works if org
+           ;; setting is config without `use-package`.
+	   ("TAB" . org-cycle)))
+    :config
+    (add-hook 'org-mode-hook 'visual-line-mode)
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((C . t)
+       (python . t)))
+    :custom
+    ;; Make tab work in Org-mode code block.
+    (org-src-tab-acts-natively t)
+    ;; Highlight code block.
+    (org-src-fontify-natively t)
+    ;; Cause annoying auto indent in org mode.
+    (electric-indent-mode -1))
 #+end_src
 * Parens
 #+begin_src emacs-lisp
@@ -788,16 +825,18 @@ System configs.
     :ensure nil
     :diminish
     :if (executable-find "hunspell")
-    :hook (((text-mode outline-mode latex-mode org-mode markdown-mode) . flyspell-mode))
+    :hook (((text-mode outline-mode
+             latex-mode org-mode markdown-mode) . flyspell-mode))
     :custom
     (flyspell-issue-message-flag nil)
     (ispell-program-name "/usr/local/bin/hunspell")
     (ispell-hunspell-dict-paths-alist
-    '(("en_US" "/Applications/dict-en-20230701_lo/en_US.aff")))
+      '(("en_US" "/Applications/dict-en-20230701_lo/en_US.aff")))
     (ispell-local-dictionary "en_US")
     (ispell-local-dictionary-alist
-    ;; Please note the list `("-d" "en_US")` contains ACTUAL parameters passed to hunspell.
-    ;; You could use `("-d" "en_US,en_US-med")` to check with multiple dictionaries.
+    ;; Please note the list `("-d" "en_US")` contains ACTUAL parameters
+    ;; passed to hunspell. You could use `("-d" "en_US,en_US-med")` to check
+    ;; with multiple dictionaries.
     '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)))
     :config
     (use-package flyspell-correct-ivy
@@ -805,7 +844,8 @@ System configs.
       :ensure t
       :bind
       (:map flyspell-mode-map
-	    ([remap flyspell-correct-word-before-point] . flyspell-correct-wrapper)
+	    ([remap flyspell-correct-word-before-point] .
+              flyspell-correct-wrapper)
 	    ("C-c l" . flyspell-correct-wrapper))
       :custom (flyspell-correct-interface 'flyspell-correct-ivy)))
 
@@ -821,8 +861,8 @@ System configs.
     :ensure t
     :config
     ;; Global settings (defaults)
-    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-	  doom-themes-enable-italic t) ; if nil, italics is universally disabled
+    (setq doom-themes-enable-bold t
+	  doom-themes-enable-italic t)
     (if (display-graphic-p)
 	(load-theme 'doom-ayu-light t)
       (load-theme 'doom-feather-light t)))
@@ -844,18 +884,21 @@ System configs.
     (global-undo-tree-mode)
     (global-set-key (kbd "C-z") 'undo-tree-undo)
     (global-set-key (kbd "C-r") 'undo-tree-redo)
-    ; Unbind `C-/` to avoid overwriting for the globally set key mapped to comment.
+    ;; Unbind `C-/` to avoid overwriting for the globally set key mapped to
+    ;; comment.
     :bind (:map undo-tree-map
                 ("C-/" . nil))
     :custom
     (undo-tree-visualizer-diff t)
-    (undo-tree-history-directory-alist `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
+    (undo-tree-history-directory-alist
+       `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
     (undo-tree-visualizer-timestamps t)
     :config
     (unbind-key (kbd "C-x u") undo-tree-map)) ; Unbind visualize key.
 
+ ;; Somehow you need both to unbind. Why emacs keybinding in modes and package is so confusing?
   (eval-after-load 'undo-tree
-    '(unbind-key (kbd "C-x u"))) ; Somehow you need both to unbind. Why emacs keybinding in modes and package is so confusing?
+    '(unbind-key (kbd "C-x u")))
 #+end_src
 * Whitespace
 #+begin_src emacs-lisp
@@ -870,7 +913,8 @@ System configs.
   (setq show-trailing-whitespace t)
   (setq whitespace-style
 	'(face
-	  tabs trailing space-before-tab space-after-tab ; tabs spaces trailing space-before-tab space-after-tab
+          ;; tabs spaces trailing space-before-tab space-after-tab
+	  tabs trailing space-before-tab space-after-tab
 	  tab-mark))))
 #+end_src
 * Winner
