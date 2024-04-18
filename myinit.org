@@ -38,8 +38,9 @@ System configs.
   (use-package ace-window
     :ensure t
     :bind
-    ("C-o" . ace-window)
     ("C-x o" . ace-window))
+
+  (global-set-key (kbd "C-o") 'other-window)
 #+end_src
 * Aggressive Indent
 #+begin_src emacs-lisp
@@ -113,6 +114,17 @@ System configs.
   (crux-with-region-or-buffer untabify)
   (crux-with-region-or-point-to-eol kill-ring-save)
   (defalias 'rename-file-and-buffer 'crux-rename-file-and-buffer))
+#+end_src
+* Dimmer
+#+begin_src emacs-lisp
+  (use-package dimmer
+    :ensure t
+    :init
+    (dimmer-configure-helm)
+    (dimmer-mode t)
+    :custom
+    ;; Lower it if using a dark theme.
+    (dimmer-fraction 0.6))
 #+end_src
 * Dired
 #+begin_src emacs-lisp
@@ -665,12 +677,14 @@ System configs.
     :ensure nil
     :defer t
     :bind ((:map org-mode-map
-	   ;; Unbind `C-i`.
-	   ("C-i" . nil)
-           ;; Don't know why tab doesn't fold/unfold heading if using
-           ;; `use-package` to config org setting (it works if org
-           ;; setting is config without `use-package`.
-	   ("TAB" . org-cycle)))
+		 ;; Unbind `C-i`.
+		 ("C-i" . nil)
+		 ;; Don't know why tab doesn't fold/unfold heading if using
+		 ;; `use-package` to config org setting (it works if org
+		 ;; setting is config without `use-package`.
+		 ("TAB" . org-cycle)))
+    :init
+    (electric-indent-mode -1) ; Cause annoying auto indent in org mode.
     :config
     (add-hook 'org-mode-hook 'visual-line-mode)
     (org-babel-do-load-languages
@@ -681,9 +695,7 @@ System configs.
     ;; Make tab work in Org-mode code block.
     (org-src-tab-acts-natively t)
     ;; Highlight code block.
-    (org-src-fontify-natively t)
-    ;; Cause annoying auto indent in org mode.
-    (electric-indent-mode -1))
+    (org-src-fontify-natively t))
 #+end_src
 * Parens
 #+begin_src emacs-lisp
