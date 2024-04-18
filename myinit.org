@@ -102,7 +102,7 @@ System configs.
   :bind
   (("C-x K" . crux-kill-other-buffers)
    ("C-k" . crux-smart-kill-line)
-   ("M-o" . crux-smart-open-line)
+   ("C-i" . crux-smart-open-line)
    ("C-c f" . crux-recentf-find-file)
    ("C-c d" . crux-duplicate-current-line-or-region)
    ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
@@ -123,7 +123,6 @@ System configs.
     (dimmer-configure-helm)
     (dimmer-mode t)
     :custom
-    ;; Lower it if using a dark theme.
     (dimmer-fraction 0.6))
 #+end_src
 * Dired
@@ -290,7 +289,6 @@ System configs.
 
   ;; Hightlight current line.
   (global-hl-line-mode +1)
-  (set-face-background hl-line-face "#DCDCDC") ; Might look bad in your theme.
 
   ;; Highlight only a single virtual line.
   (setq hl-line-range-function
@@ -876,15 +874,18 @@ System configs.
     (setq doom-themes-enable-bold t
 	  doom-themes-enable-italic t)
     (if (display-graphic-p)
-	(load-theme 'doom-ayu-light t)
-      (load-theme 'doom-feather-light t)))
-
-  ;; (use-package zenburn-theme
-  ;;   :ensure t
-  ;;   :config
-  ;;   (if (display-graphic-p)
-  ;;       (load-theme 'zenburn t)))
- (set-cursor-color "#404040")
+	;; (progn
+	;;	(load-theme 'doom-ayu-light t)
+	;;	(set-cursor-color "#404040")
+	;;	(set-face-background hl-line-face "#DCDCDC"))
+      (progn
+	   (load-theme 'doom-zenburn t)
+	   (set-cursor-color "#F0F0F0")
+	   (set-face-background hl-line-face "#222222"))
+      (progn
+	(load-theme 'doom-feather-light t)
+	(set-cursor-color "#404040")
+	(set-face-background hl-line-face "#DCDCDC"))))
 #+end_src
 * Undo Tree
 #+begin_src emacs-lisp
