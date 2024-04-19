@@ -489,7 +489,7 @@ System configs.
       (comment-or-uncomment-region beg end)
       (next-line)))
 
-  (global-set-key (kbd "M-;") 'my/comment-or-uncomment-region-or-
+  (global-set-key (kbd "M-;") 'my/comment-or-uncomment-region-or-line)
 #+end_src
 * My/Keybindings
 #+begin_src emacs-lisp
