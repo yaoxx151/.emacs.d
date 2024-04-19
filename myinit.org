@@ -37,9 +37,9 @@ System configs.
   (use-package ace-window
     :ensure t
     :bind
-    ("C-x o" . ace-window))
-
-  (global-set-key (kbd "C-o") 'other-window)
+    ("C-x o" . ace-window)
+    :init
+    (global-set-key (kbd "C-o") 'other-window))
 #+end_src
 * Aggressive Indent
 #+begin_src emacs-lisp
@@ -111,8 +111,11 @@ System configs.
   :config
   (crux-with-region-or-buffer indent-region)
   (crux-with-region-or-buffer untabify)
+  (crux-with-region-or-line comment-or-uncomment-region) ; `M-;` works on line.
   (crux-with-region-or-point-to-eol kill-ring-save)
-  (defalias 'rename-file-and-buffer 'crux-rename-file-and-buffer))
+  (defalias 'rename-file-and-buffer 'crux-rename-file-and-buffer)
+  :init
+  (global-set-key (kbd "M-;") 'comment-or-uncomment-region))
 #+end_src
 * Dimmer
 #+begin_src emacs-lisp
@@ -399,10 +402,7 @@ System configs.
   :init
   (global-git-gutter+-mode)
   :config
-  (setq git-gutter+-disabled-modes '(org-mode tex-mode))
-  ;; Move between local changes.
-  (global-set-key (kbd "C-c p") 'git-gutter+-previous-hunk)
-  (global-set-key (kbd "C-c n") 'git-gutter+-next-hunk))
+  (setq git-gutter+-disabled-modes '(org-mode tex-mode)))
 #+end_src emacs-lisp
 * Multi-cursor
 #+begin_src emacs-lisp
@@ -476,20 +476,6 @@ System configs.
     "Opens this file."
     (interactive)
     (find-file "~/.emacs.d/myinit.org"))
-
-  ;; Comment.
-  (defun my/comment-or-uncomment-region-or-line ()
-    "Comments or uncomments the region or the current line if there's no
-       active region."
-    (interactive)
-    (let (beg end)
-      (if (region-active-p)
-	  (setq beg (region-beginning) end (region-end))
-	(setq beg (line-beginning-position) end (line-end-position)))
-      (comment-or-uncomment-region beg end)
-      (next-line)))
-
-  (global-set-key (kbd "M-;") 'my/comment-or-uncomment-region-or-line)
 #+end_src
 * My/Keybindings
 #+begin_src emacs-lisp
