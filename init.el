@@ -24,3 +24,8 @@
 
 ;; Configs are in the org file.
 (org-babel-load-file (expand-file-name "~/.emacs.d/myinit.org"))
+
+;; Load work-related config.
+(let ((work-config-file "~/.emacs.d/work.el"))
+  (when (file-exists-p work-config-file)
+    (load work-config-file)))

@@ -651,7 +651,7 @@ System configs.
 
   ;; Electric indent.
   (add-hook 'prog-mode-hook 'electric-indent-mode)
-  (remove-hook 'org-mode-hook 'electric-indent-mode) ; Cause annoying auto indent in org mode.
+  (add-hook 'org-mode-hook (lambda () (electric-indent-local-mode 0))) ; Cause annoying auto indent in org mode.
 
   ;; Default some files to text-mode.
   (add-to-list 'auto-mode-alist '("\\.in\\'" . text-mode))

@@ -1,14 +1,3 @@
-*~
-SessionDesktop.el
-bookmarks
-history
-recentf
-tramp
-elpa/*
-url/*
-eshell/*
-auto-save-list/*
-
 # Ignore everything but
 *
 !.gitignore
