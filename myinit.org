@@ -218,7 +218,8 @@ System configs.
   (use-package expand-region
   :ensure t
   :config
-  (global-set-key (kbd "C-c =") 'er/expand-region))
+  (global-set-key (kbd "C-c =") 'er/expand-region)
+  (global-set-key (kbd "M-e") 'er/expand-region))
 #+end_src
 * Flycheck
 #+begin_src emacs-lisp
