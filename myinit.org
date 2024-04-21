@@ -15,6 +15,10 @@ Rebinding of basic commands:
 | M-n or C-<down> | page down (only a few lines)               |
 | M-c             | copy                                       |
 | M-v             | paste                                      |
+| M-j             | backward word movement                     |
+| M-k             | forward word movement                      |
+| M-h             | backward char movement                     |
+| M-l             | forward char movement                      |
 
 System configs.
 #+begin_src emacs-lisp
@@ -47,6 +51,18 @@ System configs.
   :ensure t
   :config
   (global-aggressive-indent-mode 1))
+#+end_src
+* Avy
+#+begin_src emacs-lisp
+  (use-package avy
+    :ensure t
+    :defer t
+    :bind
+    (("M-s" . avy-goto-char-2))
+    :custom
+    (avy-style 'pre)
+    :custom-face
+    (avy-lead-face ((t (:background "#51afef" :foreground "#870000" :weight bold)))))
 #+end_src
 * Backup
 #+begin_src emacs-lisp
@@ -490,6 +506,12 @@ System configs.
   (global-set-key (kbd "M-c") 'kill-ring-save)
   (global-set-key (kbd "M-v") 'yank)
 
+  ;; Better movement without the arbitrary binding with `b` and `f`.
+  (global-set-key (kbd "M-j") 'backward-word)
+  (global-set-key (kbd "M-k") 'forward-word)
+  (global-set-key (kbd "M-h") 'backward-char)
+  (global-set-key (kbd "M-l") 'forward-char)
+
   ;; Adjust font size like web browsers. Doesn't work in terminal.
   (global-set-key (kbd "C-=") 'text-scale-increase)
   (global-set-key (kbd "C--") 'text-scale-decrease)
@@ -520,13 +542,14 @@ System configs.
   ;; Misc.
   (global-set-key (kbd "C-c g") 'goto-line)
   (global-set-key (kbd "C-x k") 'kill-this-buffer) ; Don't ask.
+  (global-set-key (kbd "C-x \\") 'sort-lines)
   (global-set-key (kbd "C-x ?") 'describe-key)
 
   ;; Aliases.
-  (defalias 'reload  'my/reload-init-file)
-  (defalias 'config  'my/edit-configs)
-  (defalias 'vce     'vc-ediff)
-  (defalias 'rc      'recompile)
+  (defalias 'rl  'my/reload-init-file)
+  (defalias 'cf  'my/edit-configs)
+  (defalias 'vce 'vc-ediff)
+  (defalias 'rc  'recompile)
 #+end_src
 * My/Small Configs
 #+begin_src emacs-lisp
@@ -662,8 +685,8 @@ System configs.
     :ensure nil
     :defer t
     :bind ((:map org-mode-map
-		 ;; Unbind `C-i`.
 		 ("C-i" . nil)
+		 ("M-h" . nil)
 		 ;; Don't know why tab doesn't fold/unfold heading if using
 		 ;; `use-package` to config org setting (it works if org
 		 ;; setting is config without `use-package`.
@@ -857,12 +880,12 @@ System configs.
     (setq doom-themes-enable-bold t
 	  doom-themes-enable-italic t)
     (if (display-graphic-p)
-	(progn
-	  (load-theme 'doom-ayu-light t)
-	  (set-cursor-color "#404040"))
-      ;; (progn
-      ;;	 (load-theme 'doom-zenburn t)
-      ;;	 (set-cursor-color "#F0F0F0"))
+	;; (progn
+	;;	(load-theme 'doom-ayu-light t)
+	;;	(set-cursor-color "#404040"))
+      (progn
+       (load-theme 'doom-zenburn t)
+	 (set-cursor-color "#F0F0F0"))
       (progn
 	(load-theme 'doom-feather-light t)
 	(set-cursor-color "#404040"))))
