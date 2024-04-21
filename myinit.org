@@ -1,24 +1,25 @@
 #+STARTIP: overview
 Rebinding of basic commands:
-| Key             | Command                                    |
-|-----------------+--------------------------------------------|
-| C-s             | save                                       |
-| C-w             | backward delete word or region if selected |
-| C-x m or C-c m  | M-x                                        |
-| C-q             | search (q for query)                       |
-| C-z             | undo                                       |
-| C-r             | redo                                       |
-| C-o             | switch window                              |
-| C-x t or C-c t  | beginning (t for top) of buffer            |
-| C-x e or C-c t  | end of buffer                              |
-| M-p or C-<up>   | page up (only a few lines)                 |
-| M-n or C-<down> | page down (only a few lines)               |
-| M-c             | copy                                       |
-| M-v             | paste                                      |
-| M-j             | backward word movement                     |
-| M-k             | forward word movement                      |
-| M-h             | backward char movement                     |
-| M-l             | forward char movement                      |
+| Key             | Command                                        |
+|-----------------+------------------------------------------------|
+| C-s             | save                                           |
+| C-w             | backward delete word or region if selected     |
+| C-x m or C-c m  | M-x                                            |
+| C-q             | search (q for query)                           |
+| C-z             | undo                                           |
+| C-r             | redo                                           |
+| C-o             | switch window                                  |
+| C-x t or C-c t  | beginning (t for top) of buffer                |
+| C-x e or C-c t  | end of buffer                                  |
+| M-p or C-<up>   | page up (only a few lines)                     |
+| M-n or C-<down> | page down (only a few lines)                   |
+| M-c             | copy                                           |
+| M-v             | paste                                          |
+| C-/             | Comment or uncomment (not working in terminal) |
+| M-j             | backward word movement                         |
+| M-k             | forward word movement                          |
+| M-h             | backward char movement                         |
+| M-l             | forward char movement                          |
 
 System configs.
 #+begin_src emacs-lisp
@@ -127,11 +128,12 @@ System configs.
   :config
   (crux-with-region-or-buffer indent-region)
   (crux-with-region-or-buffer untabify)
-  (crux-with-region-or-line comment-or-uncomment-region) ; `M-;` works on line.
+  (crux-with-region-or-line comment-or-uncomment-region) ; (Un)commenting works on line.
   (crux-with-region-or-point-to-eol kill-ring-save)
   (defalias 'rename-file-and-buffer 'crux-rename-file-and-buffer)
   :init
-  (global-set-key (kbd "M-;") 'comment-or-uncomment-region))
+  (global-set-key (kbd "M-;") 'comment-or-uncomment-region)
+  (global-set-key (kbd "C-/") 'comment-or-uncomment-region))
 #+end_src
 * Dimmer
 #+begin_src emacs-lisp
