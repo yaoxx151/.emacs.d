@@ -361,7 +361,7 @@ System configs.
 #+end_src
 * MacOS
 #+begin_src emacs-lisp
-  ; Handle copy and paste in OSX.
+  ;; Handle copy and paste in OSX.
   (defun copy-from-osx ()
     "Handle copy/paste intelligently on osx."
     (let ((pbpaste (purecopy "/usr/bin/pbpaste")))
@@ -506,12 +506,6 @@ System configs.
 				  (other-window 1)))
 
   ;; Cure bad habits.
-  (global-set-key (kbd "M->") (lambda ()
-			       (interactive)
-			       (message "Use C-x e, dude.")))
-  (global-set-key (kbd "M-<") (lambda ()
-			       (interactive)
-			       (message "Use C-x t, dude.")))
   (global-set-key (kbd "M-x") (lambda ()
 			       (interactive)
 			       (message "Use C-x m, dude.")))
@@ -742,52 +736,50 @@ System configs.
     :custom
     (python-indent-offset 4)
     (flycheck-python-pycompile-executable "python3")
+    (python-shell-interpreter "python3")
+    (py-python-command "python3")
     (python-shell-interpreter "python3"))
 
+  (use-package python-black
+    :ensure t
+    :config
+    (add-hook 'python-mode-hook 'python-black-on-save-mode))
 
-    (setq py-python-command "python3")
-    (setq python-shell-interpreter "python3")
-
-    (use-package python-black
-      :ensure t
-      :config
-      (add-hook 'python-mode-hook 'python-black-on-save-mode))
-
-    (use-package py-isort
-      :ensure t
-      :config
-      (add-hook 'before-save-hook 'py-isort-before-save))
+  (use-package py-isort
+    :ensure t
+    :config
+    (add-hook 'before-save-hook 'py-isort-before-save))
 #+end_src
 * Recentf
 #+begin_src emacs-lisp
-(use-package recentf
-  :ensure nil
-  :hook (after-init . recentf-mode)
-  :custom
-  (recentf-auto-cleanup "05:00am")
-  (recentf-max-saved-items 200)
-  (recentf-exclude '((expand-file-name package-user-dir)
-                     ".cache"
-                     ".cask"
-                     ".elfeed"
-                     "bookmarks"
-                     "cache"
-                     "ido.*"
-                     "persp-confs"
-                     "recentf"
-                     "undo-tree-hist"
-                     "url"
-                     "COMMIT_EDITMSG\\'")))
+  (use-package recentf
+    :ensure nil
+    :hook (after-init . recentf-mode)
+    :custom
+    (recentf-auto-cleanup "05:00am")
+    (recentf-max-saved-items 200)
+    (recentf-exclude '((expand-file-name package-user-dir)
+		       ".cache"
+		       ".cask"
+		       ".elfeed"
+		       "bookmarks"
+		       "cache"
+		       "ido.*"
+		       "persp-confs"
+		       "recentf"
+		       "undo-tree-hist"
+		       "url"
+		       "COMMIT_EDITMSG\\'")))
 
-;; When buffer is closed, saves the cursor location
-(save-place-mode 1)
+  ;; When buffer is closed, saves the cursor location.
+  (save-place-mode 1)
 
-;; Set history-length longer
-(setq-default history-length 500)
+  ;; Set history-length longer.
+  (setq-default history-length 500)
 #+end_src
 * Scroll
 #+begin_src emacs-lisp
-  ;; Vertical Scroll
+  ;; Vertical Scroll.
   (setq scroll-step 1)
   (setq scroll-margin 1)
   (setq scroll-conservatively 100000)
@@ -798,7 +790,7 @@ System configs.
   (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
   (setq mouse-wheel-progressive-speed nil)
 
-  ;; Horizontal Scroll
+  ;; Horizontal Scroll.
   (setq hscroll-step 1)
   (setq hscroll-margin 1)
   (setq scroll-preserve-screen-position t)
@@ -827,7 +819,9 @@ System configs.
     :diminish
     :if (executable-find "hunspell")
     :hook (((text-mode outline-mode
-             latex-mode org-mode markdown-mode) . flyspell-mode))
+	     latex-mode org-mode markdown-mode) . flyspell-mode))
+    :init
+    (add-hook 'prog-mode-hook 'flyspell-prog-mode)
     :custom
     (flyspell-issue-message-flag nil)
     (ispell-program-name "/usr/local/bin/hunspell")
@@ -846,11 +840,9 @@ System configs.
       :bind
       (:map flyspell-mode-map
 	    ([remap flyspell-correct-word-before-point] .
-              flyspell-correct-wrapper)
+	      flyspell-correct-wrapper)
 	    ("C-c l" . flyspell-correct-wrapper))
       :custom (flyspell-correct-interface 'flyspell-correct-ivy)))
-
-  (add-hook 'prog-mode-hook 'flyspell-prog-mode)
 #+end_src
 * TeX
 #+begin_src emacs-lisp
@@ -885,10 +877,12 @@ System configs.
     (global-undo-tree-mode)
     (global-set-key (kbd "C-z") 'undo-tree-undo)
     (global-set-key (kbd "C-r") 'undo-tree-redo)
+    ;; Somehow you need both to unbind. Why emacs keybinding in modes and package is so confusing?
+    (eval-after-load 'undo-tree '(unbind-key (kbd "C-x u")))
     ;; Unbind `C-/` to avoid overwriting for the globally set key mapped to
     ;; comment.
     :bind (:map undo-tree-map
-                ("C-/" . nil))
+		("C-/" . nil))
     :custom
     (undo-tree-visualizer-diff t)
     (undo-tree-history-directory-alist
@@ -896,27 +890,23 @@ System configs.
     (undo-tree-visualizer-timestamps t)
     :config
     (unbind-key (kbd "C-x u") undo-tree-map)) ; Unbind visualize key.
-
- ;; Somehow you need both to unbind. Why emacs keybinding in modes and package is so confusing?
-  (eval-after-load 'undo-tree
-    '(unbind-key (kbd "C-x u")))
 #+end_src
 * Whitespace
 #+begin_src emacs-lisp
   (use-package whitespace
   :ensure t
   :init
-  (progn
   (add-hook 'prog-mode-hook 'whitespace-mode)
   (add-hook 'latex-mode-hook 'whitespace-mode)
   (remove-hook 'before-save-hook 'delete-trailing-whitespace)
-  (setq whitespace-line-column nil)
-  (setq show-trailing-whitespace t)
-  (setq whitespace-style
-	'(face
-          ;; tabs spaces trailing space-before-tab space-after-tab
-	  tabs trailing space-before-tab space-after-tab
-	  tab-mark))))
+  :custom
+  (whitespace-line-column nil)
+  (show-trailing-whitespace t)
+  (whitespace-style
+   '(face
+     ;; tabs spaces trailing space-before-tab space-after-tab
+     tabs trailing space-before-tab space-after-tab
+     tab-mark)))
 #+end_src
 * Winner
 Restore previous window layouts.
