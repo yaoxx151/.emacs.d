@@ -1,25 +1,25 @@
 #+STARTIP: overview
 Rebinding of basic commands:
-| Key             | Command                                        |
-|-----------------+------------------------------------------------|
-| C-s             | save                                           |
-| C-w             | backward delete word or region if selected     |
-| C-x m or C-c m  | M-x                                            |
-| C-q             | search (q for query)                           |
-| C-z             | undo                                           |
-| C-r             | redo                                           |
-| C-o             | switch window                                  |
-| C-x t or C-c t  | beginning (t for top) of buffer                |
-| C-x e or C-c t  | end of buffer                                  |
-| M-p or C-<up>   | page up (only a few lines)                     |
-| M-n or C-<down> | page down (only a few lines)                   |
-| M-c             | copy                                           |
-| M-v             | paste                                          |
-| C-/             | Comment or uncomment (not working in terminal) |
-| M-j             | backward word movement                         |
-| M-k             | forward word movement                          |
-| M-h             | backward char movement                         |
-| M-l             | forward char movement                          |
+| Key                 | Command                                        |
+|---------------------+------------------------------------------------|
+| `C-s`               | save                                           |
+| `C-w`               | backward delete word or region if selected     |
+| `C-x m` or `C-c m`  | M-x                                            |
+| `C-q`               | search (q for query)                           |
+| `C-z`               | undo                                           |
+| `C-r`               | redo                                           |
+| `C-o`               | switch window                                  |
+| `C-x t` or `C-c t`  | beginning (t for top) of buffer                |
+| `C-x e` or `C-c t`  | end of buffer                                  |
+| `M-p` or `C-<up>`   | page up (only a few lines)                     |
+| `M-n` or `C-<down>` | page down (only a few lines)                   |
+| `M-c`               | copy                                           |
+| `M-v`               | paste                                          |
+| `C-/`               | Comment or uncomment (not working in terminal) |
+| `M-j`               | backward word movement                         |
+| `M-k`               | forward word movement                          |
+| `M-h`               | backward char movement                         |
+| `M-l`               | forward char movement                          |
 
 System configs.
 #+begin_src emacs-lisp
@@ -670,7 +670,8 @@ System configs.
 
   ;; Electric indent.
   (add-hook 'prog-mode-hook 'electric-indent-mode)
-  (add-hook 'org-mode-hook (lambda () (electric-indent-local-mode 0))) ; Cause annoying auto indent in org mode.
+  ;; Cause annoying auto indent in org mode.
+  (add-hook 'org-mode-hook (lambda () (electric-indent-local-mode 0)))
 
   ;; Default some files to text-mode.
   (add-to-list 'auto-mode-alist '("\\.in\\'" . text-mode))
@@ -724,9 +725,9 @@ System configs.
     (sp-local-pair 'org-mode "[" nil :actions nil))
 
   (use-package rainbow-delimiters
-  :ensure t
-  :init
-  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+    :ensure t
+    :init
+    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 #+end_src
 * PATH
 #+begin_src emacs-lisp
