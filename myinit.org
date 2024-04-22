@@ -49,9 +49,9 @@ System configs.
 * Aggressive Indent
 #+begin_src emacs-lisp
   (use-package aggressive-indent
-  :ensure t
-  :config
-  (global-aggressive-indent-mode 1))
+    :ensure t
+    :config
+    (global-aggressive-indent-mode 1))
 #+end_src
 * Avy
 #+begin_src emacs-lisp
@@ -79,34 +79,33 @@ System configs.
 * Beacon Mode
 #+begin_src emacs-lisp
   (use-package beacon
-  :ensure t
-  :config
-  (beacon-mode 1))
+    :ensure t
+    :config
+    (beacon-mode 1))
 #+end_src
 * Column Width Indicator
 #+begin_src emacs-lisp
   (setq-default display-fill-column-indicator-column 79) ; 80 linewidth
   (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
-  (add-hook 'latex-mode-hook 'display-fill-column-indicator-mode)
 #+end_src
 * Company
 #+begin_src emacs-lisp
   (use-package company
-  :ensure t
-  :config
-  (add-hook 'prog-mode-hook 'company-mode)
-  (remove-hook 'text-mode-hook 'company-mode)
-  :custom
-  (company-minimum-prefix-length 1)
-  (company-tooltip-align-annotations t)
-  (company-require-match 'never)
-  ;; Don't use company in the following modes
-  (company-global-modes
-   '(not shell-mode eaf-mode text-mode-hook latex-mode-hook))
-  ;; Trigger completion immediately.
-  (company-idle-delay 0.1)
-  ;; Number the candidates (use M-1, M-2 etc to select completions).
-  (company-show-numbers t))
+    :ensure t
+    :config
+    (add-hook 'prog-mode-hook 'company-mode)
+    (remove-hook 'text-mode-hook 'company-mode)
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-tooltip-align-annotations t)
+    (company-require-match 'never)
+    ;; Don't use company in the following modes
+    (company-global-modes
+     '(not shell-mode eaf-mode text-mode-hook latex-mode-hook))
+    ;; Trigger completion immediately.
+    (company-idle-delay 0.1)
+    ;; Number the candidates (use M-1, M-2 etc to select completions).
+    (company-show-numbers t))
 
   ;; M-/ for Hippe expand.
   (global-set-key [remap dabbrev-expand] 'hippie-expand)
@@ -114,26 +113,26 @@ System configs.
 * Crux
 #+begin_src emacs-lisp
   (use-package crux
-  :ensure t
-  :bind
-  (("C-x K" . crux-kill-other-buffers)
-   ("C-k" . crux-smart-kill-line)
-   ("M-o" . crux-smart-open-line)
-   ("C-c f" . crux-recentf-find-file)
-   ("C-c d" . crux-duplicate-current-line-or-region)
-   ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
-   :map prog-mode-map
-   ("C-a" . crux-move-beginning-of-line) ; Programming only.
-   )
-  :config
-  (crux-with-region-or-buffer indent-region)
-  (crux-with-region-or-buffer untabify)
-  (crux-with-region-or-line comment-or-uncomment-region) ; (Un)commenting works on line.
-  (crux-with-region-or-point-to-eol kill-ring-save)
-  (defalias 'rename-file-and-buffer 'crux-rename-file-and-buffer)
-  :init
-  (global-set-key (kbd "M-;") 'comment-or-uncomment-region)
-  (global-set-key (kbd "C-/") 'comment-or-uncomment-region))
+    :ensure t
+    :bind
+    (("C-x K" . crux-kill-other-buffers)
+     ("C-k" . crux-smart-kill-line)
+     ("M-o" . crux-smart-open-line)
+     ("C-c f" . crux-recentf-find-file)
+     ("C-c d" . crux-duplicate-current-line-or-region)
+     ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
+     :map prog-mode-map
+     ("C-a" . crux-move-beginning-of-line) ; Programming only.
+     )
+    :config
+    (crux-with-region-or-buffer indent-region)
+    (crux-with-region-or-buffer untabify)
+    (crux-with-region-or-line comment-or-uncomment-region) ; (Un)commenting works on line.
+    (crux-with-region-or-point-to-eol kill-ring-save)
+    (defalias 'rename-file-and-buffer 'crux-rename-file-and-buffer)
+    :init
+    (global-set-key (kbd "M-;") 'comment-or-uncomment-region)
+    (global-set-key (kbd "C-/") 'comment-or-uncomment-region))
 #+end_src
 * Dimmer
 #+begin_src emacs-lisp
@@ -235,26 +234,26 @@ System configs.
 * Expand Region
 #+begin_src emacs-lisp
   (use-package expand-region
-  :ensure t
-  :config
-  (global-set-key (kbd "C-c =") 'er/expand-region)
-  (global-set-key (kbd "M-e") 'er/expand-region))
+    :ensure t
+    :config
+    (global-set-key (kbd "C-c =") 'er/expand-region)
+    (global-set-key (kbd "M-e") 'er/expand-region))
 #+end_src
 * Flycheck
 #+begin_src emacs-lisp
   (use-package flycheck
-  :defer t
-  :diminish
-  :hook (after-init . global-flycheck-mode)
-  :commands (flycheck-add-mode)
-  :custom
-  (flycheck-global-modes
-   '(not outline-mode diff-mode shell-mode eshell-mode term-mode))
-  (flycheck-emacs-lisp-load-path 'inherit)
-  (flycheck-indication-mode (if (display-graphic-p)
-				'right-fringe 'right-margin))
-  :init
-  (add-hook 'prog-mode-hook 'flycheck-mode))
+    :defer t
+    :diminish
+    :hook (after-init . global-flycheck-mode)
+    :commands (flycheck-add-mode)
+    :custom
+    (flycheck-global-modes
+     '(not outline-mode diff-mode shell-mode eshell-mode term-mode))
+    (flycheck-emacs-lisp-load-path 'inherit)
+    (flycheck-indication-mode (if (display-graphic-p)
+				  'right-fringe 'right-margin))
+    :init
+    (add-hook 'prog-mode-hook 'flycheck-mode))
 #+end_src
 * Font
 #+begin_src emacs-lisp
@@ -298,17 +297,17 @@ System configs.
 #+begin_src emacs-lisp
   ;; Highlight indent.
   (use-package highlight-indent-guides
-  :ensure t
-  :init
-  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
-  (setq highlight-indent-guides-method 'character)
-  (setq highlight-indent-guides-auto-enabled nil))
+    :ensure t
+    :init
+    (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+    (setq highlight-indent-guides-method 'character)
+    (setq highlight-indent-guides-auto-enabled nil))
 
   ;; Highlight current word.
   (use-package highlight-symbol
-  :ensure t
-  :init
-  (add-hook 'prog-mode-hook 'highlight-symbol-mode))
+    :ensure t
+    :init
+    (add-hook 'prog-mode-hook 'highlight-symbol-mode))
 
   ;; Highlight only a single virtual line.
   (setq hl-line-range-function
@@ -402,36 +401,35 @@ System configs.
 #+end_src
 * Magit
 #+begin_src emacs-lisp
-(use-package magit
-  :ensure t
-  :bind
-  (("C-x g" . magit-status)
-   (:map magit-status-mode-map
-         ("M-RET" . magit-diff-visit-file-other-window)))
-  :config
-  (defun magit-log-follow-current-file ()
+  (use-package magit
+    :ensure t
+    :bind
+    (("C-x g" . magit-status)
+    (:map magit-status-mode-map
+    ("M-RET" . magit-diff-visit-file-other-window)))
+    :config
+    (defun magit-log-follow-current-file ()
     "A wrapper around `magit-log-buffer-file' with `--follow' argument."
     (interactive)
     (magit-log-buffer-file t))
-  (setq magit-log-arguments '("-n256" "--graph" "--decorate" "--color")
-        ;; Show diff per word.
-        magit-diff-refine-hunk t))
+    (setq magit-log-arguments '("-n256" "--graph" "--decorate" "--color")
+    ;; Show diff per word.
+    magit-diff-refine-hunk t))
 
-(use-package git-gutter+
-  :ensure t
-  :init
-  (global-git-gutter+-mode)
-  :config
-  (setq git-gutter+-disabled-modes '(org-mode tex-mode)))
+  (use-package git-gutter+
+    :ensure t
+    :init
+    (global-git-gutter+-mode)
+    :config
+    (setq git-gutter+-disabled-modes '(org-mode tex-mode)))
 #+end_src emacs-lisp
 * Multi-cursor
 #+begin_src emacs-lisp
   (use-package multiple-cursors
-  :ensure t
-  :init
-  (global-set-key (kbd "C-c <return>") 'mc/edit-lines)
-  (global-set-key (kbd "C-c RET") 'mc/edit-lines)
-  )
+    :ensure t
+    :init
+    (global-set-key (kbd "C-c <return>") 'mc/edit-lines)
+    (global-set-key (kbd "C-c RET") 'mc/edit-lines))
 #+end_src
 * My/Functions
 #+begin_src emacs-lisp
@@ -733,10 +731,9 @@ System configs.
 * PATH
 #+begin_src emacs-lisp
   (use-package exec-path-from-shell
-  :ensure t
-  :config
-  (exec-path-from-shell-initialize)
-  )
+    :ensure t
+    :config
+    (exec-path-from-shell-initialize))
 #+end_src
 * Projectile
 #+begin_src emacs-lisp
@@ -830,11 +827,11 @@ System configs.
 #+end_src
 * Shell
 #+begin_src emacs-lisp
-  (setq explicit-shell-file-name "/bin/zsh")
-
   (use-package exec-path-from-shell
     :ensure t
     :if (memq window-system '(mac ns x))
+    :init
+    (setq explicit-shell-file-name "/bin/zsh")
     :config
     (exec-path-from-shell-initialize))
 #+end_src
@@ -924,19 +921,19 @@ System configs.
 * Whitespace
 #+begin_src emacs-lisp
   (use-package whitespace
-  :ensure t
-  :init
-  (add-hook 'prog-mode-hook 'whitespace-mode)
-  (add-hook 'latex-mode-hook 'whitespace-mode)
-  (remove-hook 'before-save-hook 'delete-trailing-whitespace)
-  :custom
-  (whitespace-line-column nil)
-  (show-trailing-whitespace t)
-  (whitespace-style
-   '(face
-     ;; tabs spaces trailing space-before-tab space-after-tab
-     tabs trailing space-before-tab space-after-tab
-     tab-mark)))
+    :ensure t
+    :init
+    (add-hook 'prog-mode-hook 'whitespace-mode)
+    (add-hook 'latex-mode-hook 'whitespace-mode)
+    (remove-hook 'before-save-hook 'delete-trailing-whitespace)
+    :custom
+    (whitespace-line-column nil)
+    (show-trailing-whitespace t)
+    (whitespace-style
+     '(face
+       ;; tabs spaces trailing space-before-tab space-after-tab
+       tabs trailing space-before-tab space-after-tab
+       tab-mark)))
 #+end_src
 * Winner
 Restore previous window layouts.
