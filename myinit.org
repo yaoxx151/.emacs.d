@@ -117,13 +117,13 @@ System configs.
     :bind
     (("C-x K" . crux-kill-other-buffers)
      ("C-k" . crux-smart-kill-line)
-     ("M-o" . crux-smart-open-line)
      ("C-c f" . crux-recentf-find-file)
      ("C-c d" . crux-duplicate-current-line-or-region)
      ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
      :map prog-mode-map
-     ("C-a" . crux-move-beginning-of-line) ; Programming only.
-     )
+     ("C-a" . crux-move-beginning-of-line)
+     ("M-<return>" . crux-smart-open-line)
+     ("M-RET" . crux-smart-open-line))
     :config
     (crux-with-region-or-buffer indent-region)
     (crux-with-region-or-buffer untabify)
@@ -673,6 +673,22 @@ System configs.
   ;; Cause annoying auto indent in org mode.
   (add-hook 'org-mode-hook (lambda () (electric-indent-local-mode 0)))
 
+  ;; Warn only when opening files bigger than 100MB.
+  (setq large-file-warning-threshold 100000000)
+
+  ;; Frame title shows either a file or a buffer name
+  ;; (if the buffer isn't visiting a file)
+  (setq frame-title-format
+	'((:eval (if (buffer-file-name)
+		     (abbreviate-file-name (buffer-file-name))
+		   "%b"))))
+
+  ;; Maximize the initial frame.
+  (add-to-list 'initial-frame-alist '(fullscreen . maximized))
+
+  ;; Treat selected region like a normal region in other systems.
+  (delete-selection-mode t)
+
   ;; Default some files to text-mode.
   (add-to-list 'auto-mode-alist '("\\.in\\'" . text-mode))
   (add-to-list 'auto-mode-alist '("\\.out\\'" . text-mode))
@@ -867,6 +883,14 @@ System configs.
 	      flyspell-correct-wrapper)
 	    ("C-c l" . flyspell-correct-wrapper))
       :custom (flyspell-correct-interface 'flyspell-correct-ivy)))
+#+end_src
+* Super-save
+#+begin_src emacs-lisp
+  (use-package super-save
+    :ensure t
+    :config
+    (add-to-list 'super-save-triggers 'ace-window)
+    (super-save-mode +1))
 #+end_src
 * TeX
 #+begin_src emacs-lisp
