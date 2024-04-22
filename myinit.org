@@ -207,6 +207,7 @@ System configs.
   (global-unset-key (kbd "C-x m"))
   (global-unset-key (kbd "C-x C-u"))
   (global-unset-key (kbd "C-x C-l"))
+  (global-unset-key (kbd "C-x f"))
   ;; Too much to type for saving. Map to `C-s` instead.
   (global-unset-key (kbd "C-x C-s"))
 #+end_src
@@ -887,10 +888,14 @@ System configs.
 	;;	(set-cursor-color "#404040"))
       (progn
        (load-theme 'doom-zenburn t)
-	 (set-cursor-color "#F0F0F0"))
+	 (set-cursor-color "#F0F0F0")
+	 ;; Paren matching color.
+	 (set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#CCCCCC"))
       (progn
 	(load-theme 'doom-feather-light t)
-	(set-cursor-color "#404040"))))
+	 ;; Paren matching color.
+	(set-cursor-color "#404040")
+	(set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#666666"))))
 #+end_src
 * Undo Tree
 #+begin_src emacs-lisp
