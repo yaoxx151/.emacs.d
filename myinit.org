@@ -282,17 +282,6 @@ System configs.
     :init
     (global-set-key (kbd "C-c b") 'goto-last-change))
 #+end_src emacs-lisp
-* Helm
-#+begin_src emacs-lisp
-  ;; helm-M-x only
-  (use-package helm
-    :ensure t
-    :init
-    ;; Stevey's suggestion.
-    (global-set-key (kbd "C-x m") 'helm-M-x)
-    (global-set-key (kbd "C-c m") 'helm-M-x))
-#+end_src
-
 * Highlight
 #+begin_src emacs-lisp
   ;; Highlight indent.
@@ -354,6 +343,9 @@ System configs.
     (use-package amx :ensure t :defer t)
     (use-package counsel :ensure t :diminish :config (counsel-mode 1))
     (use-package swiper :ensure t :defer t)
+    ;; Stevey's suggestion.
+    (global-set-key (kbd "C-x m") 'counsel-M-x)
+    (global-set-key (kbd "C-c m") 'counsel-M-x)
     (ivy-mode 1)
     :bind
     (("C-q" . swiper-isearch) ; No need for reverse search. Can just cycle back.
@@ -371,6 +363,8 @@ System configs.
     (ivy-magic-slash-non-match-action 'ivy-magic-slash-non-match-create)
     (ivy-count-format "%d/%d")
     (ivy-wrap t)
+    ;; `counsel-M-x` prompt doesn't start with `^` to match only beginning of string.
+    (ivy-initial-inputs-alist nil)
     :config
     (defun counsel-goto-local-home ()
 	"Go to the $HOME of the local machine."
@@ -551,6 +545,9 @@ System configs.
   (defalias 'cf  'my/edit-configs)
   (defalias 'vce 'vc-ediff)
   (defalias 'rc  'recompile)
+  (defalias 'qr  'query-replace)
+  (defalias 'bl  'python-black-buffer)
+  (defalias 'is  'py-isort-buffer)
 #+end_src
 * My/Small Configs
 #+begin_src emacs-lisp
@@ -786,13 +783,10 @@ System configs.
 
   (use-package python-black
     :ensure t
-    :config
-    (add-hook 'python-mode-hook 'python-black-on-save-mode))
+    :after python)
 
   (use-package py-isort
-    :ensure t
-    :config
-    (add-hook 'before-save-hook 'py-isort-before-save))
+    :ensure t)
 #+end_src
 * Recentf
 #+begin_src emacs-lisp
