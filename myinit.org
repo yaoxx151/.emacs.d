@@ -51,7 +51,9 @@ System configs.
   (use-package aggressive-indent
     :ensure t
     :config
-    (global-aggressive-indent-mode 1))
+    (global-aggressive-indent-mode 1)
+    :custom
+    (aggressive-indent-comments-too t))
 #+end_src
 * Avy
 #+begin_src emacs-lisp
@@ -122,8 +124,7 @@ System configs.
      ("C-c d" . crux-duplicate-current-line-or-region)
      ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
      :map prog-mode-map
-     ("C-a" . crux-move-beginning-of-line) ; Programming only.
-     )
+     ("C-a" . crux-move-beginning-of-line))
     :config
     (crux-with-region-or-buffer indent-region)
     (crux-with-region-or-buffer untabify)
