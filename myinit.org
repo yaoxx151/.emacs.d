@@ -171,8 +171,6 @@ System configs.
     ;; Auto revert every 3 sec.
     (auto-revert-interval 3)
     :config
-    ;; Enable global auto-revert
-    (global-auto-revert-mode t)
     ;; Reuse same dired buffer, to prevent numerous buffers while navigating in
     ;; dired.
     (put 'dired-find-alternate-file 'disabled nil)
@@ -590,7 +588,7 @@ System configs.
 
   ;; Move Custom-Set-Variables to Different File.
   (setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
-  (load custom-file 'noerror)
+  (load custom-file 'noerror 'nomessage)
 
   ;; So Long mitigates slowness due to extremely long lines.
   ;; Currently available in Emacs master branch *only*!
@@ -690,6 +688,10 @@ System configs.
 
   ;; Treat selected region like a normal region in other systems.
   (delete-selection-mode t)
+
+  ;; Savehist.
+  (setq history-length 100)
+  (savehist-mode 1)
 
   ;; Default some files to text-mode.
   (add-to-list 'auto-mode-alist '("\\.in\\'" . text-mode))
