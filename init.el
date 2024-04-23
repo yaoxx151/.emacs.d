@@ -1,10 +1,11 @@
-;; Performance improvement following https://github.com/MatthewZMD/.emacs.d?tab=readme-ov-file#defer-garbage-collection.
-(setq gc-cons-threshold 100000000)
+;; Reduce the frequency of garbage collection by making it happen on
+;; each 200MB of allocated data.
+(setq gc-cons-threshold 200000000)
 
 (require 'package)
 (setq package-enable-at-startup nil)
 (add-to-list 'package-archives
-'("melpa" . "https://melpa.org/packages/"))
+	     '("melpa" . "https://melpa.org/packages/"))
 (package-initialize)
 
 ;; Install use-package if not installed.
