@@ -85,6 +85,13 @@ System configs.
     :config
     (beacon-mode 1))
 #+end_src
+* Change-inner
+#+begin_src emacs-lisp
+  (use-package change-inner
+    :ensure t
+    :init
+    (global-set-key (kbd "M-i") 'change-inner))
+#+end_src
 * Column Width Indicator
 #+begin_src emacs-lisp
   (setq-default display-fill-column-indicator-column 79) ; 80 linewidth
@@ -417,6 +424,18 @@ System configs.
     :config
     (setq git-gutter+-disabled-modes '(org-mode tex-mode)))
 #+end_src emacs-lisp
+* Marginalia
+#+begin_src emacs-lisp
+  (use-package marginalia
+    :ensure t
+    :custom
+    (marginalia-max-relative-age 0)
+    (marginalia-align 'left)
+    :bind (:map minibuffer-local-map
+	   ("M-A" . marginalia-cycle))
+    :init
+    (marginalia-mode))
+#+end_src
 * Multi-cursor
 #+begin_src emacs-lisp
   (use-package multiple-cursors
