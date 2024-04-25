@@ -16,10 +16,6 @@ Rebinding of basic commands:
 | `M-c`               | copy                                           |
 | `M-v`               | paste                                          |
 | `C-/`               | Comment or uncomment (not working in terminal) |
-| `M-j`               | backward word movement                         |
-| `M-k`               | forward word movement                          |
-| `M-h`               | backward char movement                         |
-| `M-l`               | forward char movement                          |
 
 System configs.
 #+begin_src emacs-lisp
@@ -77,7 +73,6 @@ System configs.
     kept-old-versions 10
     version-control t)
 #+end_src
-
 * Beacon Mode
 #+begin_src emacs-lisp
   (use-package beacon
@@ -520,12 +515,6 @@ System configs.
   (global-set-key (kbd "M-c") 'kill-ring-save)
   (global-set-key (kbd "M-v") 'yank)
 
-  ;; Better movement without the arbitrary binding with `b` and `f`.
-  (global-set-key (kbd "M-j") 'backward-word)
-  (global-set-key (kbd "M-k") 'forward-word)
-  (global-set-key (kbd "M-h") 'backward-char)
-  (global-set-key (kbd "M-l") 'forward-char)
-
   ;; Adjust font size like web browsers. Doesn't work in terminal.
   (global-set-key (kbd "C-=") 'text-scale-increase)
   (global-set-key (kbd "C--") 'text-scale-decrease)
@@ -554,7 +543,7 @@ System configs.
   (global-set-key (kbd "C-c b") 'goto-last-change)
 
   ;; Misc.
-  (global-set-key (kbd "C-c g") 'goto-line)
+  (global-set-key (kbd "M-g") 'goto-line)
   (global-set-key (kbd "C-x k") 'kill-this-buffer) ; Don't ask.
   (global-set-key (kbd "C-x \\") 'sort-lines)
   (global-set-key (kbd "C-x ?") 'describe-key)
@@ -909,6 +898,14 @@ System configs.
     (add-to-list 'super-save-triggers 'ace-window)
     (super-save-mode +1))
 #+end_src
+* Term
+#+begin_src emacs-lisp
+  (use-package term
+    :bind
+    (:map term-raw-map
+	  ("C-y" . term-paste)
+	  ("M-v" . term-paste)))
+#+end_src
 * TeX
 #+begin_src emacs-lisp
   (add-hook 'latex-mode-hook 'visual-line-mode)
@@ -922,16 +919,13 @@ System configs.
     (setq doom-themes-enable-bold t
 	  doom-themes-enable-italic t)
     (if (display-graphic-p)
-	;; (progn
-	;;	(load-theme 'doom-ayu-light t)
-	;;	(set-cursor-color "#404040"))
       (progn
        (load-theme 'doom-zenburn t)
 	 (set-cursor-color "#F0F0F0")
 	 ;; Paren matching color.
 	 (set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#CCCCCC"))
       (progn
-	(load-theme 'doom-feather-light t)
+	(load-theme 'doom-tomorrow-day t)
 	 ;; Paren matching color.
 	(set-cursor-color "#404040")
 	(set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#666666"))))
