@@ -701,15 +701,15 @@ System configs.
   (use-package org
     :ensure nil
     :defer t
-    :bind ((:map org-mode-map
-		 ("C-i" . nil)
-		 ("M-h" . nil)
-		 ;; Don't know why tab doesn't fold/unfold heading if using
-		 ;; `use-package` to config org setting (it works if org
-		 ;; setting is config without `use-package`.
-		 ("TAB" . org-cycle)))
+    :bind
+    (:map org-mode-map
+	  ("C-i" . nil)
+	  ("M-h" . nil)
+	  ;; Don't know why tab doesn't fold/unfold heading if using
+	  ;; `use-package` to config org setting (it works if org
+	  ;; setting is config without `use-package`).
+	  ("TAB" . org-cycle))
     :config
-    (add-hook 'org-mode-hook 'visual-line-mode)
     (org-babel-do-load-languages
      'org-babel-load-languages
      '((C . t)
@@ -718,7 +718,9 @@ System configs.
     ;; Make tab work in Org-mode code block.
     (org-src-tab-acts-natively t)
     ;; Highlight code block.
-    (org-src-fontify-natively t))
+    (org-src-fontify-natively t)
+    :init
+    (add-hook 'org-mode-hook 'visual-line-mode))
 #+end_src
 * Parens
 #+begin_src emacs-lisp
