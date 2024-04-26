@@ -398,13 +398,6 @@ System configs.
     (setq magit-log-arguments '("-n256" "--graph" "--decorate" "--color")
     ;; Show diff per word.
     magit-diff-refine-hunk t))
-
-  (use-package git-gutter+
-    :ensure t
-    :init
-    (global-git-gutter+-mode)
-    :config
-    (setq git-gutter+-disabled-modes '(org-mode tex-mode)))
 #+end_src emacs-lisp
 * Marginalia
 #+begin_src emacs-lisp
@@ -497,6 +490,13 @@ System configs.
     "Opens this file."
     (interactive)
     (find-file "~/.emacs.d/myinit.org"))
+
+  ;; C-a and C-e jump to visual line in visual-line-mode.
+  (defun my/visual-line-mode-hook ()
+    (define-key visual-line-mode-map (kbd "C-a") 'beginning-of-visual-line)
+    (define-key visual-line-mode-map (kbd "C-e") 'end-of-visual-line))
+
+  (add-hook 'visual-line-mode-hook 'my/visual-line-mode-hook)
 #+end_src
 * My/Keybindings
 #+begin_src emacs-lisp
@@ -555,13 +555,6 @@ System configs.
 #+begin_src emacs-lisp
   ;; C-p, C-n, etc uses visual lines.
   (setq line-move-visual t)
-
-  ;; C-a and C-e jump to visual line in visual-line-mode.
-  (defun my/visual-line-mode-hook ()
-    (define-key visual-line-mode-map (kbd "C-a") 'beginning-of-visual-line)
-    (define-key visual-line-mode-map (kbd "C-e") 'end-of-visual-line))
-
-  (add-hook 'visual-line-mode-hook 'my/visual-line-mode-hook)
 
   ;; y or n.
   (fset 'yes-or-no-p 'y-or-n-p)
