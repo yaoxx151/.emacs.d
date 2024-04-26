@@ -125,7 +125,6 @@ System configs.
      ("C-c d" . crux-duplicate-current-line-or-region)
      ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
      :map prog-mode-map
-     ("C-a" . crux-move-beginning-of-line)
      ("M-<return>" . crux-smart-open-line)
      ("M-RET" . crux-smart-open-line))
     :config
@@ -299,18 +298,6 @@ System configs.
     :ensure t
     :init
     (add-hook 'prog-mode-hook 'highlight-symbol-mode))
-
-  ;; Highlight only a single virtual line.
-  (setq hl-line-range-function
-	'(lambda()
-	   (save-excursion
-	     (cons
-	      (progn
-		(beginning-of-visual-line)
-		(point))
-	      (progn
-		(beginning-of-visual-line 2)
-		(point))))))
 #+end_src
 * Ibuffer
 #+begin_src emacs-lisp
@@ -439,6 +426,14 @@ System configs.
     (global-set-key (kbd "C-c <return>") 'mc/edit-lines)
     (global-set-key (kbd "C-c RET") 'mc/edit-lines))
 #+end_src
+* Mwim
+#+begin_src emacs-lisp
+  (use-package mwim
+    :ensure t
+    :init
+    (global-set-key (kbd "C-a") 'mwim-beginning)
+    (global-set-key (kbd "C-e") 'mwim-end))
+#+end_src
 * My/Functions
 #+begin_src emacs-lisp
   ;; Backward kill word or the region if selected.
@@ -519,16 +514,15 @@ System configs.
   (global-set-key (kbd "C-=") 'text-scale-increase)
   (global-set-key (kbd "C--") 'text-scale-decrease)
 
-  ;; Jump to visual line.
-  (global-set-key (kbd "C-a") 'beginning-of-visual-line)
-  (global-set-key (kbd "C-e") 'end-of-visual-line)
-
   ;; Automatically switch focus to newly splitted buffer.
   (global-set-key (kbd "C-x 2") (lambda () (interactive)
 				  (split-window-vertically) (other-window 1)))
   (global-set-key (kbd "C-x 3") (lambda () (interactive)
 				  (split-window-horizontally)
 				  (other-window 1)))
+
+  ;; Wrap.
+  (global-set-key (kbd "C-c w") 'toggle-truncate-lines)
 
   ;; Cure bad habits.
   (global-set-key (kbd "M-x") (lambda ()
@@ -562,6 +556,13 @@ System configs.
   ;; C-p, C-n, etc uses visual lines.
   (setq line-move-visual t)
 
+  ;; C-a and C-e jump to visual line in visual-line-mode.
+  (defun my/visual-line-mode-hook ()
+    (define-key visual-line-mode-map (kbd "C-a") 'beginning-of-visual-line)
+    (define-key visual-line-mode-map (kbd "C-e") 'end-of-visual-line))
+
+  (add-hook 'visual-line-mode-hook 'my/visual-line-mode-hook)
+
   ;; y or n.
   (fset 'yes-or-no-p 'y-or-n-p)
 
@@ -573,7 +574,7 @@ System configs.
 
   ;; Move the backup fies to user-emacs-directory/.backup.
   (setq backup-directory-alist
-    `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
+	`(("." . ,(expand-file-name ".backup" user-emacs-directory))))
 
   ;; Automatically kill all active processes when closing Emacs.
   (setq confirm-kill-processes nil)
@@ -929,6 +930,38 @@ System configs.
 	 ;; Paren matching color.
 	(set-cursor-color "#404040")
 	(set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#666666"))))
+#+end_src
+* Tree-sitter
+#+begin_src emacs-lisp
+  (use-package treesit
+    :ensure nil
+    :init
+    (setq treesit-language-source-alist
+	  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+	    (cmake "https://github.com/uyha/tree-sitter-cmake")
+	    (css "https://github.com/tree-sitter/tree-sitter-css")
+	    (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+	    (go "https://github.com/tree-sitter/tree-sitter-go")
+	    (html "https://github.com/tree-sitter/tree-sitter-html")
+	    (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+	    (json "https://github.com/tree-sitter/tree-sitter-json")
+	    (make "https://github.com/alemuller/tree-sitter-make")
+	    (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+	    (python "https://github.com/tree-sitter/tree-sitter-python")
+	    (toml "https://github.com/tree-sitter/tree-sitter-toml")
+	    (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+	    (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+	    (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+    ;; Hacky. https://www.masteringemacs.org/article/how-to-get-started-tree-sitter
+    (setq major-mode-remap-alist
+	  '((yaml-mode . yaml-ts-mode)
+	    (bash-mode . bash-ts-mode)
+	    (js2-mode . js-ts-mode)
+	    (typescript-mode . typescript-ts-mode)
+	    (json-mode . json-ts-mode)
+	    (css-mode . css-ts-mode)
+	    (python-mode . python-ts-mode))))
 #+end_src
 * Undo Tree
 #+begin_src emacs-lisp
