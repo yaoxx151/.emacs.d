@@ -258,11 +258,7 @@ System configs.
 #+end_src
 * Font
 #+begin_src emacs-lisp
-  (set-face-attribute 'default nil
-		    :family "Source Code Pro"
-		    :height 150
-		    :weight 'medium
-		    :width 'normal)
+  (set-frame-font "Source Code Pro 16" nil t)
 
   ;; UTF-8.
   (set-selection-coding-system 'utf-8)
@@ -895,6 +891,7 @@ System configs.
 * Term
 #+begin_src emacs-lisp
   (use-package term
+    :ensure nil
     :bind
     (:map term-raw-map
 	  ("C-y" . term-paste)
@@ -902,7 +899,10 @@ System configs.
 #+end_src
 * TeX
 #+begin_src emacs-lisp
-  (add-hook 'latex-mode-hook 'visual-line-mode)
+  (use-package tex
+    :ensure nil
+    :init
+    (add-hook 'tex-mode-hook 'visual-line-mode))
 #+end_src
 * Theme
 #+begin_src emacs-lisp
