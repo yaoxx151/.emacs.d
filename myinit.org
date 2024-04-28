@@ -90,9 +90,7 @@ Rebinding of basic commands:
      ("C-c f" . crux-recentf-find-file)
      ("C-c d" . crux-duplicate-current-line-or-region)
      ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
-     :map prog-mode-map
-     ("M-<return>" . crux-smart-open-line)
-     ("M-RET" . crux-smart-open-line))
+     ("M-o" . crux-smart-open-line))
     :config
     (crux-with-region-or-buffer indent-region)
     (crux-with-region-or-buffer untabify)
@@ -514,11 +512,11 @@ Rebinding of basic commands:
 
   ;; Cure bad habits.
   (global-set-key (kbd "M-x") (lambda ()
-			       (interactive)
-			       (message "Use C-x m, dude.")))
+				(interactive)
+				(message "Use C-x m, dude.")))
   (global-set-key (kbd "C-x C-s") (lambda ()
-			       (interactive)
-			       (message "Use C-s, dude.")))
+				    (interactive)
+				    (message "Use C-s, dude.")))
 
   ;; Somehow they don't bind later in `use-package`. Need to install first.
   (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
@@ -917,6 +915,9 @@ Rebinding of basic commands:
       (progn
        (load-theme 'doom-zenburn t)
 	 (set-cursor-color "#F0F0F0")
+	 (set-face-attribute 'region nil :background "#666")
+	 (set-face-attribute 'isearch nil :background "#51afef" :foreground "#870000")
+	 (set-face-attribute 'lazy-highlight nil :foreground "#870000")
 	 ;; Paren matching color.
 	 (set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#CCCCCC"))
       (progn
