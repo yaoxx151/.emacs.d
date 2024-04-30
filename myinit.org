@@ -906,9 +906,11 @@ Rebinding of basic commands:
     :config
     (load-theme 'doom-zenburn t)
     (set-cursor-color "#F0F0F0")
-    (set-face-attribute 'region nil :background "#666")
     (set-face-attribute 'isearch nil :background "#51afef" :foreground "#870000")
     (set-face-attribute 'lazy-highlight nil :foreground "#870000")
+    (set-face-attribute 'region nil :background "#666")
+    ;; Mini buffer current highlighted line color.
+    (custom-set-faces '(ivy-current-match ((t (:background "#666")))))
     ;; Paren matching color.
     (set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#CCCCCC"))
 #+end_src
