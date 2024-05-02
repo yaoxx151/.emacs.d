@@ -400,7 +400,7 @@ Rebinding of basic commands:
 
   (global-set-key (kbd "C-w") 'my/backward-kill-word-or-kill-region)
 
-  ;; Scroll window up/down by 8 lines.
+  ;; Scroll window up/down by half window.
   (require 'view)
   (global-set-key (kbd "C-<down>") 'View-scroll-half-page-forward)
   (global-set-key (kbd "C-<up>") 'View-scroll-half-page-backward)
@@ -456,18 +456,6 @@ Rebinding of basic commands:
 
   (global-set-key (kbd "C-s") 'my/save-all-buffers)
 
-  ;; MiniBuffer Functions.
-  (defun my/abort-minibuffer-using-mouse ()
-    "Abort the minibuffer when using the mouse."
-    (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
-      (abort-recursive-edit)))
-
-  (add-hook 'mouse-leave-buffer-hook 'my/abort-minibuffer-using-mouse)
-  ;; Keep the point out of the minibuffer.
-  (setq-default minibuffer-prompt-properties
-		'(read-only t point-entered minibuffer-avoid-prompt
-			    face minibuffer-prompt))
-
   ;; Edit this file.
   (defun my/edit-configs ()
     "Opens this file."
@@ -517,6 +505,9 @@ Rebinding of basic commands:
   ;; Somehow they don't bind later in `use-package`. Need to install first.
   (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
   (global-set-key (kbd "C-c b") 'goto-last-change)
+
+  ;; Mispress.
+  (global-set-key (kbd "C-c C-f") (key-binding (kbd "C-x C-f")))
 
   ;; Misc.
   (global-set-key (kbd "M-g") 'goto-line)
@@ -618,7 +609,7 @@ Rebinding of basic commands:
   (setq-default mode-line-format (delq 'mode-line-modes mode-line-format))
 
   ;; Show time.
-  (setq display-time-format "[%Y-%m-%d (%a) %H:%M]")
+  (setq display-time-format "[%m-%d (%a) %H:%M]")
   (setq display-time-default-load-average nil)
   (display-time-mode 1)
 
