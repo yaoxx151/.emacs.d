@@ -222,7 +222,7 @@ Rebinding of basic commands:
 #+end_src
 * Font
 #+begin_src emacs-lisp
-  (set-frame-font "Source Code Pro 16" nil t)
+  (set-frame-font "consolas 16" nil t)
 
   ;; UTF-8.
   (set-selection-coding-system 'utf-8)
@@ -885,7 +885,8 @@ Rebinding of basic commands:
 * TeX
 #+begin_src emacs-lisp
   (use-package tex
-    :ensure nil
+    :ensure auctex
+    :defer t
     :init
     (add-to-list 'auto-mode-alist '("\\.tex\\'" . LaTeX-mode))
     (add-hook 'LaTeX-mode-hook 'visual-line-mode))
@@ -895,7 +896,7 @@ Rebinding of basic commands:
   (use-package zenburn-theme
     :ensure t
     :config
-    (load-theme 'doom-zenburn t)
+    (load-theme 'zenburn t)
     (set-cursor-color "#F0F0F0")
     (set-face-attribute 'isearch nil :background "#51afef" :foreground "#870000")
     (set-face-attribute 'lazy-highlight nil :foreground "#870000")
