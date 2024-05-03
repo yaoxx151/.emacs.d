@@ -896,10 +896,17 @@ Rebinding of basic commands:
   (use-package zenburn-theme
     :ensure t
     :config
+    (setq zenburn-override-colors-alist
+	  '(("zenburn-bg" . "#494949") ; Make background lighter.
+	    ("zenburn-fg"  . "#CBB390") ; Make main text light gold. Color borrowed from Jon Blow.
+	    ;; Set original orange and yellow to blue since they conflict
+	    ;; with the main text.
+	    ("zenburn-orange" . "#7CB8BB")
+	    ("zenburn-yellow" . "#7CB8BB")))
     (load-theme 'zenburn t)
     (set-cursor-color "#F0F0F0")
-    (set-face-attribute 'isearch nil :background "#51afef" :foreground "#870000")
-    (set-face-attribute 'lazy-highlight nil :foreground "#870000")
+    (set-face-attribute 'isearch nil :background "#ADD8E6" :foreground "#E0115F")
+    (set-face-attribute 'lazy-highlight nil :foreground "#E0115F")
     (set-face-attribute 'region nil :background "#666")
     ;; Mini buffer current highlighted line color.
     (custom-set-faces '(ivy-current-match ((t (:background "#666")))))
