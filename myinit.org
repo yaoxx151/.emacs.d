@@ -482,9 +482,6 @@ Rebinding of basic commands:
   (global-set-key (kbd "M-i") 'isearch-backward)
   (define-key isearch-mode-map (kbd "M-i") 'isearch-repeat-backward)
 
-  ;; Wrap.
-  (global-set-key (kbd "C-c w") 'toggle-truncate-lines)
-
   ;; Cure bad habits.
   (global-set-key (kbd "M-x") (lambda ()
 				(interactive)
@@ -505,6 +502,8 @@ Rebinding of basic commands:
   (global-set-key (kbd "C-c DEL") 'delete-indentation) ; Back delete whitespace up to non-whitespace.
   (global-set-key (kbd "C-c <delete>") 'delete-indentation)
   (global-set-key (kbd "C-x k") 'kill-this-buffer) ; Don't ask.
+  (global-set-key (kbd "C-c w") 'toggle-truncate-lines) ; Wrap.
+  (global-set-key (kbd "C-x d") 'kill-whole-line)
   (global-set-key (kbd "C-x \\") 'sort-lines)
   (global-set-key (kbd "C-x ?") 'describe-key)
 
