@@ -194,7 +194,6 @@ Rebinding of basic commands:
   (use-package expand-region
     :ensure t
     :config
-    (global-set-key (kbd "C-c =") 'er/expand-region)
     (global-set-key (kbd "M-e") 'er/expand-region))
 #+end_src
 * Flycheck
@@ -394,11 +393,13 @@ Rebinding of basic commands:
   (global-set-key (kbd "C-w") 'my/backward-kill-word-or-kill-region)
 
   ;; Scroll window up/down by half window.
-  (require 'view)
-  (global-set-key (kbd "C-<down>") 'View-scroll-half-page-forward)
-  (global-set-key (kbd "C-<up>") 'View-scroll-half-page-backward)
-  (global-set-key (kbd "M-n") 'View-scroll-half-page-forward)
-  (global-set-key (kbd "M-p") 'View-scroll-half-page-backward)
+  (use-package view
+    :ensure nil
+    :init
+    (global-set-key (kbd "C-<down>") 'View-scroll-half-page-forward)
+    (global-set-key (kbd "C-<up>") 'View-scroll-half-page-backward)
+    (global-set-key (kbd "M-n") 'View-scroll-half-page-forward)
+    (global-set-key (kbd "M-p") 'View-scroll-half-page-backward))
 
   ;; When splitting window, automatically balance them and switch focus to the newly splitted window.
   (global-set-key (kbd "C-x 2")
@@ -751,6 +752,19 @@ Rebinding of basic commands:
     :init
     (use-package python-black :ensure t :defer t)
     (use-package py-isort :ensure t :defer t)
+    :bind
+    ;; Annoying you need to do keybinding twice to treesitter mode too.
+    ;; When will they fix the hacky way of using ts mode?
+    (:map python-ts-mode-map
+	  ("<tab>" . python-indent-shift-right)
+	  ("TAB" . python-indent-shift-right)
+	  ("C-c <tab>" . python-indent-shift-left)
+	  ("C-c TAB" . python-indent-shift-left))
+    (:map python-ts-mode-map
+	  ("<tab>" . python-indent-shift-right)
+	  ("TAB" . python-indent-shift-right)
+	  ("C-c <tab>" . python-indent-shift-left)
+	  ("C-c TAB" . python-indent-shift-left))
     :custom
     (python-indent-offset 4)
     (flycheck-python-pycompile-executable "python3")
