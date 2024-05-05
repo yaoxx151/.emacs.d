@@ -1,23 +1,23 @@
 #+STARTIP: overview
 Rebinding of basic commands:
-| Key                 | Command                                        |
-|---------------------+------------------------------------------------|
-| `C-s`               | save                                           |
-| `C-w`               | backward delete word or region if selected     |
-| `C-x m` or `C-c m`  | M-x                                            |
-| `C-q`               | search (q for query)                           |
-| `C-z`               | undo                                           |
-| `C-r`               | redo                                           |
-| `C-o`               | switch window                                  |
-| `C-x t` or `C-c t`  | beginning (t for top) of buffer                |
-| `C-x e` or `C-c t`  | end of buffer                                  |
-| `M-p` or `C-<up>`   | scroll up half page                            |
-| `M-n` or `C-<down>` | scroll down half page                          |
-| `M-c`               | copy                                           |
-| `M-v`               | paste                                          |
-| `C-/`               | comment or uncomment (not working in terminal) |
-| `M-s`               | forward isearch (for within-screen jump)       |
-| `M-i`               | backward isearch (for within-screen jump)      |
+| Key                    | Command                                        |
+|------------------------+------------------------------------------------|
+| `C-s`                  | save                                           |
+| `C-w`                  | backward delete word or region if selected     |
+| `C-x C-m` or `C-c C-m` | M-x                                            |
+| `C-q`                  | search (q for query)                           |
+| `C-z`                  | undo                                           |
+| `C-r`                  | redo                                           |
+| `C-o`                  | switch window                                  |
+| `C-x t` or `C-c t`     | beginning (t for top) of buffer                |
+| `C-x e` or `C-c t`     | end of buffer                                  |
+| `M-p` or `C-<up>`      | scroll up half page                            |
+| `M-n` or `C-<down>`    | scroll down half page                          |
+| `M-c`                  | copy                                           |
+| `M-v`                  | paste                                          |
+| `C-/`                  | comment or uncomment (not working in terminal) |
+| `M-s`                  | forward isearch (for within-screen jump)       |
+| `M-i`                  | backward isearch (for within-screen jump)      |
 * Ace-window
 #+begin_src emacs-lisp
   (use-package ace-window
@@ -56,11 +56,13 @@ Rebinding of basic commands:
     :config
     (add-hook 'prog-mode-hook 'company-mode)
     (remove-hook 'text-mode-hook 'company-mode)
+    ;;  `company-debbrev` gives odd candidates.
+    (delete 'company-dabbrev company-backends)
     :custom
-    (company-minimum-prefix-length 1)
+    (company-minimum-prefix-length 3)
     (company-tooltip-align-annotations t)
     (company-require-match 'never)
-    ;; Don't use company in the following modes
+    ;; Don't use company in the following modes.
     (company-global-modes
      '(not shell-mode eaf-mode text-mode-hook latex-mode-hook))
     ;; Trigger completion immediately.
@@ -284,8 +286,8 @@ Rebinding of basic commands:
     (use-package counsel :ensure t :diminish :config (counsel-mode 1))
     (use-package swiper :ensure t :defer t)
     ;; Stevey's suggestion.
-    (global-set-key (kbd "C-x m") 'counsel-M-x)
-    (global-set-key (kbd "C-c m") 'counsel-M-x)
+    (global-set-key (kbd "C-x C-m") 'counsel-M-x)
+    (global-set-key (kbd "C-c C-m") 'counsel-M-x)
     (ivy-mode 1)
     :bind
     (("C-q" . swiper-isearch)
@@ -485,7 +487,7 @@ Rebinding of basic commands:
   ;; Cure bad habits.
   (global-set-key (kbd "M-x") (lambda ()
 				(interactive)
-				(message "Use C-x m, dude.")))
+				(message "Use C-x C-m, dude.")))
   (global-set-key (kbd "C-x C-s") (lambda ()
 				    (interactive)
 				    (message "Use C-s, dude.")))
@@ -503,7 +505,6 @@ Rebinding of basic commands:
   (global-set-key (kbd "C-c <delete>") 'delete-indentation)
   (global-set-key (kbd "C-x k") 'kill-this-buffer) ; Don't ask.
   (global-set-key (kbd "C-c w") 'toggle-truncate-lines) ; Wrap.
-  (global-set-key (kbd "C-x d") 'kill-whole-line)
   (global-set-key (kbd "C-x \\") 'sort-lines)
   (global-set-key (kbd "C-x ?") 'describe-key)
 
