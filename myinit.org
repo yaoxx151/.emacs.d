@@ -56,11 +56,6 @@ Rebinding of basic commands:
     :config
     (beacon-mode 1))
 #+end_src
-* Column Width Indicator
-#+begin_src emacs-lisp
-  (setq-default display-fill-column-indicator-column 79) ; 80 linewidth
-  (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
-#+end_src
 * Company
 #+begin_src emacs-lisp
   (use-package company
@@ -170,6 +165,7 @@ Rebinding of basic commands:
 
   ;; Useless keys.
   (global-unset-key (kbd "C-z")) ; Don't hit it and suspend it in terminal.
+  (global-unset-key (kbd "C-v")) ; Use M-n and M-p for scrolling.
   (global-unset-key (kbd "M-z"))
   (global-unset-key (kbd "M-m"))
   (global-unset-key (kbd "C-x C-z"))
@@ -408,15 +404,6 @@ Rebinding of basic commands:
 
   (global-set-key (kbd "C-w") 'my/backward-kill-word-or-kill-region)
 
-  ;; Scroll window up/down by half window.
-  (use-package view
-    :ensure nil
-    :init
-    (global-set-key (kbd "C-<down>") 'View-scroll-half-page-forward)
-    (global-set-key (kbd "C-<up>") 'View-scroll-half-page-backward)
-    (global-set-key (kbd "M-n") 'View-scroll-half-page-forward)
-    (global-set-key (kbd "M-p") 'View-scroll-half-page-backward))
-
   ;; When splitting window, automatically balance them and switch focus to the newly splitted window.
   (global-set-key (kbd "C-x 2")
 		  (lambda ()
@@ -586,7 +573,6 @@ Rebinding of basic commands:
   (setq next-line-add-newlines nil)
 
   ;; Don't show line numbers.
-  ;;  (global-linum-mode)
   (column-number-mode 1)
 
   ;; Save whatever’s in the current system clipboard before replacing it with
@@ -676,6 +662,10 @@ Rebinding of basic commands:
   ;; Savehist.
   (setq history-length 100)
   (savehist-mode 1)
+
+  ;; Column width indicator.
+  (setq-default display-fill-column-indicator-column 79) ; 80 linewidth
+  (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
 
   ;; Default some files to text-mode.
   (add-to-list 'auto-mode-alist '("\\.in\\'" . text-mode))
@@ -823,6 +813,15 @@ Rebinding of basic commands:
 #+end_src
 * Scroll
 #+begin_src emacs-lisp
+  ;; Scroll window up/down by half window.
+  (use-package view
+    :ensure nil
+    :init
+    (global-set-key (kbd "C-<down>") 'View-scroll-half-page-forward)
+    (global-set-key (kbd "C-<up>") 'View-scroll-half-page-backward)
+    (global-set-key (kbd "M-n") 'View-scroll-half-page-forward)
+    (global-set-key (kbd "M-p") 'View-scroll-half-page-backward))
+
   ;; Vertical Scroll.
   (setq scroll-step 1)
   (setq scroll-margin 1)
