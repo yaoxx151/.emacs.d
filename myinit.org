@@ -27,6 +27,18 @@ Rebinding of basic commands:
     :init
     (global-set-key (kbd "C-o") 'other-window))
 #+end_src
+* Avy
+#+begin_src emacs-lisp
+  (use-package avy
+    :ensure t
+    :defer t
+    :bind
+    ("M-j" . avy-goto-char-2)
+    :custom
+    (avy-style 'pre)
+    :custom-face
+    (avy-lead-face ((t (:background "#51afef" :foreground "#870000" :weight bold)))))
+#+end_src
 * Backup
 #+begin_src emacs-lisp
   (setq backup-directory-alist `(("." . "~/.saves")))
@@ -286,7 +298,10 @@ Rebinding of basic commands:
     (use-package swiper :ensure t :defer t)
     ;; Stevey's suggestion.
     (global-set-key (kbd "C-x C-m") 'counsel-M-x)
-    (global-set-key (kbd "C-c C-m") 'counsel-M-x)
+    ;; Emacs keybinding is so ugly, confusing, clumsy. Is it for backward compatibility?
+    (with-eval-after-load 'org
+      (with-eval-after-load 'multiple-cursors
+	(global-set-key (kbd "C-c C-m") 'counsel-M-x)))
     (ivy-mode 1)
     :bind
     (("C-q" . swiper-isearch)
@@ -295,7 +310,7 @@ Rebinding of basic commands:
      ("M-y" . counsel-yank-pop)
      ("C-c i" . counsel-imenu)
      (:map ivy-minibuffer-map
-	 ("M-RET" . ivy-immediate-done)))
+	   ("M-RET" . ivy-immediate-done)))
     :custom
     ;; (ivy-use-virtual-buffers t)
     ;; (ivy-use-virtual-buffers nil)
@@ -309,8 +324,8 @@ Rebinding of basic commands:
     (ivy-initial-inputs-alist nil)
     :config
     (defun counsel-goto-local-home ()
-	"Go to the $HOME of the local machine."
-	(interactive)
+      "Go to the $HOME of the local machine."
+      (interactive)
       (ivy--cd "~/")))
 #+end_src
 * MacOS
@@ -370,7 +385,8 @@ Rebinding of basic commands:
     :ensure t
     :init
     (global-set-key (kbd "C-c <return>") 'mc/edit-lines)
-    (global-set-key (kbd "C-c RET") 'mc/edit-lines))
+    (global-set-key (kbd "C-c RET") 'mc/edit-lines)
+    (global-unset-key (kbd "C-c C-m")))
 #+end_src
 * Mwim
 #+begin_src emacs-lisp
@@ -678,6 +694,7 @@ Rebinding of basic commands:
     (:map org-mode-map
 	  ("C-i" . nil)
 	  ("M-h" . nil)
+	  ("C-c C-m" . nil)
 	  ;; Don't know why tab doesn't fold/unfold heading if using
 	  ;; `use-package` to config org setting (it works if org
 	  ;; setting is config without `use-package`).
@@ -706,11 +723,10 @@ Rebinding of basic commands:
     :bind
     (:map smartparens-mode-map
 	  ("C-M-f" . sp-forward-sexp)
-	  ("C-M-b" . sp-backward-sexp)
-	  ("C-M-a" . sp-backward-down-sexp)
-	  ("C-M-e" . sp-up-sexp))
+	  ("C-M-b" . sp-backward-sexp))
     :custom
     (sp-escape-quotes-after-insert nil)
+    (sp-autoinsert-pair nil) ; Don't auto-insert paired delimiters.
     :config
     ;; Stop pairing single quotes in elisp.
     (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
