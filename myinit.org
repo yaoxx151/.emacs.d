@@ -762,11 +762,13 @@ Rebinding of basic commands:
     ;; Annoying you need to do keybinding twice to treesitter mode too.
     ;; When will they fix the hacky way of using ts mode?
     (:map python-ts-mode-map
+	  ("C-c C-f" . nil)
 	  ("<tab>" . python-indent-shift-right)
 	  ("TAB" . python-indent-shift-right)
 	  ("C-c <tab>" . python-indent-shift-left)
 	  ("C-c TAB" . python-indent-shift-left))
     (:map python-ts-mode-map
+	  ("C-c C-f" . nil)
 	  ("<tab>" . python-indent-shift-right)
 	  ("TAB" . python-indent-shift-right)
 	  ("C-c <tab>" . python-indent-shift-left)
@@ -902,7 +904,8 @@ Rebinding of basic commands:
     :bind
     (:map term-raw-map
 	  ("C-y" . term-paste)
-	  ("M-v" . term-paste)))
+	  ("M-v" . term-paste)
+          ("C-o" . other-window)))
 #+end_src
 * TeX
 #+begin_src emacs-lisp
@@ -923,10 +926,10 @@ Rebinding of basic commands:
 	  '(("zenburn-bg" . "#494949")
 	    ;; Make main text light gold. Color borrowed from Jon Blow.
 	    ("zenburn-fg"  . "#CBB390")
-	    ;; Set original orange and yellow to dark rose and blue since they conflict
+	    ;; Set original orange and yellow to dark rose and green since they conflict
 	    ;; with the main text.
 	    ("zenburn-orange" . "#CC9999")
-	    ("zenburn-yellow" . "#7CB8BB")))
+	    ("zenburn-yellow" . "#8FB28F")))
     (load-theme 'zenburn t)
     (set-cursor-color "#F0F0F0")
     (set-face-attribute 'isearch nil :background "#ADD8E6" :foreground "#E0115F")
