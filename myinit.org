@@ -250,14 +250,17 @@ Rebinding of basic commands:
     :ensure t
     :init
     (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
-    (setq highlight-indent-guides-method 'character)
-    (setq highlight-indent-guides-auto-enabled nil))
+    :custom
+    (highlight-indent-guides-method 'character)
+    (highlight-indent-guides-auto-enabled nil)
+    (highlight-indent-guides-responsive 'stack)
+    (highlight-indent-guides-delay 0))
 
   ;; Highlight current word.
-  (use-package highlight-symbol
+  (use-package symbol-overlay
     :ensure t
     :init
-    (add-hook 'prog-mode-hook 'highlight-symbol-mode))
+    (add-hook 'prog-mode-hook 'symbol-overlay-mode))
 #+end_src
 * Ibuffer
 #+begin_src emacs-lisp
@@ -308,21 +311,14 @@ Rebinding of basic commands:
      (:map ivy-minibuffer-map
 	   ("M-RET" . ivy-immediate-done)))
     :custom
-    ;; (ivy-use-virtual-buffers t)
-    ;; (ivy-use-virtual-buffers nil)
-    (setq ivy-display-style 'fancy)
+    (ivy-display-style 'fancy)
     (ivy-height 10)
     (ivy-on-del-error-function nil)
     (ivy-magic-slash-non-match-action 'ivy-magic-slash-non-match-create)
     (ivy-count-format "%d/%d")
     (ivy-wrap t)
     ;; `counsel-M-x` prompt doesn't start with `^` to match only beginning of string.
-    (ivy-initial-inputs-alist nil)
-    :config
-    (defun counsel-goto-local-home ()
-      "Go to the $HOME of the local machine."
-      (interactive)
-      (ivy--cd "~/")))
+    (ivy-initial-inputs-alist nil))
 #+end_src
 * MacOS
 #+begin_src emacs-lisp
