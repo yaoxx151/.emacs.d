@@ -936,7 +936,7 @@ Rebinding of basic commands:
     (set-face-attribute 'lazy-highlight nil :foreground "#E0115F")
     (set-face-attribute 'region nil :background "#666")
     ;; Mini buffer current highlighted line color.
-    (custom-set-faces '(ivy-current-match ((t (:background "#666")))))
+    (custom-set-faces '(ivy-current-match ((t (:background "#333333")))))
     ;; Paren matching color.
     (set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#CCCCCC"))
 #+end_src
