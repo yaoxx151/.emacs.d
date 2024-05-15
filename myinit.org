@@ -16,8 +16,6 @@ Rebinding of basic commands:
 | `M-c`                  | copy                                           |
 | `M-v`                  | paste                                          |
 | `C-/`                  | comment or uncomment (not working in terminal) |
-| `M-s`                  | forward isearch (for within-screen jump)       |
-| `M-i`                  | backward isearch (for within-screen jump)      |
 * Ace-window
 #+begin_src emacs-lisp
   (use-package ace-window
