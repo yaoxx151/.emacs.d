@@ -180,11 +180,10 @@ Rebinding of basic commands:
   :ensure t
   :custom
   (dumb-jump-selector 'ivy)
+  (xref-show-definitions-function 'xref-show-definitions-completing-read)
   :bind
   (:map prog-mode-map
     ("C-c C-o" . dumb-jump-go-other-window))
-  :init
-  (setq xref-show-definitions-function 'xref-show-definitions-completing-read)
   :config
   (add-hook 'xref-backend-functions 'dumb-jump-xref-activate))
 #+end_src emacs-lisp
@@ -220,7 +219,7 @@ Rebinding of basic commands:
 #+end_src
 * Font
 #+begin_src emacs-lisp
-  (set-frame-font "consolas 16" nil t)
+  (set-frame-font "consolas 14" nil t)
 
   ;; UTF-8.
   (set-selection-coding-system 'utf-8)
@@ -251,7 +250,7 @@ Rebinding of basic commands:
     :custom
     (highlight-indent-guides-method 'character)
     (highlight-indent-guides-auto-enabled nil)
-    (highlight-indent-guides-responsive 'stack)
+    (highlight-indent-guides-responsive 'top)
     (highlight-indent-guides-delay 0))
 
   ;; Highlight current word.
@@ -661,6 +660,16 @@ Rebinding of basic commands:
   (setq-default display-fill-column-indicator-column 79) ; 80 linewidth
   (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
 
+  ;; https://martinfowler.com/articles/2023-xref-problem.html.
+  (setq dumb-jump-force-searcher 'rg)
+
+  ;; Sticky function head.
+  (use-package semantic
+    :ensure nil
+    :hook
+    (prog-mode . semantic-mode)
+    (prog-mode . global-semantic-stickyfunc-mode))
+
   ;; Default some files to text-mode.
   (add-to-list 'auto-mode-alist '("\\.in\\'" . text-mode))
   (add-to-list 'auto-mode-alist '("\\.out\\'" . text-mode))
@@ -756,17 +765,9 @@ Rebinding of basic commands:
     ;; Annoying you need to do keybinding twice to treesitter mode too.
     ;; When will they fix the hacky way of using ts mode?
     (:map python-ts-mode-map
-	  ("C-c C-f" . nil)
-	  ("<tab>" . python-indent-shift-right)
-	  ("TAB" . python-indent-shift-right)
-	  ("C-c <tab>" . python-indent-shift-left)
-	  ("C-c TAB" . python-indent-shift-left))
+	  ("C-c C-f" . nil))
     (:map python-ts-mode-map
-	  ("C-c C-f" . nil)
-	  ("<tab>" . python-indent-shift-right)
-	  ("TAB" . python-indent-shift-right)
-	  ("C-c <tab>" . python-indent-shift-left)
-	  ("C-c TAB" . python-indent-shift-left))
+	  ("C-c C-f" . nil))
     :custom
     (python-indent-offset 4)
     (flycheck-python-pycompile-executable "python3")
@@ -929,6 +930,10 @@ Rebinding of basic commands:
     (set-face-attribute 'isearch nil :background "#ADD8E6" :foreground "#E0115F")
     (set-face-attribute 'lazy-highlight nil :foreground "#E0115F")
     (set-face-attribute 'region nil :background "#666")
+    ;; Indent highlight color.
+    (set-face-background 'highlight-indent-guides-odd-face "darkgray")
+    (set-face-background 'highlight-indent-guides-even-face "dimgray")
+    (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
     ;; Mini buffer current highlighted line color.
     (custom-set-faces '(ivy-current-match ((t (:background "#333333")))))
     ;; Paren matching color.
@@ -965,8 +970,8 @@ Rebinding of basic commands:
 	    (css-mode . css-ts-mode)
 	    (python-mode . python-ts-mode)))
     :bind
-    ("C-c ," . treesit-beginning-of-defun)
-    ("C-c ." . treesit-end-of-defun))
+    ("C-x ," . treesit-beginning-of-defun)
+    ("C-x ." . treesit-end-of-defun))
 #+end_src
 * Undo Tree
 #+begin_src emacs-lisp
@@ -1038,7 +1043,6 @@ Restore previous window layouts.
     (use-package yasnippet-snippets :ensure t :after yasnippet)
     :hook ((prog-mode LaTeX-mode org-mode markdown-mode) . yas-minor-mode)
     :bind
-    ;; (:map yas-minor-mode-map ("C-c C-n" . yas-expand-from-trigger-key))
     (:map yas-keymap
 	  (("TAB" . smarter-yas-expand-next-field)
 	   ([(tab)] . smarter-yas-expand-next-field)))
