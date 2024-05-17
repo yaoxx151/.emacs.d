@@ -478,8 +478,8 @@ Rebinding of basic commands:
   ;; For within-screen jump. (Use swiper for file-level search)
   (global-set-key (kbd "M-s") 'isearch-forward)
   (define-key isearch-mode-map (kbd "M-s") 'isearch-repeat-forward)
-  (global-set-key (kbd "M-i") 'isearch-backward)
-  (define-key isearch-mode-map (kbd "M-i") 'isearch-repeat-backward)
+  (global-set-key (kbd "M-r") 'isearch-backward)
+  (define-key isearch-mode-map (kbd "M-r") 'isearch-repeat-backward)
 
   ;; Cure bad habits.
   (global-set-key (kbd "M-x") (lambda ()
@@ -492,6 +492,15 @@ Rebinding of basic commands:
   ;; Somehow they don't bind later in `use-package`. Need to install first.
   (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
   (global-set-key (kbd "C-c b") 'goto-last-change)
+
+  ;; Vim's `t`.
+  (global-set-key (kbd "M-t") 'zap-up-to-char)
+
+  ;; Vim's `i`.
+  (use-package change-inner
+    :ensure t
+    :init
+    (global-set-key (kbd "M-i") 'change-inner))
 
   ;; Mispress.
   (global-set-key (kbd "C-c C-f") (key-binding (kbd "C-x C-f")))
