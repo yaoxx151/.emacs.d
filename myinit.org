@@ -513,6 +513,7 @@ Rebinding of basic commands:
   (global-set-key (kbd "C-c w") 'toggle-truncate-lines) ; Wrap.
   (global-set-key (kbd "C-x \\") 'sort-lines)
   (global-set-key (kbd "C-x ?") 'describe-key)
+  (global-set-key (kbd "C-x r") 'call-last-kbd-macro)
 
   ;; Aliases.
   (defalias 'rl  'my/reload-init-file)
