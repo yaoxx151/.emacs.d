@@ -85,7 +85,6 @@ Rebinding of basic commands:
     :bind
     (("C-x K" . crux-kill-other-buffers)
      ("C-k" . crux-smart-kill-line)
-     ("C-c f" . crux-recentf-find-file)
      ("C-c d" . crux-duplicate-current-line-or-region)
      ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
      ("M-o" . crux-smart-open-line))
@@ -302,6 +301,7 @@ Rebinding of basic commands:
     :bind
     (("C-q" . swiper-isearch)
      ("C-c s" . swiper-isearch-thing-at-point)
+     ("C-c f" . counsel-recentf)
      ("C-c g" . counsel-rg)
      ("M-y" . counsel-yank-pop)
      ("C-c i" . counsel-imenu)
@@ -507,13 +507,13 @@ Rebinding of basic commands:
 
   ;; Misc.
   (global-set-key (kbd "M-g") 'goto-line)
-  (global-set-key (kbd "C-c DEL") 'delete-indentation) ; Back delete whitespace up to non-whitespace.
-  (global-set-key (kbd "C-c <delete>") 'delete-indentation)
+  (global-set-key (kbd "C-c DEL") 'delete-blank-lines)
+  (global-set-key (kbd "C-c <delete>") 'delete-blank-lines)
   (global-set-key (kbd "C-x k") 'kill-this-buffer) ; Don't ask.
   (global-set-key (kbd "C-c w") 'toggle-truncate-lines) ; Wrap.
   (global-set-key (kbd "C-x \\") 'sort-lines)
   (global-set-key (kbd "C-x ?") 'describe-key)
-  (global-set-key (kbd "C-x r") 'call-last-kbd-macro)
+  (global-set-key (kbd "C-x c") 'call-last-kbd-macro)
 
   ;; Aliases.
   (defalias 'rl  'my/reload-init-file)
@@ -937,9 +937,10 @@ Rebinding of basic commands:
 	    ("zenburn-yellow" . "#8FB28F")))
     (load-theme 'zenburn t)
     (set-cursor-color "#F0F0F0")
+    (set-face-attribute 'region nil :background "#666666")
+    ;; Search.
     (set-face-attribute 'isearch nil :background "#ADD8E6" :foreground "#E0115F")
     (set-face-attribute 'lazy-highlight nil :foreground "#E0115F")
-    (set-face-attribute 'region nil :background "#666")
     ;; Indent highlight color.
     (set-face-background 'highlight-indent-guides-odd-face "darkgray")
     (set-face-background 'highlight-indent-guides-even-face "dimgray")
