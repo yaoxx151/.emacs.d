@@ -502,8 +502,9 @@ Rebinding of basic commands:
     :init
     (global-set-key (kbd "M-i") 'change-inner))
 
-  ;; Mispress.
+  ;; Keys easy to mispress.
   (global-set-key (kbd "C-c C-f") (key-binding (kbd "C-x C-f")))
+  (global-unset-key (kbd "C-h C-h"))
 
   ;; Misc.
   (global-set-key (kbd "M-g") 'goto-line)
@@ -712,8 +713,8 @@ Rebinding of basic commands:
     (org-src-tab-acts-natively t)
     ;; Highlight code block.
     (org-src-fontify-natively t)
-    ;; Don't ask when running python code.
-    (org-confirm-babel-evaluate (lambda (lang body) (not (string= lang "python"))))
+    ;; Don't ask when running code.
+    (org-confirm-babel-evaluate 'nil)
     :init
     (add-hook 'org-mode-hook 'visual-line-mode))
 #+end_src
