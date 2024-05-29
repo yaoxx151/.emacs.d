@@ -523,6 +523,7 @@ Rebinding of basic commands:
   (defalias 'vce 'vc-ediff)
   (defalias 'rc  'recompile)
   (defalias 'qr  'query-replace)
+  (defalias 'ib  'ibuffer)
 #+end_src
 * My/Small Configs
 #+begin_src emacs-lisp
