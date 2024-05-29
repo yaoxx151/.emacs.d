@@ -107,7 +107,7 @@ Rebinding of basic commands:
     (dimmer-configure-helm)
     (dimmer-mode t)
     :custom
-    (dimmer-fraction 0.6))
+    (dimmer-fraction 0.5))
 #+end_src
 * Dired
 #+begin_src emacs-lisp
@@ -170,8 +170,8 @@ Rebinding of basic commands:
   (global-unset-key (kbd "C-x m"))   ; Easy to mispress.
   (global-unset-key (kbd "C-x C-u")) ; Easy to mispress.
   (global-unset-key (kbd "C-x C-l")) ; Easy to mispress.
-  (global-unset-key (kbd "C-x f"))   ; Not overwriting my find recentf.
-  (global-unset-key (kbd "C-j"))     ; Not overwriring my M-x.
+  (global-unset-key (kbd "C-x f"))   ; Don't overwrite my find recentf.
+  (global-unset-key (kbd "C-j"))     ; Don't overwrite my M-x.
   ;; Too much to type for saving. Map to `C-s` instead.
   (global-unset-key (kbd "C-x C-s"))
 #+end_src
@@ -503,7 +503,8 @@ Rebinding of basic commands:
   (global-set-key (kbd "C-=") 'text-scale-increase)
   (global-set-key (kbd "C--") 'text-scale-decrease)
 
-  ;; For within-screen jump. (Use swiper for file-level search)
+  ;; For within-screen jump. Less disruptive than swiper.
+  ;; (Use swiper for large search within a file.)
   (global-set-key (kbd "M-s") 'isearch-forward)
   (define-key isearch-mode-map (kbd "M-s") 'isearch-repeat-forward)
   (global-set-key (kbd "M-r") 'isearch-backward)
@@ -514,9 +515,15 @@ Rebinding of basic commands:
 				    (interactive)
 				    (message "Use C-s, dude.")))
 
-  ;; Somehow they don't bind later in `use-package`. Need to install first.
+  ;; Somehow those two packages aren't installed automatically by `use-package`.
+  ;; Need to install them manually first. And then bind them here. And you can't do
+  ;; `eval-after-load` for some reason.
   (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
   (global-set-key (kbd "C-c b") 'goto-last-change)
+  (global-set-key (kbd "C-v") 'goto-last-change)
+
+  ;; Vim's `t`.
+  (global-set-key (kbd "C-t") 'zap-up-to-char)
 
   ;; Vim's `i`.
   (use-package change-inner
@@ -721,7 +728,7 @@ Rebinding of basic commands:
     (:map org-mode-map
 	  ("C-i" . nil)
 	  ("M-h" . nil)
-	  ("C-j" . nil) ; Not overwriring my M-x.
+	  ("C-j" . nil) ; Don't overwrite my M-x.
 	  ("C-c C-m" . nil)
 	  ;; Don't know why tab doesn't fold/unfold heading if using
 	  ;; `use-package` to config org setting (it works if org
@@ -948,8 +955,8 @@ Rebinding of basic commands:
     (add-hook 'tex-mode-hook 'visual-line-mode)
     :bind
     (:map tex-mode-map
-	  ("C-j" . nil) ; Not overwriring my M-x.
-  ))
+	  ;; Don't overwrite my M-x.
+	  ("C-j" . nil)))
 #+end_src
 * Theme
 #+begin_src emacs-lisp
