@@ -85,6 +85,8 @@ Rebinding of basic commands:
     :bind
     (("C-x K" . crux-kill-other-buffers)
      ("C-k" . crux-smart-kill-line)
+     ("C-x <delete>" . crux-kill-whole-line)
+     ("C-x DEL" . crux-kill-whole-line)
      ("C-c d" . crux-duplicate-current-line-or-region)
      ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
      ("M-o" . crux-smart-open-line))
@@ -459,6 +461,14 @@ Rebinding of basic commands:
 	(exchange-point-and-mark))))
 
   (global-set-key (kbd "M-t") 'my/mark-until-char)
+
+  ;; Backward kill line.
+  (defun my/backward-kill-line ()
+    (interactive)
+    (kill-line 0)
+    (indent-according-to-mode))
+
+  (global-set-key (kbd "C-<backspace>") 'my/backward-kill-line) ; Doesn't work in terminal.
 
   ;; Edit this file.
   (defun my/edit-configs ()
