@@ -388,14 +388,14 @@ Rebinding of basic commands:
 * My/Functions
 #+begin_src emacs-lisp
   ;; Backward kill word or the region if selected.
-  (defun my/backward-kill-word-or-kill-region ()
+  (defun my/backward-kill-word-or-region ()
     "Kill a word backward or the region if selected."
     (interactive)
     (if (region-active-p)
 	(kill-region (region-beginning) (region-end))
       (backward-kill-word 1)))
 
-  (global-set-key (kbd "C-w") 'my/backward-kill-word-or-kill-region)
+  (global-set-key (kbd "C-w") 'my/backward-kill-word-or-region)
 
   ;; When splitting window, automatically balance them and switch focus to the newly splitted window.
   (global-set-key (kbd "C-x 2")
@@ -418,7 +418,7 @@ Rebinding of basic commands:
 		    (delete-window)
 		    (balance-windows)))
 
-  ;; Column goal.
+  ;; Toggle column goal.
   (defun my/toggle-goal-column ()
     "Toggle goal column mode."
     (interactive)
@@ -445,6 +445,20 @@ Rebinding of basic commands:
     (save-some-buffers t))
 
   (global-set-key (kbd "C-s") 'my/save-all-buffers)
+
+  ;; Mark text until a char.
+  (defun my/mark-until-char ()
+    "Mark text from current cursor position until the first occurrence
+     of a prompted character."
+    (interactive)
+    (let ((prompt (read-char "Enter the character: ")))
+      (save-excursion
+	(search-forward (string prompt) nil t)
+	(set-mark (point))
+	(goto-char (1- (point)))
+	(exchange-point-and-mark))))
+
+  (global-set-key (kbd "M-t") 'my/mark-until-char)
 
   ;; Edit this file.
   (defun my/edit-configs ()
@@ -492,9 +506,6 @@ Rebinding of basic commands:
   ;; Somehow they don't bind later in `use-package`. Need to install first.
   (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
   (global-set-key (kbd "C-c b") 'goto-last-change)
-
-  ;; Vim's `t`.
-  (global-set-key (kbd "M-t") 'zap-up-to-char)
 
   ;; Vim's `i`.
   (use-package change-inner
