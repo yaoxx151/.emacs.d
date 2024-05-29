@@ -84,6 +84,8 @@ Rebinding of basic commands:
     :bind
     (("C-x K" . crux-kill-other-buffers)
      ("C-k" . crux-smart-kill-line)
+     ("C-x <delete>" . crux-kill-whole-line)
+     ("C-x DEL" . crux-kill-whole-line)
      ("C-c d" . crux-duplicate-current-line-or-region)
      ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
      ("M-o" . crux-smart-open-line))
@@ -386,14 +388,14 @@ Rebinding of basic commands:
 * My/Functions
 #+begin_src emacs-lisp
   ;; Backward kill word or the region if selected.
-  (defun my/backward-kill-word-or-kill-region ()
+  (defun my/backward-kill-word-or-region ()
     "Kill a word backward or the region if selected."
     (interactive)
     (if (region-active-p)
 	(kill-region (region-beginning) (region-end))
       (backward-kill-word 1)))
 
-  (global-set-key (kbd "C-w") 'my/backward-kill-word-or-kill-region)
+  (global-set-key (kbd "C-w") 'my/backward-kill-word-or-region)
 
   ;; When splitting window, automatically balance them and switch focus to the newly splitted window.
   (global-set-key (kbd "C-x 2")
@@ -416,7 +418,7 @@ Rebinding of basic commands:
 		    (delete-window)
 		    (balance-windows)))
 
-  ;; Column goal.
+  ;; Toggle column goal.
   (defun my/toggle-goal-column ()
     "Toggle goal column mode."
     (interactive)
@@ -443,6 +445,28 @@ Rebinding of basic commands:
     (save-some-buffers t))
 
   (global-set-key (kbd "C-s") 'my/save-all-buffers)
+
+  ;; Mark text until a char.
+  (defun my/mark-until-char ()
+    "Mark text from current cursor position until the first occurrence
+     of a prompted character."
+    (interactive)
+    (let ((prompt (read-char "Enter the character: ")))
+      (save-excursion
+	(search-forward (string prompt) nil t)
+	(set-mark (point))
+	(goto-char (1- (point)))
+	(exchange-point-and-mark))))
+
+  (global-set-key (kbd "M-t") 'my/mark-until-char)
+
+  ;; Backward kill line.
+  (defun my/backward-kill-line ()
+    (interactive)
+    (kill-line 0)
+    (indent-according-to-mode))
+
+  (global-set-key (kbd "C-<backspace>") 'my/backward-kill-line) ; Doesn't work in terminal.
 
   ;; Edit this file.
   (defun my/edit-configs ()
@@ -494,17 +518,15 @@ Rebinding of basic commands:
   (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
   (global-set-key (kbd "C-c b") 'goto-last-change)
 
-  ;; Vim's `t`.
-  (global-set-key (kbd "M-t") 'zap-up-to-char)
-
   ;; Vim's `i`.
   (use-package change-inner
     :ensure t
     :init
     (global-set-key (kbd "M-i") 'change-inner))
 
-  ;; Mispress.
+  ;; Keys easy to mispress.
   (global-set-key (kbd "C-c C-f") (key-binding (kbd "C-x C-f")))
+  (global-unset-key (kbd "C-h C-h"))
 
   ;; Misc.
   (global-set-key (kbd "M-g") 'goto-line)
@@ -715,8 +737,8 @@ Rebinding of basic commands:
     (org-src-tab-acts-natively t)
     ;; Highlight code block.
     (org-src-fontify-natively t)
-    ;; Don't ask when running python code.
-    (org-confirm-babel-evaluate (lambda (lang body) (not (string= lang "python"))))
+    ;; Don't ask when running code.
+    (org-confirm-babel-evaluate 'nil)
     :init
     (add-hook 'org-mode-hook 'visual-line-mode))
 #+end_src
