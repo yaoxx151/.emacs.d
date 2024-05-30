@@ -5,7 +5,7 @@ Rebinding of basic commands:
 | `C-s`               | save                                       |
 | `C-o`               | switch window                              |
 | `C-w`               | backward delete word or region if selected |
-| `C-m`               | M-x                                        |
+| `C-j`               | M-x (no meaning; just an unused key)       |
 | `C-q`               | search (q for query)                       |
 | `C-z`               | undo                                       |
 | `C-r`               | redo                                       |
@@ -174,8 +174,7 @@ Rebinding of basic commands:
   (global-unset-key (kbd "C-x C-u")) ; Easy to mispress.
   (global-unset-key (kbd "C-x C-l")) ; Easy to mispress.
   (global-unset-key (kbd "C-x f"))   ; Don't overwrite my find recentf.
-  (global-unset-key (kbd "C-m"))     ; Don't overwrite my M-x.
-  (global-unset-key (kbd "C-j"))     ; Unused key.
+  (global-unset-key (kbd "C-j"))     ; Don't overwrite my M-x.
   ;; Too much to type for saving. Map to `C-s` instead.
   (global-unset-key (kbd "C-x C-s"))
 #+end_src
@@ -299,8 +298,8 @@ Rebinding of basic commands:
     (use-package swiper :ensure t :defer t)
     ;; Following Stevey's suggestion. But not `C-x C-m` and `C-c C-m`.
     ;; Tried those for a while. Too easy to mispress. Binded to a simpler
-    ;; unused `C-m`.
-    (global-set-key (kbd "C-m") 'counsel-M-x)
+    ;; unused `C-j`.
+    (global-set-key (kbd "C-j") 'counsel-M-x)
     (ivy-mode 1)
     :bind
     (("C-q" . swiper-isearch)
@@ -748,7 +747,7 @@ Rebinding of basic commands:
     (:map org-mode-map
 	  ("C-i" . nil)
 	  ("M-h" . nil)
-	  ("C-m" . nil) ; Don't overwrite my M-x.
+	  ("C-j" . nil) ; Don't overwrite my M-x.
 	  ("C-c C-m" . nil)
 	  ("C-<return>" . nil) ; Don't overwrite my open line.
 	  ("C-RET" . nil) ; Don't overwrite my open line.
@@ -980,7 +979,7 @@ Rebinding of basic commands:
     :bind
     (:map tex-mode-map
 	  ;; Don't overwrite my M-x.
-	  ("C-m" . nil)))
+	  ("C-j" . nil)))
 #+end_src
 * Theme
 #+begin_src emacs-lisp
