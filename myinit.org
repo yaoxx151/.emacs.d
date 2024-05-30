@@ -546,6 +546,11 @@ Rebinding of basic commands:
   (global-set-key (kbd "C-c C-f") (key-binding (kbd "C-x C-f")))
   (global-unset-key (kbd "C-h C-h"))
 
+  ;; Bind `C-h` to `C-g` to reduce mispress. If needing helper commands,
+  ;; use M-x.
+  (global-unset-key (kbd "C-h"))
+  (global-set-key (kbd "C-h") 'keyboard-quit)
+
   ;; Misc.
   (global-set-key (kbd "M-g") 'goto-line)
   (global-set-key (kbd "C-c DEL") 'delete-blank-lines)
