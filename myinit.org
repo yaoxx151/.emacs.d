@@ -220,7 +220,7 @@ Rebinding of basic commands:
 #+end_src
 * Font
 #+begin_src emacs-lisp
-  (set-frame-font "consolas 14" nil t)
+  (set-frame-font "consolas 12" nil t)
 
   ;; UTF-8.
   (set-selection-coding-system 'utf-8)
@@ -230,6 +230,7 @@ Rebinding of basic commands:
   (set-terminal-coding-system 'utf-8)
   (set-keyboard-coding-system 'utf-8)
   (setq locale-coding-system 'utf-8)
+
   ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
   (when (display-graphic-p)
     (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
@@ -440,7 +441,7 @@ Rebinding of basic commands:
   ;; Save all buffers.
   (defun my/save-all-buffers ()
     "Instead of `save-buffer', save all opened buffers by calling
-	`save-some-buffers' with ARG t."
+	  `save-some-buffers' with ARG t."
     (interactive)
     (save-some-buffers t))
 
@@ -449,7 +450,7 @@ Rebinding of basic commands:
   ;; Mark text until a char.
   (defun my/mark-until-char ()
     "Mark text from current cursor position until the first occurrence
-     of a prompted character."
+       of a prompted character."
     (interactive)
     (let ((prompt (read-char "Enter the character: ")))
       (save-excursion
@@ -479,6 +480,16 @@ Rebinding of basic commands:
     "Show the full path of the file in the minibuffer."
     (interactive)
     (message (buffer-file-name)))
+
+  ;; Kill a word when the cursor is in the middle.
+  (defun my/kill-word-at-point ()
+    "Kill the word at the current cursor position."
+    (interactive)
+    (let ((bounds (bounds-of-thing-at-point 'word)))
+      (when bounds
+	(kill-region (car bounds) (cdr bounds)))))
+
+  (global-set-key (kbd "M-w") 'my/kill-word-at-point)
 
   ;; C-a and C-e jump to visual line in visual-line-mode.
   (defun my/visual-line-mode-hook ()
@@ -687,8 +698,16 @@ Rebinding of basic commands:
 		     (abbreviate-file-name (buffer-file-name))
 		   "%b"))))
 
-  ;; Maximize the initial frame.
-  (add-to-list 'initial-frame-alist '(fullscreen . maximized))
+  ;; Set frame size and position.
+  (when (display-graphic-p)
+    ;; Max height.
+    (add-to-list 'default-frame-alist '(fullscreen . fullheight))
+    ;; Roughly half screen width (the variable that
+    ;; gets the screen width doesn't work).
+    (add-to-list 'default-frame-alist '(width . 125))
+    ;; Position: top (roughly) right.
+    (add-to-list 'default-frame-alist '(top . 0))
+    (add-to-list 'default-frame-alist '(left . 800)))
 
   ;; Treat selected region like a normal region in other systems.
   (delete-selection-mode t)
