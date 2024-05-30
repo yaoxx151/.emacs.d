@@ -5,12 +5,12 @@ Rebinding of basic commands:
 | `C-s`               | save                                       |
 | `C-o`               | switch window                              |
 | `C-w`               | backward delete word or region if selected |
-| `C-j`               | M-x (no meaning; just an unused key)       |
+| `C-m`               | M-x                                        |
 | `C-q`               | search (q for query)                       |
 | `C-z`               | undo                                       |
 | `C-r`               | redo                                       |
-| `C-x t` or `C-c t`  | beginning (t for top) of buffer            |
-| `C-x e` or `C-c t`  | end of buffer                              |
+| `C-x t`             | beginning (t for top) of buffer            |
+| `C-x e`             | end of buffer                              |
 | `M-p` or `C-<up>`   | scroll up half page                        |
 | `M-n` or `C-<down>` | scroll down half page                      |
 | `M-c`               | copy                                       |
@@ -88,7 +88,10 @@ Rebinding of basic commands:
      ("C-x DEL" . crux-kill-whole-line)
      ("C-c d" . crux-duplicate-current-line-or-region)
      ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
-     ("M-o" . crux-smart-open-line))
+     ("C-<return>" . crux-smart-open-line)
+     ("C-RET" . crux-smart-open-line)
+     ("M-<return>" . crux-smart-open-line-above)
+     ("M-RET" . crux-smart-open-line-above))
     :config
     (crux-with-region-or-buffer indent-region)
     (crux-with-region-or-buffer untabify)
@@ -171,7 +174,8 @@ Rebinding of basic commands:
   (global-unset-key (kbd "C-x C-u")) ; Easy to mispress.
   (global-unset-key (kbd "C-x C-l")) ; Easy to mispress.
   (global-unset-key (kbd "C-x f"))   ; Don't overwrite my find recentf.
-  (global-unset-key (kbd "C-j"))     ; Don't overwrite my M-x.
+  (global-unset-key (kbd "C-m"))     ; Don't overwrite my M-x.
+  (global-unset-key (kbd "C-j"))     ; Unused key.
   ;; Too much to type for saving. Map to `C-s` instead.
   (global-unset-key (kbd "C-x C-s"))
 #+end_src
@@ -295,8 +299,8 @@ Rebinding of basic commands:
     (use-package swiper :ensure t :defer t)
     ;; Following Stevey's suggestion. But not `C-x C-m` and `C-c C-m`.
     ;; Tried those for a while. Too easy to mispress. Binded to a simpler
-    ;; unused `C-j`.
-    (global-set-key (kbd "C-j") 'counsel-M-x)
+    ;; unused `C-m`.
+    (global-set-key (kbd "C-m") 'counsel-M-x)
     (ivy-mode 1)
     :bind
     (("C-q" . swiper-isearch)
@@ -485,7 +489,7 @@ Rebinding of basic commands:
   (defun my/kill-word-at-point ()
     "Kill the word at the current cursor position."
     (interactive)
-    (let ((bounds (bounds-of-thing-at-point 'word)))
+    (let ((bounds (bounds-of-thing-at-point 'symbol)))
       (when bounds
 	(kill-region (car bounds) (cdr bounds)))))
 
@@ -502,9 +506,7 @@ Rebinding of basic commands:
 #+begin_src emacs-lisp
   ;; Stevey's suggestion.
   (global-set-key (kbd "C-x t") 'beginning-of-buffer)
-  (global-set-key (kbd "C-c t") 'beginning-of-buffer)
   (global-set-key (kbd "C-x e") 'end-of-buffer)
-  (global-set-key (kbd "C-c e") 'end-of-buffer)
 
   ;; Conventional copy/paste.
   (global-set-key (kbd "M-c") 'kill-ring-save)
@@ -544,12 +546,6 @@ Rebinding of basic commands:
 
   ;; Keys easy to mispress.
   (global-set-key (kbd "C-c C-f") (key-binding (kbd "C-x C-f")))
-  (global-unset-key (kbd "C-h C-h"))
-
-  ;; Bind `C-h` to `C-g` to reduce mispress. If needing helper commands,
-  ;; use M-x.
-  (global-unset-key (kbd "C-h"))
-  (global-set-key (kbd "C-h") 'keyboard-quit)
 
   ;; Misc.
   (global-set-key (kbd "M-g") 'goto-line)
@@ -752,8 +748,12 @@ Rebinding of basic commands:
     (:map org-mode-map
 	  ("C-i" . nil)
 	  ("M-h" . nil)
-	  ("C-j" . nil) ; Don't overwrite my M-x.
+	  ("C-m" . nil) ; Don't overwrite my M-x.
 	  ("C-c C-m" . nil)
+	  ("C-<return>" . nil) ; Don't overwrite my open line.
+	  ("C-RET" . nil) ; Don't overwrite my open line.
+	  ("M-<return>" . nil) ; Don't overwrite my open line above.
+	  ("M-RET" . nil) ; Don't overwrite my open line above.
 	  ;; Don't know why tab doesn't fold/unfold heading if using
 	  ;; `use-package` to config org setting (it works if org
 	  ;; setting is config without `use-package`).
@@ -980,7 +980,7 @@ Rebinding of basic commands:
     :bind
     (:map tex-mode-map
 	  ;; Don't overwrite my M-x.
-	  ("C-j" . nil)))
+	  ("C-m" . nil)))
 #+end_src
 * Theme
 #+begin_src emacs-lisp
