@@ -30,11 +30,12 @@ Rebinding of basic commands:
     :ensure t
     :defer t
     :bind
-    ("M-j" . avy-goto-char-2)
+    ("M-j" . avy-goto-char-timer)
     :custom
+    (avy-timeout-seconds 0.3)
     (avy-style 'pre)
     :custom-face
-    (avy-lead-face ((t (:background "#51afef" :foreground "#870000" :weight bold)))))
+    (avy-lead-face ((t (:background "#ADD8E6" :foreground "#E0115F" :weight bold)))))
 #+end_src
 * Backup
 #+begin_src emacs-lisp
@@ -517,6 +518,7 @@ Rebinding of basic commands:
 
   ;; For within-screen jump. Less disruptive than swiper.
   ;; (Use swiper for large search within a file.)
+  ;; @Note: Remove after Avy?
   (global-set-key (kbd "M-s") 'isearch-forward)
   (define-key isearch-mode-map (kbd "M-s") 'isearch-repeat-forward)
   (global-set-key (kbd "M-r") 'isearch-backward)
@@ -532,7 +534,6 @@ Rebinding of basic commands:
   ;; `eval-after-load` for some reason.
   (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
   (global-set-key (kbd "C-c b") 'goto-last-change)
-  (global-set-key (kbd "C-v") 'goto-last-change)
 
   ;; Vim's `t`.
   (global-set-key (kbd "C-t") 'zap-up-to-char)
@@ -555,6 +556,7 @@ Rebinding of basic commands:
   (global-set-key (kbd "C-x \\") 'sort-lines)
   (global-set-key (kbd "C-x ?") 'describe-key)
   (global-set-key (kbd "C-x c") 'call-last-kbd-macro)
+  (global-set-key (kbd "C-v") 'ivy-switch-buffer)
 
   ;; Aliases.
   (defalias 'rl  'my/reload-init-file)
@@ -700,14 +702,15 @@ Rebinding of basic commands:
 
   ;; Set frame size and position.
   (when (display-graphic-p)
+    (add-to-list 'default-frame-alist '(fullscreen . maximized)))
     ;; Max height.
-    (add-to-list 'default-frame-alist '(fullscreen . fullheight))
-    ;; Roughly half screen width (the variable that
-    ;; gets the screen width doesn't work).
-    (add-to-list 'default-frame-alist '(width . 125))
-    ;; Position: top (roughly) right.
-    (add-to-list 'default-frame-alist '(top . 0))
-    (add-to-list 'default-frame-alist '(left . 800)))
+  ;;   (add-to-list 'default-frame-alist '(fullscreen . fullheight))
+  ;;   ;; Roughly half screen width (the variable that
+  ;;   ;; gets the screen width doesn't work).
+  ;;   (add-to-list 'default-frame-alist '(width . 125))
+  ;;   ;; Position: top (roughly) right.
+  ;;   (add-to-list 'default-frame-alist '(top . 0))
+  ;;   (add-to-list 'default-frame-alist '(left . 800)))
 
   ;; Treat selected region like a normal region in other systems.
   (delete-selection-mode t)
