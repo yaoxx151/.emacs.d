@@ -535,9 +535,6 @@ Rebinding of basic commands:
   (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
   (global-set-key (kbd "C-c b") 'goto-last-change)
 
-  ;; Vim's `t`.
-  (global-set-key (kbd "C-t") 'zap-up-to-char)
-
   ;; Vim's `i`.
   (use-package change-inner
     :ensure t
@@ -556,7 +553,6 @@ Rebinding of basic commands:
   (global-set-key (kbd "C-x \\") 'sort-lines)
   (global-set-key (kbd "C-x ?") 'describe-key)
   (global-set-key (kbd "C-x c") 'call-last-kbd-macro)
-  (global-set-key (kbd "C-v") 'ivy-switch-buffer)
 
   ;; Aliases.
   (defalias 'rl  'my/reload-init-file)
@@ -833,8 +829,10 @@ Rebinding of basic commands:
     ;; Annoying you need to do keybinding twice to treesitter mode too.
     ;; When will they fix the hacky way of using ts mode?
     (:map python-ts-mode-map
+	  ("C-x f" . my/format-python)
 	  ("C-c C-f" . nil))
     (:map python-ts-mode-map
+	  ("C-x f" . my/format-python)
 	  ("C-c C-f" . nil))
     :custom
     (python-indent-offset 4)
@@ -885,7 +883,9 @@ Rebinding of basic commands:
     (global-set-key (kbd "C-<down>") 'View-scroll-half-page-forward)
     (global-set-key (kbd "C-<up>") 'View-scroll-half-page-backward)
     (global-set-key (kbd "M-n") 'View-scroll-half-page-forward)
-    (global-set-key (kbd "M-p") 'View-scroll-half-page-backward))
+    (global-set-key (kbd "M-p") 'View-scroll-half-page-backward)
+    (global-set-key (kbd "C-v") 'View-scroll-half-page-forward)
+    (global-set-key (kbd "C-t") 'View-scroll-half-page-backward))
 
   ;; Vertical Scroll.
   (setq scroll-step 1)
