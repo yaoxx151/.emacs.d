@@ -1,20 +1,20 @@
 #+STARTIP: overview
 Rebinding of basic commands:
-| Key                 | Command                                    |
-|---------------------+--------------------------------------------|
-| `C-s`               | save                                       |
-| `C-o`               | switch window                              |
-| `C-w`               | backward delete word or region if selected |
-| `C-j`               | M-x (no meaning; just an unused key)       |
-| `C-q`               | search (q for query)                       |
-| `C-z`               | undo                                       |
-| `C-r`               | redo                                       |
-| `C-x t`             | beginning (t for top) of buffer            |
-| `C-x e`             | end of buffer                              |
-| `M-p` or `C-<up>`   | scroll up half page                        |
-| `M-n` or `C-<down>` | scroll down half page                      |
-| `M-c`               | copy                                       |
-| `M-v`               | paste                                      |
+| Key     | Command                                    |
+|---------+--------------------------------------------|
+| `C-s`   | save                                       |
+| `C-o`   | switch window                              |
+| `C-w`   | backward delete word or region if selected |
+| `C-j`   | M-x (no meaning; just an unused key)       |
+| `C-q`   | search (q for query)                       |
+| `C-z`   | undo                                       |
+| `C-r`   | redo                                       |
+| `C-x t` | beginning (t for top) of buffer            |
+| `C-x e` | end of buffer                              |
+| `M-p`   | scroll up half page                        |
+| `M-n`   | scroll down half page                      |
+| `M-c`   | copy                                       |
+| `M-v`   | paste                                      |
 * Ace-window
 #+begin_src emacs-lisp
   (use-package ace-window
@@ -102,16 +102,6 @@ Rebinding of basic commands:
     :init
     (global-set-key (kbd "M-;") 'comment-or-uncomment-region)
     (global-set-key (kbd "C-/") 'comment-or-uncomment-region))
-#+end_src
-* Dimmer
-#+begin_src emacs-lisp
-  (use-package dimmer
-    :ensure t
-    :init
-    (dimmer-configure-helm)
-    (dimmer-mode t)
-    :custom
-    (dimmer-fraction 0.5))
 #+end_src
 * Dired
 #+begin_src emacs-lisp
@@ -451,7 +441,7 @@ Rebinding of basic commands:
 
   (global-set-key (kbd "C-s") 'my/save-all-buffers)
 
-  ;; Mark text until a char.
+  ;; Mark until a char. A general version of `Zap-up-to-char`.
   (defun my/mark-until-char ()
     "Mark text from current cursor position until the first occurrence
        of a prompted character."
@@ -1008,6 +998,9 @@ Rebinding of basic commands:
     (set-face-background 'highlight-indent-guides-odd-face "darkgray")
     (set-face-background 'highlight-indent-guides-even-face "dimgray")
     (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
+    ;; Highlight current buffer through mode-line color.
+    (set-face-attribute 'mode-line-buffer-id nil :foreground "#CC9999" :underline)
+    (set-face-attribute 'mode-line-inactive nil :foreground "gray40")
     ;; Mini buffer current highlighted line color.
     (custom-set-faces '(ivy-current-match ((t (:background "#333333")))))
     ;; Paren matching color.
