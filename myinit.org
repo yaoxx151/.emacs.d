@@ -527,6 +527,19 @@ Rebinding of basic commands:
 	  (set-visited-file-name newname)
 	  (set-buffer-modified-p nil)  t))))
 
+  ;; Delete this file.
+  (defun my/delete-this-file ()
+    "Kill the current buffer and deletes the file it is visiting."
+    (interactive)
+    (let ((filename (buffer-file-name)))
+      (if filename
+	  (if (y-or-n-p (concat "Do you really want to delete file " filename " ?"))
+	      (progn
+		(delete-file filename)
+		(message "Deleted file %s." filename)
+		(kill-buffer)))
+	(message "Not a file visiting buffer!"))))
+
   ;; C-a and C-e jump to visual line in visual-line-mode.
   (defun my/visual-line-mode-hook ()
     (define-key visual-line-mode-map (kbd "C-a") 'beginning-of-visual-line)
