@@ -1,28 +1,28 @@
 #+STARTIP: overview
 Rebinding of basic commands:
-| Key     | Command                                    |
-|---------+--------------------------------------------|
-| `C-s`   | save                                       |
-| `C-o`   | switch window                              |
-| `C-w`   | backward delete word or region if selected |
-| `C-j`   | M-x (no meaning; just an unused key)       |
-| `C-q`   | search (q for query)                       |
-| `C-z`   | undo                                       |
-| `C-r`   | redo                                       |
-| `C-x t` | beginning (t for top) of buffer            |
-| `C-x e` | end of buffer                              |
-| `M-p`   | scroll up half page                        |
-| `M-n`   | scroll down half page                      |
-| `M-c`   | copy                                       |
-| `M-v`   | paste                                      |
+| Key       | Command                                    |
+|-----------+--------------------------------------------|
+| `C-s`     | save                                       |
+| `C-o`     | switch window                              |
+| `C-w`     | backward delete word or region if selected |
+| `C-x C-m` | M-x (thanks, Stevey. Same for `C-w`.)      |
+| `C-q`     | search (q for query)                       |
+| `C-z`     | undo                                       |
+| `C-r`     | redo                                       |
+| `C-x t`   | beginning (t for top) of buffer            |
+| `C-x e`   | end of buffer                              |
+| `M-p`     | scroll up half page                        |
+| `M-n`     | scroll down half page                      |
+| `M-c`     | copy (`kill-ring-save`)                    |
+| `M-v`     | paste (`yank`)                             |
+
 * Ace-window
 #+begin_src emacs-lisp
   (use-package ace-window
     :ensure t
     :bind
-    ("C-x o" . ace-window)
-    :init
-    (global-set-key (kbd "C-o") 'other-window))
+    ;; Overwrite normal `other-window`, use `C-o` for it.
+    ("C-x o" . ace-window))
 #+end_src
 * Avy
 #+begin_src emacs-lisp
@@ -76,6 +76,16 @@ Rebinding of basic commands:
     (company-show-numbers t))
 
   ;; M-/ for Hippe expand.
+  (setq hippie-expand-try-functions-list '(try-expand-dabbrev
+					   try-expand-dabbrev-all-buffers
+					   try-expand-dabbrev-from-kill
+					   try-complete-file-name-partially
+					   try-complete-file-name
+					   try-expand-all-abbrevs
+					   try-expand-list
+					   try-expand-line
+					   try-complete-lisp-symbol-partially
+					   try-complete-lisp-symbol))
   (global-set-key [remap dabbrev-expand] 'hippie-expand)
 #+end_src
 * Crux
@@ -85,6 +95,7 @@ Rebinding of basic commands:
     :bind
     (("C-x K" . crux-kill-other-buffers)
      ("C-k" . crux-smart-kill-line)
+     ("C-j" . crux-smart-kill-line) ; In case for mispress.
      ("C-x <delete>" . crux-kill-whole-line)
      ("C-x DEL" . crux-kill-whole-line)
      ("C-c d" . crux-duplicate-current-line-or-region)
@@ -165,7 +176,6 @@ Rebinding of basic commands:
   (global-unset-key (kbd "C-x C-u")) ; Easy to mispress.
   (global-unset-key (kbd "C-x C-l")) ; Easy to mispress.
   (global-unset-key (kbd "C-x f"))   ; Don't overwrite my find recentf.
-  (global-unset-key (kbd "C-j"))     ; Don't overwrite my M-x.
   ;; Too much to type for saving. Map to `C-s` instead.
   (global-unset-key (kbd "C-x C-s"))
 #+end_src
@@ -287,10 +297,9 @@ Rebinding of basic commands:
     (use-package amx :ensure t :defer t)
     (use-package counsel :ensure t :diminish :config (counsel-mode 1))
     (use-package swiper :ensure t :defer t)
-    ;; Following Stevey's suggestion. But not `C-x C-m` and `C-c C-m`.
-    ;; Tried those for a while. Too easy to mispress. Binded to a simpler
-    ;; unused `C-j`.
-    (global-set-key (kbd "C-j") 'counsel-M-x)
+    ;; Following Stevey's suggestion.
+    (global-set-key (kbd "C-x C-m") 'counsel-M-x)
+    (global-set-key (kbd "C-c C-m") 'counsel-M-x)
     (ivy-mode 1)
     :bind
     (("C-q" . swiper-isearch)
@@ -350,6 +359,13 @@ Rebinding of basic commands:
     (setq magit-log-arguments '("-n256" "--graph" "--decorate" "--color")
     ;; Show diff per word.
     magit-diff-refine-hunk t))
+
+  (use-package diff-hl
+    :ensure t
+    :config
+    (global-diff-hl-mode +1)
+    (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
+    (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh))
 #+end_src emacs-lisp
 * Marginalia
 #+begin_src emacs-lisp
@@ -590,6 +606,7 @@ Rebinding of basic commands:
   (global-set-key (kbd "C-c C-f") (key-binding (kbd "C-x C-f")))
 
   ;; Misc.
+  (global-set-key (kbd "C-o") 'other-window)
   (global-set-key (kbd "M-g") 'goto-line)
   (global-set-key (kbd "C-c DEL") 'delete-blank-lines)
   (global-set-key (kbd "C-c <delete>") 'delete-blank-lines)
@@ -656,6 +673,9 @@ Rebinding of basic commands:
 
   ;; Enable `erase-buffer' function.
   (put 'erase-buffer 'disabled nil)
+
+  ;; Smart tab behavior: indent or complete.
+  (setq tab-always-indent 'complete)
 
   ;; Prevent down-arrow from adding empty lines to the bottom of the buffer.
   (setq next-line-add-newlines nil)
@@ -791,7 +811,7 @@ Rebinding of basic commands:
     (:map org-mode-map
 	  ("C-i" . nil)
 	  ("M-h" . nil)
-	  ("C-j" . nil) ; Don't overwrite my M-x.
+	  ("C-j" . nil)
 	  ("C-c C-m" . nil)
 	  ("C-<return>" . nil) ; Don't overwrite my open line.
 	  ("C-RET" . nil) ; Don't overwrite my open line.
@@ -1026,7 +1046,8 @@ Rebinding of basic commands:
     (add-hook 'tex-mode-hook 'visual-line-mode)
     :bind
     (:map tex-mode-map
-	  ;; Don't overwrite my M-x.
+	  ("C-j" . nil))
+    (:map LaTeX-mode-map
 	  ("C-j" . nil)))
 #+end_src
 * Theme
