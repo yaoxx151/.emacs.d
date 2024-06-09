@@ -167,12 +167,10 @@ Rebinding of basic commands:
   (setq initial-scratch-message "")
 
   ;; Useless keys.
-  (global-unset-key (kbd "C-z"))     ; Don't hit it and suspend it in terminal.
+  (global-unset-key (kbd "C-z"))     ; Don't hit it and suspend it in terminal. Stupid key.
   (global-unset-key (kbd "C-v"))     ; Use M-n and M-p for scrolling.
-  (global-unset-key (kbd "M-z"))     ; Easy to mispress.
   (global-unset-key (kbd "M-m"))     ; Easy to mispress.
   (global-unset-key (kbd "C-x C-z")) ; Easy to mispress.
-  (global-unset-key (kbd "C-x m"))   ; Easy to mispress.
   (global-unset-key (kbd "C-x C-u")) ; Easy to mispress.
   (global-unset-key (kbd "C-x C-l")) ; Easy to mispress.
   (global-unset-key (kbd "C-x f"))   ; Don't overwrite my find recentf.
@@ -299,7 +297,8 @@ Rebinding of basic commands:
     (use-package swiper :ensure t :defer t)
     ;; Following Stevey's suggestion.
     (global-set-key (kbd "C-x C-m") 'counsel-M-x)
-    (global-set-key (kbd "C-c C-m") 'counsel-M-x)
+    (global-set-key (kbd "C-x m") 'counsel-M-x)   ; For mispress.
+    (global-set-key (kbd "C-x C-,") 'counsel-M-x) ; For mispress.
     (ivy-mode 1)
     :bind
     (("C-q" . swiper-isearch)
@@ -1125,6 +1124,7 @@ Rebinding of basic commands:
     :init
     (global-undo-tree-mode)
     (global-set-key (kbd "C-z") 'undo-tree-undo)
+    (global-set-key (kbd "M-z") 'undo-tree-undo) ; Emulate the normal cmd-z.
     (global-set-key (kbd "C-r") 'undo-tree-redo)
     ;; Somehow you need both to unbind. Why emacs keybinding in modes and package is so confusing?
     (eval-after-load 'undo-tree '(unbind-key (kbd "C-x u")))
