@@ -100,6 +100,8 @@ Rebinding of basic commands:
      ("C-x DEL" . crux-kill-whole-line)
      ("C-c d" . crux-duplicate-current-line-or-region)
      ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
+     ("C-x 4 t" . crux-transpose-windows)
+     ("C-c t" . crux-visit-shell-buffer)
      ("C-<return>" . crux-smart-open-line)
      ("C-RET" . crux-smart-open-line)
      ("M-<return>" . crux-smart-open-line-above)
