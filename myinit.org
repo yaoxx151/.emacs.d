@@ -691,7 +691,7 @@ Rebinding of basic commands:
   ;; Stop ivy from displaying recentf files.
   (setq ivy-use-virtual-buffers nil)
 
-  ;; Width to wrap lines.
+  ;; Width to wrap lines for `fill-paragraph` and `fill-region`.
   (setq fill-column 100)
 
   ;; Visual line don't break the word.
@@ -710,13 +710,19 @@ Rebinding of basic commands:
   ;; Show unfinished keystrokes early.
   (setq echo-keystrokes 0.1)
 
-  ;; Hide all modes in the mode line.
-  (setq-default mode-line-format (delq 'mode-line-modes mode-line-format))
-
-  ;; Show time.
+  ;; Don't show useless info in mode line.
   (setq display-time-format "[%m-%d (%a) %H:%M]")
+  (setq display-time-24hr-format t)
   (setq display-time-default-load-average nil)
+  (setq display-time-mail-string "")
   (display-time-mode 1)
+  (setq-default mode-line-format
+		(list
+		 "  "                  ; Don't understand why Emacs puts "-" here.
+		 'mode-line-modified
+		 "%b  (%l, %c)  "      ; Buffer name  (line number, column number).
+		 'display-time-string  ; Time.
+		 "  Focus!"))          ; Of course.
 
   ;; Don't ask when killing a buffer with a live process.
   (setq kill-buffer-query-functions
@@ -733,7 +739,7 @@ Rebinding of basic commands:
   ;; Better Compilation.
   ;; Kill compilation process before starting another.
   (setq-default compilation-always-kill t)
-  ;; Save all buffers on `compile'.
+  ;; Save all buffers on `compile`.
   (setq-default compilation-ask-about-save nil)
   (setq-default compilation-scroll-output t)
 
@@ -765,7 +771,7 @@ Rebinding of basic commands:
   ;; Set frame size and position.
   (when (display-graphic-p)
     (add-to-list 'default-frame-alist '(fullscreen . maximized)))
-    ;; Max height.
+  ;; Max height.
   ;;   (add-to-list 'default-frame-alist '(fullscreen . fullheight))
   ;;   ;; Roughly half screen width (the variable that
   ;;   ;; gets the screen width doesn't work).
@@ -1045,6 +1051,8 @@ Rebinding of basic commands:
     (add-to-list 'auto-mode-alist '("\\.tex\\'" . LaTeX-mode))
     (add-hook 'LaTeX-mode-hook 'visual-line-mode)
     (add-hook 'tex-mode-hook 'visual-line-mode)
+    (add-hook 'LaTeX-mode-hook 'auto-fill-mode)
+    (add-hook 'tex-mode-hook 'auto-fill-mode)
     :bind
     (:map tex-mode-map
 	  ("C-j" . nil))
