@@ -274,6 +274,7 @@ Rebinding of basic commands:
       :commands (ibuffer-vc-set-filter-groups-by-vc-root)
       :custom
       (ibuffer-vc-skip-if-remote 'nil))
+    (global-set-key (kbd "C-x i") 'ibuffer)
     :custom
     (ibuffer-formats
      '((mark modified read-only locked " "
@@ -386,8 +387,7 @@ Rebinding of basic commands:
     :ensure t
     :init
     (global-set-key (kbd "C-c <return>") 'mc/edit-lines)
-    (global-set-key (kbd "C-c RET") 'mc/edit-lines)
-    (global-unset-key (kbd "C-c C-m")))
+    (global-set-key (kbd "C-c RET") 'mc/edit-lines))
 #+end_src
 * Mwim
 #+begin_src emacs-lisp
@@ -720,7 +720,9 @@ Rebinding of basic commands:
 		(list
 		 "  "                  ; Don't understand why Emacs puts "-" here.
 		 'mode-line-modified
-		 "%b  (%l, %c)  "      ; Buffer name  (line number, column number).
+		 "  "
+		 'mode-line-buffer-identification
+		 "  (%l, %c)  "      ; Buffer name  (line number, column number).
 		 'display-time-string  ; Time.
 		 "  Focus!"))          ; Of course.
 
@@ -819,7 +821,6 @@ Rebinding of basic commands:
 	  ("C-i" . nil)
 	  ("M-h" . nil)
 	  ("C-j" . nil)
-	  ("C-c C-m" . nil)
 	  ("C-<return>" . nil) ; Don't overwrite my open line.
 	  ("C-RET" . nil) ; Don't overwrite my open line.
 	  ("M-<return>" . nil) ; Don't overwrite my open line above.
