@@ -15,16 +15,8 @@ Rebinding of basic commands:
 | `M-n`     | scroll down half page                      |
 | `M-c`     | copy (`kill-ring-save`)                    |
 | `M-v`     | paste (`yank`)                             |
-
-* Ace-window
-#+begin_src emacs-lisp
-  (use-package ace-window
-    :ensure t
-    :bind
-    ;; Overwrite normal `other-window`, use `C-o` for it.
-    ("C-x o" . ace-window))
-#+end_src
 * Avy
+Try not to use mouse.
 #+begin_src emacs-lisp
   (use-package avy
     :ensure t
@@ -38,6 +30,7 @@ Rebinding of basic commands:
     (avy-lead-face ((t (:background "#ADD8E6" :foreground "#E0115F" :weight bold)))))
 #+end_src
 * Backup
+Haven't found it useful. Maybe you would sleep better at night.
 #+begin_src emacs-lisp
   (setq backup-directory-alist `(("." . "~/.saves")))
   (setq auto-save-list-file-prefix "~/.saves/.saves-")
@@ -48,6 +41,7 @@ Rebinding of basic commands:
     version-control t)
 #+end_src
 * Beacon Mode
+Make switching window easier to see.
 #+begin_src emacs-lisp
   (use-package beacon
     :ensure t
@@ -55,6 +49,7 @@ Rebinding of basic commands:
     (beacon-mode 1))
 #+end_src
 * Company
+Only some basic code completion. (Is that even too much?) No heavy LSP stuffs.
 #+begin_src emacs-lisp
   (use-package company
     :ensure t
@@ -89,6 +84,7 @@ Rebinding of basic commands:
   (global-set-key [remap dabbrev-expand] 'hippie-expand)
 #+end_src
 * Crux
+Those are useful.
 #+begin_src emacs-lisp
   (use-package crux
     :ensure t
@@ -154,8 +150,8 @@ Rebinding of basic commands:
 				     (find-alternate-file ".."))))))
 #+end_src
 * Disable Useless Things
+Why does Emacs put those garbage by default that take screen space?
 #+begin_src emacs-lisp
-  ;; Useless thing.
   (setq inhibit-startup-screen t)
   (setq initial-major-mode 'text-mode)
   (setq inhibit-startup-message t)
@@ -180,6 +176,8 @@ Rebinding of basic commands:
   (global-unset-key (kbd "C-x C-s"))
 #+end_src
 * Dumb Jump
+Useful to go to code definitions. Old packages that might not work in the future.
+Why doesn't Emacs have better go to definition packages/commands? It should be a default feature.
 #+begin_src emacs-lisp
 (use-package dumb-jump
   :ensure t
@@ -200,6 +198,7 @@ Rebinding of basic commands:
   (ediff-window-setup-function 'ediff-setup-windows-plain))
 #+end_src
 * Expand Region
+Useful in coding.
 #+begin_src emacs-lisp
   (use-package expand-region
     :ensure t
@@ -207,6 +206,7 @@ Rebinding of basic commands:
     (global-set-key (kbd "M-e") 'er/expand-region))
 #+end_src
 * Flycheck
+Can be slow.
 #+begin_src emacs-lisp
   (use-package flycheck
     :defer t
@@ -240,6 +240,7 @@ Rebinding of basic commands:
     (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 #+end_src
 * Goto-chg
+Old packages might not work in the future too. Such a basic function that should be default.
 #+begin_src emacs-lisp
   (use-package goto-chg
     :ensure t
@@ -289,6 +290,7 @@ Rebinding of basic commands:
 	     " " filename))))
 #+end_src
 * Ivy
+Useful because Emacs default completion sucks.
 #+begin_src emacs-lisp
   ;; https://github.com/MatthewZMD/.emacs.d?tab=readme-ov-file#ivy-amx-counsel-swiper.
   (use-package ivy
@@ -324,8 +326,8 @@ Rebinding of basic commands:
     (ivy-initial-inputs-alist nil))
 #+end_src
 * MacOS
+Handle copy and paste in OSX.
 #+begin_src emacs-lisp
-  ;; Handle copy and paste in OSX.
   (defun copy-from-osx ()
     "Handle copy/paste intelligently on osx."
     (let ((pbpaste (purecopy "/usr/bin/pbpaste")))
@@ -346,6 +348,7 @@ Rebinding of basic commands:
 	    interprogram-paste-function 'copy-from-osx))
 #+end_src
 * Magit
+Make git slightly less painful, but git is still a pain in ass.
 #+begin_src emacs-lisp
   (use-package magit
     :ensure t
@@ -370,6 +373,7 @@ Rebinding of basic commands:
     (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh))
 #+end_src emacs-lisp
 * Marginalia
+Should be Emacs default.
 #+begin_src emacs-lisp
   (use-package marginalia
     :ensure t
@@ -382,6 +386,7 @@ Rebinding of basic commands:
     (marginalia-mode))
 #+end_src
 * Multi-cursor
+Useful but can be tempting to show off and waste time.
 #+begin_src emacs-lisp
   (use-package multiple-cursors
     :ensure t
@@ -390,6 +395,7 @@ Rebinding of basic commands:
     (global-set-key (kbd "C-c RET") 'mc/edit-lines))
 #+end_src
 * Mwim
+Quite useful. Agreed by Stevey.
 #+begin_src emacs-lisp
   (use-package mwim
     :ensure t
@@ -812,6 +818,7 @@ Rebinding of basic commands:
   (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . markdown-mode))
 #+end_src
 * Org
+Org is great as long as you don't spend your life on it exploring all the features.
 #+begin_src emacs-lisp
   (use-package org
     :ensure nil
@@ -867,14 +874,8 @@ Rebinding of basic commands:
     :init
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 #+end_src
-* PATH
-#+begin_src emacs-lisp
-  (use-package exec-path-from-shell
-    :ensure t
-    :config
-    (exec-path-from-shell-initialize))
-#+end_src
 * Projectile
+A hack that shouldn't exist if GUI Emacs can isolate buffers in each instance.
 #+begin_src emacs-lisp
   (use-package projectile
     :ensure t
@@ -949,7 +950,7 @@ Rebinding of basic commands:
 #+end_src
 * Scroll
 #+begin_src emacs-lisp
-  ;; Scroll window up/down by half window.
+  ;; Scroll window up/down by half window. Default Emacs scolling sucks.
   (use-package view
     :ensure nil
     :init
@@ -983,7 +984,7 @@ Rebinding of basic commands:
     (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
     (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
 #+end_src
-* Shell
+* Shell/Terminal
 #+begin_src emacs-lisp
   (use-package exec-path-from-shell
     :ensure t
@@ -992,6 +993,14 @@ Rebinding of basic commands:
     (setq explicit-shell-file-name "/bin/zsh")
     :config
     (exec-path-from-shell-initialize))
+
+  (use-package term
+    :ensure nil
+    :bind
+    (:map term-raw-map
+	  ("C-y" . term-paste)
+	  ("M-v" . term-paste)
+          ("C-o" . other-window)))
 #+end_src
 * Spell Checker
 #+begin_src emacs-lisp
@@ -1026,22 +1035,12 @@ Rebinding of basic commands:
       :custom (flyspell-correct-interface 'flyspell-correct-ivy)))
 #+end_src
 * Super-save
+Make the paranoid sleep better.
 #+begin_src emacs-lisp
   (use-package super-save
     :ensure t
     :config
-    (add-to-list 'super-save-triggers 'ace-window)
     (super-save-mode +1))
-#+end_src
-* Term
-#+begin_src emacs-lisp
-  (use-package term
-    :ensure nil
-    :bind
-    (:map term-raw-map
-	  ("C-y" . term-paste)
-	  ("M-v" . term-paste)
-          ("C-o" . other-window)))
 #+end_src
 * TeX
 #+begin_src emacs-lisp
@@ -1061,6 +1060,7 @@ Rebinding of basic commands:
 	  ("C-j" . nil)))
 #+end_src
 * Theme
+Tune Zenburn theme.
 #+begin_src emacs-lisp
   (use-package zenburn-theme
     :ensure t
@@ -1085,7 +1085,7 @@ Rebinding of basic commands:
     (set-face-background 'highlight-indent-guides-even-face "dimgray")
     (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
     ;; Mode line.
-    (set-face-attribute 'mode-line-buffer-id nil :foreground "#4682B4" :underline)
+    (set-face-attribute 'mode-line-buffer-id nil :foreground "gray40" :underline)
     (set-face-attribute 'mode-line-inactive nil :foreground "gray40" :box nil)
     (set-face-attribute 'mode-line nil
 			:foreground "#062329"
@@ -1097,6 +1097,7 @@ Rebinding of basic commands:
     (set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#CCCCCC"))
 #+end_src
 * Tree-sitter
+Newly supported. Can be buggy.
 #+begin_src emacs-lisp
   (use-package treesit
     :ensure nil
@@ -1131,6 +1132,7 @@ Rebinding of basic commands:
     ("C-x ." . treesit-end-of-defun))
 #+end_src
 * Undo Tree
+Emacs default undo/redo sucks.
 #+begin_src emacs-lisp
   (use-package undo-tree
     :ensure t
@@ -1156,6 +1158,7 @@ Rebinding of basic commands:
     (unbind-key (kbd "C-x u") undo-tree-map)) ; Unbind visualize key.
 #+end_src
 * Whitespace
+Be tidy please.
 #+begin_src emacs-lisp
   (use-package whitespace
     :ensure t
@@ -1193,6 +1196,7 @@ Restore previous window layouts.
   (winner-mode 1))
 #+end_src
 * Yasnippet
+Is it useful?
 #+begin_src emacs-lisp
   (use-package yasnippet
     :ensure t
