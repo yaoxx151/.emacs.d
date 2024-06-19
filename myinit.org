@@ -150,7 +150,7 @@ Those are useful.
 				     (find-alternate-file ".."))))))
 #+end_src
 * Disable Useless Things
-Why does Emacs put those garbage by default that take screen space?
+Why does Emacs put those garbage by default?
 #+begin_src emacs-lisp
   (setq inhibit-startup-screen t)
   (setq initial-major-mode 'text-mode)
@@ -177,7 +177,7 @@ Why does Emacs put those garbage by default that take screen space?
 #+end_src
 * Dumb Jump
 Useful to go to code definitions. Old packages that might not work in the future.
-Why doesn't Emacs have better go to definition packages/commands? It should be a default feature.
+Why doesn't Emacs have better go-to-definition packages/commands? It should be a default feature.
 #+begin_src emacs-lisp
 (use-package dumb-jump
   :ensure t
@@ -240,7 +240,7 @@ Can be slow.
     (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 #+end_src
 * Goto-chg
-Old packages might not work in the future too. Such a basic function that should be default.
+Old package; might not work in the future too. Such a basic function that should be default.
 #+begin_src emacs-lisp
   (use-package goto-chg
     :ensure t
@@ -348,7 +348,7 @@ Handle copy and paste in OSX.
 	    interprogram-paste-function 'copy-from-osx))
 #+end_src
 * Magit
-Make git slightly less painful, but git is still a pain in ass.
+Make git slightly less painful, but git is still a pain in the ass.
 #+begin_src emacs-lisp
   (use-package magit
     :ensure t
@@ -626,11 +626,10 @@ Quite useful. Agreed by Stevey.
   ;; Aliases.
   (defalias 'rl  'my/reload-init-file)
   (defalias 'cf  'my/edit-configs)
-  (defalias 'fpy 'my/format-python)
   (defalias 'vce 'vc-ediff)
   (defalias 'rc  'recompile)
   (defalias 'qr  'query-replace)
-  (defalias 'ib  'ibuffer)
+  (defalias 'rs  'replace-string)
 #+end_src
 * My/Small Configs
 #+begin_src emacs-lisp
@@ -698,7 +697,11 @@ Quite useful. Agreed by Stevey.
   (setq ivy-use-virtual-buffers nil)
 
   ;; Width to wrap lines for `fill-paragraph` and `fill-region`.
-  (setq fill-column 100)
+  (setq-default fill-column 80)
+  (add-hook 'LaTeX-mode-hook 'auto-fill-mode)
+  (add-hook 'tex-mode-hook 'auto-fill-mode)
+  (add-hook 'org-mode-hook 'auto-fill-mode)
+  (add-hook 'text-mode-hook 'auto-fill-mode)
 
   ;; Visual line don't break the word.
   (setq-default word-wrap t)
@@ -716,7 +719,7 @@ Quite useful. Agreed by Stevey.
   ;; Show unfinished keystrokes early.
   (setq echo-keystrokes 0.1)
 
-  ;; Don't show useless info in mode line.
+  ;; Don't show useless things in mode line.
   (setq display-time-format "[%m-%d (%a) %H:%M]")
   (setq display-time-24hr-format t)
   (setq display-time-default-load-average nil)
@@ -728,7 +731,7 @@ Quite useful. Agreed by Stevey.
 		 'mode-line-modified
 		 "  "
 		 'mode-line-buffer-identification
-		 "  (%l, %c)  "      ; Buffer name  (line number, column number).
+		 "  (%l, %c)  "        ; Buffer name  (line number, column number).
 		 'display-time-string  ; Time.
 		 "  Focus!"))          ; Of course.
 
@@ -744,10 +747,8 @@ Quite useful. Agreed by Stevey.
   (setq trash-directory "~/.Trash")
   (setq delete-by-moving-to-trash t)
 
-  ;; Better Compilation.
-  ;; Kill compilation process before starting another.
+  ;; Compilation.
   (setq-default compilation-always-kill t)
-  ;; Save all buffers on `compile`.
   (setq-default compilation-ask-about-save nil)
   (setq-default compilation-scroll-output t)
 
@@ -779,14 +780,6 @@ Quite useful. Agreed by Stevey.
   ;; Set frame size and position.
   (when (display-graphic-p)
     (add-to-list 'default-frame-alist '(fullscreen . maximized)))
-  ;; Max height.
-  ;;   (add-to-list 'default-frame-alist '(fullscreen . fullheight))
-  ;;   ;; Roughly half screen width (the variable that
-  ;;   ;; gets the screen width doesn't work).
-  ;;   (add-to-list 'default-frame-alist '(width . 125))
-  ;;   ;; Position: top (roughly) right.
-  ;;   (add-to-list 'default-frame-alist '(top . 0))
-  ;;   (add-to-list 'default-frame-alist '(left . 800)))
 
   ;; Treat selected region like a normal region in other systems.
   (delete-selection-mode t)
@@ -818,7 +811,7 @@ Quite useful. Agreed by Stevey.
   (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . markdown-mode))
 #+end_src
 * Org
-Org is great as long as you don't spend your life on it exploring all the features.
+Org is great as long as you don't spend your whole life on it.
 #+begin_src emacs-lisp
   (use-package org
     :ensure nil
@@ -829,9 +822,9 @@ Org is great as long as you don't spend your life on it exploring all the featur
 	  ("M-h" . nil)
 	  ("C-j" . nil)
 	  ("C-<return>" . nil) ; Don't overwrite my open line.
-	  ("C-RET" . nil) ; Don't overwrite my open line.
+	  ("C-RET" . nil)      ; Don't overwrite my open line.
 	  ("M-<return>" . nil) ; Don't overwrite my open line above.
-	  ("M-RET" . nil) ; Don't overwrite my open line above.
+	  ("M-RET" . nil)      ; Don't overwrite my open line above.
 	  ;; Don't know why tab doesn't fold/unfold heading if using
 	  ;; `use-package` to config org setting (it works if org
 	  ;; setting is config without `use-package`).
@@ -842,12 +835,9 @@ Org is great as long as you don't spend your life on it exploring all the featur
      '((C . t)
        (python . t)))
     :custom
-    ;; Make tab work in Org-mode code block.
-    (org-src-tab-acts-natively t)
-    ;; Highlight code block.
-    (org-src-fontify-natively t)
-    ;; Don't ask when running code.
-    (org-confirm-babel-evaluate 'nil)
+    (org-src-tab-acts-natively t)      ; Make tab work in Org-mode code block.
+    (org-src-fontify-natively t)       ; Highlight code block.
+    (org-confirm-babel-evaluate 'nil)  ; Don't ask when running code.
     :init
     (add-hook 'org-mode-hook 'visual-line-mode))
 #+end_src
@@ -875,7 +865,7 @@ Org is great as long as you don't spend your life on it exploring all the featur
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 #+end_src
 * Projectile
-A hack that shouldn't exist if GUI Emacs can isolate buffers in each instance.
+Shouldn't be used if GUI Emacs can isolate buffers in each instance.
 #+begin_src emacs-lisp
   (use-package projectile
     :ensure t
@@ -979,8 +969,7 @@ A hack that shouldn't exist if GUI Emacs can isolate buffers in each instance.
 
   ;; Click and scroll in terminal.
   (unless (display-graphic-p)
-    ;; Activate mouse-based scrolling.
-    (xterm-mouse-mode 1)
+    (xterm-mouse-mode 1) ; Activate mouse-based scrolling.
     (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
     (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
 #+end_src
@@ -1051,8 +1040,6 @@ Make the paranoid sleep better.
     (add-to-list 'auto-mode-alist '("\\.tex\\'" . LaTeX-mode))
     (add-hook 'LaTeX-mode-hook 'visual-line-mode)
     (add-hook 'tex-mode-hook 'visual-line-mode)
-    (add-hook 'LaTeX-mode-hook 'auto-fill-mode)
-    (add-hook 'tex-mode-hook 'auto-fill-mode)
     :bind
     (:map tex-mode-map
 	  ("C-j" . nil))
@@ -1085,7 +1072,7 @@ Tune Zenburn theme.
     (set-face-background 'highlight-indent-guides-even-face "dimgray")
     (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
     ;; Mode line.
-    (set-face-attribute 'mode-line-buffer-id nil :foreground "gray40" :underline)
+    (set-face-attribute 'mode-line-buffer-id nil :foreground "#327232" :underline)
     (set-face-attribute 'mode-line-inactive nil :foreground "gray40" :box nil)
     (set-face-attribute 'mode-line nil
 			:foreground "#062329"
