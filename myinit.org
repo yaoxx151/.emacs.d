@@ -1,20 +1,23 @@
 #+STARTIP: overview
 Rebinding of basic commands:
-| Key       | Command                                    |
-|-----------+--------------------------------------------|
-| `C-s`     | save                                       |
-| `C-o`     | switch window                              |
-| `C-w`     | backward delete word or region if selected |
-| `C-x C-m` | M-x (thanks, Stevey. Same for `C-w`.)      |
-| `C-q`     | search (q for query)                       |
-| `C-z`     | undo                                       |
-| `C-r`     | redo                                       |
-| `C-x t`   | beginning (t for top) of buffer            |
-| `C-x e`   | end of buffer                              |
-| `M-p`     | scroll up half page                        |
-| `M-n`     | scroll down half page                      |
-| `M-c`     | copy (`kill-ring-save`)                    |
-| `M-v`     | paste (`yank`)                             |
+| Key       | Command                         |
+|-----------+---------------------------------|
+| `C-s`     | Save                            |
+| `C-o`     | Switch window                   |
+| `C-w`     | Backward-delete word or region  |
+| `C-x C-m` | M-x (thanks, Stevey)            |
+| `C-q`     | Search (q for query)            |
+| `C-z`     | Undo                            |
+| `C-r`     | Redo                            |
+| `M-j`     | Backward word                   |
+| `M-k`     | Forward word                    |
+| `C-x t`   | Beginning (t for top) of buffer |
+| `C-x e`   | End of buffer                   |
+| `M-p`     | Scroll up half page             |
+| `M-n`     | Scroll down half page           |
+| `M-c`     | Copy (`kill-ring-save`)         |
+| `M-v`     | Paste (`yank`)                  |
+
 * Avy
 Try not to use mouse.
 #+begin_src emacs-lisp
@@ -22,7 +25,7 @@ Try not to use mouse.
     :ensure t
     :defer t
     :bind
-    ("M-j" . avy-goto-char-timer)
+    ("M-m" . avy-goto-char-timer) ; Just a key easy to press.
     :custom
     (avy-timeout-seconds 0.3)
     (avy-style 'pre)
@@ -326,7 +329,7 @@ Useful because Emacs default completion sucks.
     (ivy-initial-inputs-alist nil))
 #+end_src
 * MacOS
-Handle copy and paste in OSX.
+Handle copy/paste in OSX.
 #+begin_src emacs-lisp
   (defun copy-from-osx ()
     "Handle copy/paste intelligently on osx."
@@ -579,6 +582,10 @@ Quite useful. Agreed by Stevey.
   ;; Conventional copy/paste.
   (global-set-key (kbd "M-c") 'kill-ring-save)
   (global-set-key (kbd "M-v") 'yank)
+
+  ;; Default `M-b` and `M-f` are always awkward to me.
+  (global-set-key (kbd "M-j") 'backward-word)
+  (global-set-key (kbd "M-k") 'forward-word)
 
   ;; Adjust font size like web browsers. Doesn't work in terminal.
   (global-set-key (kbd "C-=") 'text-scale-increase)
