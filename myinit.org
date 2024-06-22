@@ -25,7 +25,7 @@ Try not to use mouse.
     :ensure t
     :defer t
     :bind
-    ("M-m" . avy-goto-char-timer) ; Just a key easy to press.
+    ("M-f" . avy-goto-char-timer)
     :custom
     (avy-timeout-seconds 0.3)
     (avy-style 'pre)
@@ -405,417 +405,6 @@ Quite useful. Agreed by Stevey.
     :init
     (global-set-key (kbd "C-a") 'mwim-beginning)
     (global-set-key (kbd "C-e") 'mwim-end))
-#+end_src
-* My/Functions
-#+begin_src emacs-lisp
-  ;; Backward kill word or the region if selected.
-  (defun my/backward-kill-word-or-region ()
-    "Kill a word backward or the region if selected."
-    (interactive)
-    (if (region-active-p)
-	(kill-region (region-beginning) (region-end))
-      (backward-kill-word 1)))
-
-  (global-set-key (kbd "C-w") 'my/backward-kill-word-or-region)
-
-  ;; When splitting window, automatically balance them and switch focus to the newly splitted window.
-  (global-set-key (kbd "C-x 2")
-		  (lambda ()
-		    (interactive)
-		    (split-window-vertically)
-		    (balance-windows)
-		    (other-window 1)))
-  (global-set-key (kbd "C-x 3")
-		  (lambda ()
-		    (interactive)
-		    (split-window-horizontally)
-		    (balance-windows)
-		    (other-window 1)))
-
-  ;; Auto-balance window when deleting window.
-  (global-set-key (kbd "C-x 0")
-		  (lambda ()
-		    (interactive)
-		    (delete-window)
-		    (balance-windows)))
-
-  ;; Toggle column goal.
-  (defun my/toggle-goal-column ()
-    "Toggle goal column mode."
-    (interactive)
-    (if goal-column
-	(progn
-	  (setq goal-column nil)
-	  (message "Unset goal column"))
-      (progn
-	(setq goal-column (current-column))
-	(message "Set goal column at %d" goal-column))))
-
-  (global-set-key (kbd "C-x C-u") 'my/toggle-goal-column)
-
-  ;; Reload init files.
-  (defun my/reload-init-file ()
-    (interactive)
-    (load-file user-init-file))
-
-  ;; Save all buffers.
-  (defun my/save-all-buffers ()
-    "Instead of `save-buffer', save all opened buffers by calling
-	      `save-some-buffers' with ARG t."
-    (interactive)
-    (save-some-buffers t))
-
-  (global-set-key (kbd "C-s") 'my/save-all-buffers)
-
-  ;; Mark until a char. A general version of `Zap-up-to-char`.
-  (defun my/mark-until-char ()
-    "Mark text from current cursor position until the first occurrence
-	   of a prompted character."
-    (interactive)
-    (let ((prompt (read-char "Enter the character: ")))
-      (save-excursion
-	(search-forward (string prompt) nil t)
-	(set-mark (point))
-	(goto-char (1- (point)))
-	(exchange-point-and-mark))))
-
-  (global-set-key (kbd "M-t") 'my/mark-until-char)
-
-  ;; Backward kill line.
-  (defun my/backward-kill-line ()
-    (interactive)
-    (kill-line 0)
-    (indent-according-to-mode))
-
-  (global-set-key (kbd "C-<backspace>") 'my/backward-kill-line) ; Doesn't work in terminal.
-
-  ;; Edit this file.
-  (defun my/edit-configs ()
-    "Opens this file."
-    (interactive)
-    (find-file "~/.emacs.d/myinit.org"))
-
-  ;; Show buffer's file path.
-  (defun show-file-path ()
-    "Show the full path of the file in the minibuffer."
-    (interactive)
-    (message (buffer-file-name)))
-
-  ;; Kill a word when the cursor is in the middle.
-  (defun my/kill-word-at-point ()
-    "Kill the word at the current cursor position."
-    (interactive)
-    (let ((bounds (bounds-of-thing-at-point 'symbol)))
-      (when bounds
-	(kill-region (car bounds) (cdr bounds)))))
-
-  (global-set-key (kbd "M-w") 'my/kill-word-at-point)
-
-  ;; Go to the middle of the line.
-  (defun my/go-to-middle-of-line ()
-    "Move the cursor to the middle of the current line."
-    (interactive)
-    (let ((middle (floor (/ (line-end-position) 2))))
-      (goto-char middle)))
-
-  (global-set-key (kbd "M-l") 'my/go-to-middle-of-line)
-
-  ;; Stolen from Stevey.
-  (defun my/rename-file-and-buffer (new-name)
-    "Renames both current buffer and file it's visiting to NEW-NAME."
-    (interactive "sNew name: ")
-    (let ((name (buffer-name))
-	  (filename (buffer-file-name)))
-      (if (not filename)
-	  (message "Buffer '%s' is not visiting a file!" name)
-	(if (get-buffer new-name)
-	    (message "A buffer named '%s' already exists!" new-name)
-	  (progn
-	    (rename-file filename new-name 1)
-	    (rename-buffer new-name)
-	    (set-visited-file-name new-name)
-	    (set-buffer-modified-p nil))))))
-
-  (defun my/move-buffer-file (dir)
-    "Moves both current buffer and file it's visiting to DIR."
-    (interactive "DNew directory: ")
-    (let* ((name (buffer-name))
-	   (filename (buffer-file-name))
-	   (dir
-	    (if (string-match dir "\\(?:/\\|\\\\)$")
-		(substring dir 0 -1) dir))
-	   (newname (concat dir "/" name)))
-      (if (not filename)
-	  (message "Buffer '%s' is not visiting a file!" name)
-	(progn
-	  (copy-file filename newname 1)
-	  (delete-file filename)
-	  (set-visited-file-name newname)
-	  (set-buffer-modified-p nil)  t))))
-
-  ;; Delete this file.
-  (defun my/delete-this-file ()
-    "Kill the current buffer and deletes the file it is visiting."
-    (interactive)
-    (let ((filename (buffer-file-name)))
-      (if filename
-	  (if (y-or-n-p (concat "Do you really want to delete file " filename " ?"))
-	      (progn
-		(delete-file filename)
-		(message "Deleted file %s." filename)
-		(kill-buffer)))
-	(message "Not a file visiting buffer!"))))
-
-  ;; C-a and C-e jump to visual line in visual-line-mode.
-  (defun my/visual-line-mode-hook ()
-    (define-key visual-line-mode-map (kbd "C-a") 'beginning-of-visual-line)
-    (define-key visual-line-mode-map (kbd "C-e") 'end-of-visual-line))
-
-  (add-hook 'visual-line-mode-hook 'my/visual-line-mode-hook)
-#+end_src
-* My/Keybindings
-#+begin_src emacs-lisp
-  ;; Stevey's suggestion.
-  (global-set-key (kbd "C-x t") 'beginning-of-buffer)
-  (global-set-key (kbd "C-x e") 'end-of-buffer)
-
-  ;; Conventional copy/paste.
-  (global-set-key (kbd "M-c") 'kill-ring-save)
-  (global-set-key (kbd "M-v") 'yank)
-
-  ;; Default `M-b` and `M-f` are always awkward to me.
-  (global-set-key (kbd "M-j") 'backward-word)
-  (global-set-key (kbd "M-k") 'forward-word)
-
-  ;; Adjust font size like web browsers. Doesn't work in terminal.
-  (global-set-key (kbd "C-=") 'text-scale-increase)
-  (global-set-key (kbd "C--") 'text-scale-decrease)
-
-  ;; For within-screen jump. Less disruptive than swiper.
-  ;; (Use swiper for large search within a file.)
-  ;; @Note: Remove after Avy?
-  (global-set-key (kbd "M-s") 'isearch-forward)
-  (define-key isearch-mode-map (kbd "M-s") 'isearch-repeat-forward)
-  (global-set-key (kbd "M-r") 'isearch-backward)
-  (define-key isearch-mode-map (kbd "M-r") 'isearch-repeat-backward)
-
-  ;; Cure bad habits.
-  (global-set-key (kbd "C-x C-s") (lambda ()
-				    (interactive)
-				    (message "Use C-s, dude.")))
-
-  ;; Somehow those two packages aren't installed automatically by `use-package`.
-  ;; Need to install them manually first. And then bind them here. And you can't do
-  ;; `eval-after-load` for some reason.
-  (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
-  (global-set-key (kbd "C-c b") 'goto-last-change)
-
-  ;; Vim's `i`.
-  (use-package change-inner
-    :ensure t
-    :init
-    (global-set-key (kbd "M-i") 'change-inner))
-
-  ;; Keys easy to mispress.
-  (global-set-key (kbd "C-c C-f") (key-binding (kbd "C-x C-f")))
-
-  ;; Misc.
-  (global-set-key (kbd "C-o") 'other-window)
-  (global-set-key (kbd "M-g") 'goto-line)
-  (global-set-key (kbd "C-c DEL") 'delete-blank-lines)
-  (global-set-key (kbd "C-c <delete>") 'delete-blank-lines)
-  (global-set-key (kbd "C-x k") 'kill-this-buffer) ; Don't ask.
-  (global-set-key (kbd "C-c w") 'toggle-truncate-lines) ; Wrap.
-  (global-set-key (kbd "C-x \\") 'sort-lines)
-  (global-set-key (kbd "C-x ?") 'describe-key)
-  (global-set-key (kbd "C-x c") 'call-last-kbd-macro)
-
-  ;; Aliases.
-  (defalias 'rl  'my/reload-init-file)
-  (defalias 'cf  'my/edit-configs)
-  (defalias 'vce 'vc-ediff)
-  (defalias 'rc  'recompile)
-  (defalias 'qr  'query-replace)
-  (defalias 'rs  'replace-string)
-#+end_src
-* My/Small Configs
-#+begin_src emacs-lisp
-  ;; C-p, C-n, etc uses visual lines.
-  (setq line-move-visual t)
-
-  ;; y or n.
-  (fset 'yes-or-no-p 'y-or-n-p)
-
-  ;; Ask before killing emacs.
-  (setq confirm-kill-emacs 'y-or-n-p)
-
-  ;; No dialgue!
-  (setq use-dialog-box nil)
-
-  ;; Move the backup fies to user-emacs-directory/.backup.
-  (setq backup-directory-alist
-	`(("." . ,(expand-file-name ".backup" user-emacs-directory))))
-
-  ;; Automatically kill all active processes when closing Emacs.
-  (setq confirm-kill-processes nil)
-
-  ;; Turn Off Cursor Alarms.
-  (setq ring-bell-function 'ignore)
-
-  ;; Show Keystrokes in Progress Instantly.
-  (setq echo-keystrokes 0.1)
-
-  ;; Don't Lock Files.
-  (setq-default create-lockfiles nil)
-
-  ;; ad-handle-definition warnings are generated when functions are
-  ;; redefined with `defadvice', they are not helpful.
-  (setq ad-redefinition-action 'accept)
-
-  ;; Move Custom-Set-Variables to Different File.
-  (setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
-  (load custom-file 'noerror 'nomessage)
-
-  ;; So Long mitigates slowness due to extremely long lines.
-  ;; Currently available in Emacs master branch *only*!
-  (when (fboundp 'global-so-long-mode)
-    (global-so-long-mode))
-
-  ;; Add a newline automatically at the end of the file upon save.
-  (setq require-final-newline t)
-
-  ;; Enable `erase-buffer' function.
-  (put 'erase-buffer 'disabled nil)
-
-  ;; Smart tab behavior: indent or complete.
-  (setq tab-always-indent 'complete)
-
-  ;; Prevent down-arrow from adding empty lines to the bottom of the buffer.
-  (setq next-line-add-newlines nil)
-
-  ;; Don't show line numbers.
-  (column-number-mode 1)
-
-  ;; Save whatever’s in the current system clipboard before replacing it with
-  ;; the Emacs' text.
-  (setq save-interprogram-paste-before-kill t)
-
-  ;; Stop ivy from displaying recentf files.
-  (setq ivy-use-virtual-buffers nil)
-
-  ;; Width to wrap lines for `fill-paragraph` and `fill-region`.
-  (setq-default fill-column 80)
-  (add-hook 'LaTeX-mode-hook 'auto-fill-mode)
-  (add-hook 'tex-mode-hook 'auto-fill-mode)
-  (add-hook 'org-mode-hook 'auto-fill-mode)
-  (add-hook 'text-mode-hook 'auto-fill-mode)
-
-  ;; Visual line don't break the word.
-  (setq-default word-wrap t)
-
-  ;; Paren match.
-  (add-hook 'prog-mode-hook 'show-paren-mode)
-
-  ;; Automatically update a buffer if a file changes on disk.
-  (global-auto-revert-mode 1)
-  (add-hook 'dired-mode-hook 'auto-revert-mode) ; Refresh dired too.
-
-  ;; Give context to cursor.
-  (setq scroll-margin 4)
-
-  ;; Show unfinished keystrokes early.
-  (setq echo-keystrokes 0.1)
-
-  ;; Don't show useless things in mode line.
-  (setq display-time-format "[%m-%d (%a) %H:%M]")
-  (setq display-time-24hr-format t)
-  (setq display-time-default-load-average nil)
-  (setq display-time-mail-string "")
-  (display-time-mode 1)
-  (setq-default mode-line-format
-		(list
-		 "  "                  ; Don't understand why Emacs puts "-" here.
-		 'mode-line-modified
-		 "  "
-		 'mode-line-buffer-identification
-		 "  (%l, %c)  "        ; Buffer name  (line number, column number).
-		 'display-time-string  ; Time.
-		 "  Focus!"))          ; Of course.
-
-  ;; Don't ask when killing a buffer with a live process.
-  (setq kill-buffer-query-functions
-	(remq 'process-kill-buffer-query-function
-	      kill-buffer-query-functions))
-
-  ;; Tramp.
-  (setq tramp-default-method "ssh")
-
-  ;; Uses system trash rather than deleting forever.
-  (setq trash-directory "~/.Trash")
-  (setq delete-by-moving-to-trash t)
-
-  ;; Compilation.
-  (setq-default compilation-always-kill t)
-  (setq-default compilation-ask-about-save nil)
-  (setq-default compilation-scroll-output t)
-
-  ;; Move `custom-set-variables` to a different file.
-  (setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
-  (load custom-file 'noerror)
-
-  ;; Switch to help buffers automatically.
-  (setq help-window-select t)
-
-  ;; Reduce a little typing latency.
-  (setq redisplay-dont-pause t)
-
-  ;; Electric indent.
-  (add-hook 'prog-mode-hook 'electric-indent-mode)
-  ;; Cause annoying auto indent in org mode.
-  (add-hook 'org-mode-hook (lambda () (electric-indent-local-mode 0)))
-
-  ;; Warn only when opening files bigger than 100MB.
-  (setq large-file-warning-threshold 100000000)
-
-  ;; Frame title shows either a file or a buffer name
-  ;; (if the buffer isn't visiting a file)
-  (setq frame-title-format
-	'((:eval (if (buffer-file-name)
-		     (abbreviate-file-name (buffer-file-name))
-		   "%b"))))
-
-  ;; Set frame size and position.
-  (when (display-graphic-p)
-    (add-to-list 'default-frame-alist '(fullscreen . maximized)))
-
-  ;; Treat selected region like a normal region in other systems.
-  (delete-selection-mode t)
-
-  ;; Savehist.
-  (setq history-length 100)
-  (savehist-mode 1)
-
-  ;; Column width indicator.
-  (setq-default display-fill-column-indicator-column 79) ; 80 linewidth
-  (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
-
-  ;; https://martinfowler.com/articles/2023-xref-problem.html.
-  (setq dumb-jump-force-searcher 'rg)
-
-  ;; Sticky function head.
-  (use-package semantic
-    :ensure nil
-    :hook
-    (prog-mode . semantic-mode)
-    (prog-mode . global-semantic-stickyfunc-mode))
-
-  ;; Default some files to text-mode.
-  (add-to-list 'auto-mode-alist '("\\.in\\'" . text-mode))
-  (add-to-list 'auto-mode-alist '("\\.out\\'" . text-mode))
-  (add-to-list 'auto-mode-alist '("\\.args\\'" . text-mode))
-  (add-to-list 'auto-mode-alist '("\\.bb\\'" . shell-script-mode))
-  (add-to-list 'auto-mode-alist '("\\.bbclass\\'" . shell-script-mode))
-  (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . markdown-mode))
 #+end_src
 * Org
 Org is great as long as you don't spend your whole life on it.
@@ -1213,4 +802,407 @@ Is it useful?
 	(when (and (eq old-point (point))
 		   (eq old-tick (buffer-chars-modified-tick)))
 	  (ignore-errors (yas-next-field))))))
+#+end_src
+
+* My/Functions
+#+begin_src emacs-lisp
+  ;; Backward kill word or the region if selected.
+  (defun my/backward-kill-word-or-region ()
+    "Kill a word backward or the region if selected."
+    (interactive)
+    (if (region-active-p)
+	(kill-region (region-beginning) (region-end))
+      (backward-kill-word 1)))
+
+  (global-set-key (kbd "C-w") 'my/backward-kill-word-or-region)
+
+  ;; When splitting window, automatically balance them and switch focus to the newly splitted window.
+  (global-set-key (kbd "C-x 2")
+		  (lambda ()
+		    (interactive)
+		    (split-window-vertically)
+		    (balance-windows)
+		    (other-window 1)))
+  (global-set-key (kbd "C-x 3")
+		  (lambda ()
+		    (interactive)
+		    (split-window-horizontally)
+		    (balance-windows)
+		    (other-window 1)))
+
+  ;; Auto-balance window when deleting window.
+  (global-set-key (kbd "C-x 0")
+		  (lambda ()
+		    (interactive)
+		    (delete-window)
+		    (balance-windows)))
+
+  ;; Toggle column goal.
+  (defun my/toggle-goal-column ()
+    "Toggle goal column mode."
+    (interactive)
+    (if goal-column
+	(progn
+	  (setq goal-column nil)
+	  (message "Unset goal column"))
+      (progn
+	(setq goal-column (current-column))
+	(message "Set goal column at %d" goal-column))))
+
+  (global-set-key (kbd "C-x C-u") 'my/toggle-goal-column)
+
+  ;; Reload init files.
+  (defun my/reload-init-file ()
+    (interactive)
+    (load-file user-init-file))
+
+  ;; Save all buffers.
+  (defun my/save-all-buffers ()
+    "Instead of `save-buffer', save all opened buffers by calling
+	      `save-some-buffers' with ARG t."
+    (interactive)
+    (save-some-buffers t))
+
+  (global-set-key (kbd "C-s") 'my/save-all-buffers)
+
+  ;; Mark until a char. A general version of `Zap-up-to-char`.
+  (defun my/mark-until-char ()
+    "Mark text from current cursor position until the first occurrence
+	   of a prompted character."
+    (interactive)
+    (let ((prompt (read-char "Enter the character: ")))
+      (save-excursion
+	(search-forward (string prompt) nil t)
+	(set-mark (point))
+	(goto-char (1- (point)))
+	(exchange-point-and-mark))))
+
+  (global-set-key (kbd "M-t") 'my/mark-until-char)
+
+  ;; Backward kill line.
+  (defun my/backward-kill-line ()
+    (interactive)
+    (kill-line 0)
+    (indent-according-to-mode))
+
+  (global-set-key (kbd "C-<backspace>") 'my/backward-kill-line) ; Doesn't work in terminal.
+
+  ;; Edit this file.
+  (defun my/edit-configs ()
+    "Opens this file."
+    (interactive)
+    (find-file "~/.emacs.d/myinit.org"))
+
+  ;; Show buffer's file path.
+  (defun show-file-path ()
+    "Show the full path of the file in the minibuffer."
+    (interactive)
+    (message (buffer-file-name)))
+
+  ;; Kill a word when the cursor is in the middle.
+  (defun my/kill-word-at-point ()
+    "Kill the word at the current cursor position."
+    (interactive)
+    (let ((bounds (bounds-of-thing-at-point 'symbol)))
+      (when bounds
+	(kill-region (car bounds) (cdr bounds)))))
+
+  (global-set-key (kbd "M-w") 'my/kill-word-at-point)
+
+  ;; Stolen from Stevey.
+  (defun my/rename-file-and-buffer (new-name)
+    "Renames both current buffer and file it's visiting to NEW-NAME."
+    (interactive "sNew name: ")
+    (let ((name (buffer-name))
+	  (filename (buffer-file-name)))
+      (if (not filename)
+	  (message "Buffer '%s' is not visiting a file!" name)
+	(if (get-buffer new-name)
+	    (message "A buffer named '%s' already exists!" new-name)
+	  (progn
+	    (rename-file filename new-name 1)
+	    (rename-buffer new-name)
+	    (set-visited-file-name new-name)
+	    (set-buffer-modified-p nil))))))
+
+  (defun my/move-buffer-file (dir)
+    "Moves both current buffer and file it's visiting to DIR."
+    (interactive "DNew directory: ")
+    (let* ((name (buffer-name))
+	   (filename (buffer-file-name))
+	   (dir
+	    (if (string-match dir "\\(?:/\\|\\\\)$")
+		(substring dir 0 -1) dir))
+	   (newname (concat dir "/" name)))
+      (if (not filename)
+	  (message "Buffer '%s' is not visiting a file!" name)
+	(progn
+	  (copy-file filename newname 1)
+	  (delete-file filename)
+	  (set-visited-file-name newname)
+	  (set-buffer-modified-p nil)  t))))
+
+  ;; Delete this file.
+  (defun my/delete-this-file ()
+    "Kill the current buffer and deletes the file it is visiting."
+    (interactive)
+    (let ((filename (buffer-file-name)))
+      (if filename
+	  (if (y-or-n-p (concat "Do you really want to delete file " filename " ?"))
+	      (progn
+		(delete-file filename)
+		(message "Deleted file %s." filename)
+		(kill-buffer)))
+	(message "Not a file visiting buffer!"))))
+
+  ;; C-a and C-e jump to visual line in visual-line-mode.
+  (defun my/visual-line-mode-hook ()
+    (define-key visual-line-mode-map (kbd "C-a") 'beginning-of-visual-line)
+    (define-key visual-line-mode-map (kbd "C-e") 'end-of-visual-line))
+
+  (add-hook 'visual-line-mode-hook 'my/visual-line-mode-hook)
+#+end_src
+* My/Keybindings
+#+begin_src emacs-lisp
+  ;; Stevey's suggestion.
+  (global-set-key (kbd "C-x t") 'beginning-of-buffer)
+  (global-set-key (kbd "C-x e") 'end-of-buffer)
+
+  ;; Conventional copy/paste.
+  (global-set-key (kbd "M-c") 'kill-ring-save)
+  (global-set-key (kbd "M-v") 'yank)
+
+  ;; Default `M-b` and `M-f` are always awkward to me.
+  (global-set-key (kbd "M-j") 'backward-word)
+  (global-set-key (kbd "M-k") 'forward-word)
+
+  ;; Adjust font size like web browsers. Doesn't work in terminal.
+  (global-set-key (kbd "C-=") 'text-scale-increase)
+  (global-set-key (kbd "C--") 'text-scale-decrease)
+
+  ;; For within-screen jump. Less disruptive than swiper.
+  ;; (Use swiper for large search within a file.)
+  ;; @Note: Remove after Avy?
+  (global-set-key (kbd "M-s") 'isearch-forward)
+  (define-key isearch-mode-map (kbd "M-s") 'isearch-repeat-forward)
+  (global-set-key (kbd "M-r") 'isearch-backward)
+  (define-key isearch-mode-map (kbd "M-r") 'isearch-repeat-backward)
+
+  ;; Cure bad habits.
+  (global-set-key (kbd "C-x C-s") (lambda ()
+				    (interactive)
+				    (message "Use C-s, dude.")))
+
+  ;; Somehow those two packages aren't installed automatically by `use-package`.
+  ;; Need to install them manually first. And then bind them here. And you can't do
+  ;; `eval-after-load` for some reason.
+  (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
+  (global-set-key (kbd "C-c b") 'goto-last-change)
+
+  ;; Vim's `i`.
+  (use-package change-inner
+    :ensure t
+    :init
+    (global-set-key (kbd "M-i") 'change-inner))
+
+  ;; Keys easy to mispress.
+  (global-set-key (kbd "C-c C-f") (key-binding (kbd "C-x C-f")))
+
+  ;; Misc.
+  (global-set-key (kbd "C-o") 'other-window)
+  (global-set-key (kbd "M-g") 'goto-line)
+  (global-set-key (kbd "C-c DEL") 'delete-blank-lines)
+  (global-set-key (kbd "C-c <delete>") 'delete-blank-lines)
+  (global-set-key (kbd "C-x k") 'kill-this-buffer) ; Don't ask.
+  (global-set-key (kbd "C-c w") 'toggle-truncate-lines) ; Wrap.
+  (global-set-key (kbd "C-x \\") 'sort-lines)
+  (global-set-key (kbd "C-x ?") 'describe-key)
+  (global-set-key (kbd "C-x c") 'call-last-kbd-macro)
+
+  ;; Aliases.
+  (defalias 'rl  'my/reload-init-file)
+  (defalias 'cf  'my/edit-configs)
+  (defalias 'vce 'vc-ediff)
+  (defalias 'rc  'recompile)
+  (defalias 'qr  'query-replace)
+  (defalias 'rs  'replace-string)
+#+end_src
+* My/Small Configs
+#+begin_src emacs-lisp
+  ;; C-p, C-n, etc uses visual lines.
+  (setq line-move-visual t)
+
+  ;; y or n.
+  (fset 'yes-or-no-p 'y-or-n-p)
+
+  ;; Ask before killing emacs.
+  (setq confirm-kill-emacs 'y-or-n-p)
+
+  ;; No dialgue!
+  (setq use-dialog-box nil)
+
+  ;; Move the backup fies to user-emacs-directory/.backup.
+  (setq backup-directory-alist
+	`(("." . ,(expand-file-name ".backup" user-emacs-directory))))
+
+  ;; Automatically kill all active processes when closing Emacs.
+  (setq confirm-kill-processes nil)
+
+  ;; Turn Off Cursor Alarms.
+  (setq ring-bell-function 'ignore)
+
+  ;; Show Keystrokes in Progress Instantly.
+  (setq echo-keystrokes 0.1)
+
+  ;; Don't Lock Files.
+  (setq-default create-lockfiles nil)
+
+  ;; ad-handle-definition warnings are generated when functions are
+  ;; redefined with `defadvice', they are not helpful.
+  (setq ad-redefinition-action 'accept)
+
+  ;; Move Custom-Set-Variables to Different File.
+  (setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
+  (load custom-file 'noerror 'nomessage)
+
+  ;; So Long mitigates slowness due to extremely long lines.
+  ;; Currently available in Emacs master branch *only*!
+  (when (fboundp 'global-so-long-mode)
+    (global-so-long-mode))
+
+  ;; Add a newline automatically at the end of the file upon save.
+  (setq require-final-newline t)
+
+  ;; Enable `erase-buffer' function.
+  (put 'erase-buffer 'disabled nil)
+
+  ;; Smart tab behavior: indent or complete.
+  (setq tab-always-indent 'complete)
+
+  ;; Prevent down-arrow from adding empty lines to the bottom of the buffer.
+  (setq next-line-add-newlines nil)
+
+  ;; Don't show line numbers.
+  (column-number-mode 1)
+
+  ;; Save whatever’s in the current system clipboard before replacing it with
+  ;; the Emacs' text.
+  (setq save-interprogram-paste-before-kill t)
+
+  ;; Stop ivy from displaying recentf files.
+  (setq ivy-use-virtual-buffers nil)
+
+  ;; Width to wrap lines for `fill-paragraph` and `fill-region`.
+  (setq-default fill-column 80)
+  (add-hook 'LaTeX-mode-hook 'auto-fill-mode)
+  (add-hook 'tex-mode-hook 'auto-fill-mode)
+  (add-hook 'org-mode-hook 'auto-fill-mode)
+  (add-hook 'text-mode-hook 'auto-fill-mode)
+
+  ;; Visual line don't break the word.
+  (setq-default word-wrap t)
+
+  ;; Paren match.
+  (add-hook 'prog-mode-hook 'show-paren-mode)
+
+  ;; Automatically update a buffer if a file changes on disk.
+  (global-auto-revert-mode 1)
+  (add-hook 'dired-mode-hook 'auto-revert-mode) ; Refresh dired too.
+
+  ;; Give context to cursor.
+  (setq scroll-margin 4)
+
+  ;; Show unfinished keystrokes early.
+  (setq echo-keystrokes 0.1)
+
+  ;; Don't show useless things in mode line.
+  (setq display-time-format "[%m-%d (%a) %H:%M]")
+  (setq display-time-24hr-format t)
+  (setq display-time-default-load-average nil)
+  (setq display-time-mail-string "")
+  (display-time-mode 1)
+  (setq-default mode-line-format
+		(list
+		 "  "                  ; Don't understand why Emacs puts "-" here.
+		 'mode-line-modified
+		 "  "
+		 'mode-line-buffer-identification
+		 "  (%l, %c)  "        ; Buffer name  (line number, column number).
+		 'display-time-string  ; Time.
+		 "  Focus!"))          ; Of course.
+
+  ;; Don't ask when killing a buffer with a live process.
+  (setq kill-buffer-query-functions
+	(remq 'process-kill-buffer-query-function
+	      kill-buffer-query-functions))
+
+  ;; Tramp.
+  (setq tramp-default-method "ssh")
+
+  ;; Uses system trash rather than deleting forever.
+  (setq trash-directory "~/.Trash")
+  (setq delete-by-moving-to-trash t)
+
+  ;; Compilation.
+  (setq-default compilation-always-kill t)
+  (setq-default compilation-ask-about-save nil)
+  (setq-default compilation-scroll-output t)
+
+  ;; Move `custom-set-variables` to a different file.
+  (setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
+  (load custom-file 'noerror)
+
+  ;; Switch to help buffers automatically.
+  (setq help-window-select t)
+
+  ;; Reduce a little typing latency.
+  (setq redisplay-dont-pause t)
+
+  ;; Electric indent.
+  (add-hook 'prog-mode-hook 'electric-indent-mode)
+  ;; Cause annoying auto indent in org mode.
+  (add-hook 'org-mode-hook (lambda () (electric-indent-local-mode 0)))
+
+  ;; Warn only when opening files bigger than 100MB.
+  (setq large-file-warning-threshold 100000000)
+
+  ;; Frame title shows either a file or a buffer name
+  ;; (if the buffer isn't visiting a file)
+  (setq frame-title-format
+	'((:eval (if (buffer-file-name)
+		     (abbreviate-file-name (buffer-file-name))
+		   "%b"))))
+
+  ;; Set frame size and position.
+  (when (display-graphic-p)
+    (add-to-list 'default-frame-alist '(fullscreen . maximized)))
+
+  ;; Treat selected region like a normal region in other systems.
+  (delete-selection-mode t)
+
+  ;; Savehist.
+  (setq history-length 100)
+  (savehist-mode 1)
+
+  ;; Column width indicator.
+  (setq-default display-fill-column-indicator-column 79) ; 80 linewidth
+  (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+
+  ;; https://martinfowler.com/articles/2023-xref-problem.html.
+  (setq dumb-jump-force-searcher 'rg)
+
+  ;; Sticky function head.
+  (use-package semantic
+    :ensure nil
+    :hook
+    (prog-mode . semantic-mode)
+    (prog-mode . global-semantic-stickyfunc-mode))
+
+  ;; Default some files to text-mode.
+  (add-to-list 'auto-mode-alist '("\\.in\\'" . text-mode))
+  (add-to-list 'auto-mode-alist '("\\.out\\'" . text-mode))
+  (add-to-list 'auto-mode-alist '("\\.args\\'" . text-mode))
+  (add-to-list 'auto-mode-alist '("\\.bb\\'" . shell-script-mode))
+  (add-to-list 'auto-mode-alist '("\\.bbclass\\'" . shell-script-mode))
+  (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . markdown-mode))
 #+end_src
