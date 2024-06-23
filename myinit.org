@@ -11,6 +11,8 @@ Rebinding of basic commands:
 | `C-r`     | Redo                            |
 | `M-j`     | Backward word                   |
 | `M-k`     | Forward word                    |
+| `M-h`     | Backward char                   |
+| `M-l`     | Forward char                    |
 | `C-x t`   | Beginning (t for top) of buffer |
 | `C-x e`   | End of buffer                   |
 | `M-p`     | Scroll up half page             |
@@ -972,9 +974,11 @@ Is it useful?
   (global-set-key (kbd "M-c") 'kill-ring-save)
   (global-set-key (kbd "M-v") 'yank)
 
-  ;; Default `M-b` and `M-f` are always awkward to me.
+  ;; Default word and char movement are always awkward to me.
   (global-set-key (kbd "M-j") 'backward-word)
   (global-set-key (kbd "M-k") 'forward-word)
+  (global-set-key (kbd "M-h") 'backward-char)
+  (global-set-key (kbd "M-l") 'forward-char)
 
   ;; Adjust font size like web browsers. Doesn't work in terminal.
   (global-set-key (kbd "C-=") 'text-scale-increase)
@@ -992,6 +996,12 @@ Is it useful?
   (global-set-key (kbd "C-x C-s") (lambda ()
 				    (interactive)
 				    (message "Use C-s, dude.")))
+  (global-set-key (kbd "C-f") (lambda ()
+				    (interactive)
+				    (message "Use meta, dude.")))
+  (global-set-key (kbd "C-b") (lambda ()
+				    (interactive)
+				    (message "Use meta, dude.")))
 
   ;; Somehow those two packages aren't installed automatically by `use-package`.
   ;; Need to install them manually first. And then bind them here. And you can't do
