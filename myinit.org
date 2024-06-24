@@ -11,8 +11,6 @@ Rebinding of basic commands:
 | `C-r`     | Redo                            |
 | `M-j`     | Backward word                   |
 | `M-k`     | Forward word                    |
-| `M-h`     | Backward char                   |
-| `M-l`     | Forward char                    |
 | `C-x t`   | Beginning (t for top) of buffer |
 | `C-x e`   | End of buffer                   |
 | `M-p`     | Scroll up half page             |
@@ -27,7 +25,7 @@ Try not to use mouse.
     :ensure t
     :defer t
     :bind
-    ("M-f" . avy-goto-char-timer)
+    ("M-s" . avy-goto-char-timer)
     :custom
     (avy-timeout-seconds 0.3)
     (avy-style 'pre)
@@ -974,34 +972,25 @@ Is it useful?
   (global-set-key (kbd "M-c") 'kill-ring-save)
   (global-set-key (kbd "M-v") 'yank)
 
-  ;; Default word and char movement are always awkward to me.
+  ;; Default word and char movement are always awkward to me. Char movement
+  ;; is harder to change.
   (global-set-key (kbd "M-j") 'backward-word)
   (global-set-key (kbd "M-k") 'forward-word)
-  (global-set-key (kbd "M-h") 'backward-char)
-  (global-set-key (kbd "M-l") 'forward-char)
 
   ;; Adjust font size like web browsers. Doesn't work in terminal.
   (global-set-key (kbd "C-=") 'text-scale-increase)
   (global-set-key (kbd "C--") 'text-scale-decrease)
 
-  ;; For within-screen jump. Less disruptive than swiper.
-  ;; (Use swiper for large search within a file.)
-  ;; @Note: Remove after Avy?
-  (global-set-key (kbd "M-s") 'isearch-forward)
-  (define-key isearch-mode-map (kbd "M-s") 'isearch-repeat-forward)
-  (global-set-key (kbd "M-r") 'isearch-backward)
-  (define-key isearch-mode-map (kbd "M-r") 'isearch-repeat-backward)
+  ;; For within-screen jump. No need after avy jump.
+  ;; (global-set-key (kbd "M-s") 'isearch-forward)
+  ;; (define-key isearch-mode-map (kbd "M-s") 'isearch-repeat-forward)
+  ;; (global-set-key (kbd "M-r") 'isearch-backward)
+  ;; (define-key isearch-mode-map (kbd "M-r") 'isearch-repeat-backward)
 
   ;; Cure bad habits.
   (global-set-key (kbd "C-x C-s") (lambda ()
 				    (interactive)
 				    (message "Use C-s, dude.")))
-  (global-set-key (kbd "C-f") (lambda ()
-				    (interactive)
-				    (message "Use meta, dude.")))
-  (global-set-key (kbd "C-b") (lambda ()
-				    (interactive)
-				    (message "Use meta, dude.")))
 
   ;; Somehow those two packages aren't installed automatically by `use-package`.
   ;; Need to install them manually first. And then bind them here. And you can't do
