@@ -152,32 +152,6 @@ Those are useful.
 				   (lambda () (interactive)
 				     (find-alternate-file ".."))))))
 #+end_src
-* Disable Useless Things
-Why does Emacs put those garbage by default?
-#+begin_src emacs-lisp
-  (setq inhibit-startup-screen t)
-  (setq initial-major-mode 'text-mode)
-  (setq inhibit-startup-message t)
-  (when (display-graphic-p)
-    (tool-bar-mode -1)
-    (scroll-bar-mode -1))
-  (menu-bar-mode -1)
-  (setq-default visible-bell t)
-  (blink-cursor-mode 0)
-  (setq ns-use-proxy-icon nil) ; Icon of filetype.
-  (setq initial-scratch-message "")
-
-  ;; Useless keys.
-  (global-unset-key (kbd "C-v"))
-  (global-unset-key (kbd "C-t"))
-  (global-unset-key (kbd "M-m"))     ; Easy to mispress.
-  (global-unset-key (kbd "C-x C-z")) ; Easy to mispress.
-  (global-unset-key (kbd "C-x C-u")) ; Easy to mispress.
-  (global-unset-key (kbd "C-x C-l")) ; Easy to mispress.
-  (global-unset-key (kbd "C-x f"))   ; Don't overwrite my find recentf.
-  ;; Too much to type for saving. Map to `C-s` instead.
-  (global-unset-key (kbd "C-x C-s"))
-#+end_src
 * Dumb Jump
 Useful to go to code definitions. Old packages that might not work in the future.
 Why doesn't Emacs have better go-to-definition packages/commands? It should be a default feature.
@@ -807,6 +781,32 @@ Is it useful?
 	  (ignore-errors (yas-next-field))))))
 #+end_src
 
+* My/Disable Useless Things
+Why does Emacs put those garbage by default?
+#+begin_src emacs-lisp
+  (setq inhibit-startup-screen t)
+  (setq initial-major-mode 'text-mode)
+  (setq inhibit-startup-message t)
+  (when (display-graphic-p)
+    (tool-bar-mode -1)
+    (scroll-bar-mode -1))
+  (menu-bar-mode -1)
+  (setq-default visible-bell t)
+  (blink-cursor-mode 0)
+  (setq ns-use-proxy-icon nil) ; Icon of filetype.
+  (setq initial-scratch-message "")
+
+  ;; Useless keys.
+  (global-unset-key (kbd "C-v"))
+  (global-unset-key (kbd "C-t"))
+  (global-unset-key (kbd "M-m"))     ; Easy to mispress.
+  (global-unset-key (kbd "C-x C-z")) ; Easy to mispress.
+  (global-unset-key (kbd "C-x C-u")) ; Easy to mispress.
+  (global-unset-key (kbd "C-x C-l")) ; Easy to mispress.
+  (global-unset-key (kbd "C-x f"))   ; Don't overwrite my find recentf.
+  ;; Too much to type for saving. Map to `C-s` instead.
+  (global-unset-key (kbd "C-x C-s"))
+#+end_src
 * My/Functions
 #+begin_src emacs-lisp
   ;; Backward kill word or the region if selected.
