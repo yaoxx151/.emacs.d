@@ -222,6 +222,10 @@ Can be slow.
     (flycheck-emacs-lisp-load-path 'inherit)
     (flycheck-indication-mode (if (display-graphic-p)
 				  'right-fringe 'right-margin))
+    :bind
+    (:map flycheck-mode-map
+	  ("C-c p" . flycheck-previous-error)
+	  ("C-c n" . flycheck-next-error))
     :init
     (add-hook 'prog-mode-hook 'flycheck-mode))
 #+end_src
