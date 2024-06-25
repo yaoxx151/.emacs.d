@@ -168,8 +168,8 @@ Why does Emacs put those garbage by default?
   (setq initial-scratch-message "")
 
   ;; Useless keys.
-  (global-unset-key (kbd "C-z"))     ; Don't hit it and suspend it in terminal. Stupid key.
-  (global-unset-key (kbd "C-v"))     ; Use M-n and M-p for scrolling.
+  (global-unset-key (kbd "C-v"))
+  (global-unset-key (kbd "C-t"))
   (global-unset-key (kbd "M-m"))     ; Easy to mispress.
   (global-unset-key (kbd "C-x C-z")) ; Easy to mispress.
   (global-unset-key (kbd "C-x C-u")) ; Easy to mispress.
@@ -547,9 +547,7 @@ Shouldn't be used if GUI Emacs can isolate buffers in each instance.
     (global-set-key (kbd "C-<down>") 'View-scroll-half-page-forward)
     (global-set-key (kbd "C-<up>") 'View-scroll-half-page-backward)
     (global-set-key (kbd "M-n") 'View-scroll-half-page-forward)
-    (global-set-key (kbd "M-p") 'View-scroll-half-page-backward)
-    (global-set-key (kbd "C-v") 'View-scroll-half-page-forward)
-    (global-set-key (kbd "C-t") 'View-scroll-half-page-backward))
+    (global-set-key (kbd "M-p") 'View-scroll-half-page-backward))
 
   ;; Vertical Scroll.
   (setq scroll-step 1)
@@ -984,6 +982,10 @@ Is it useful?
   (global-set-key (kbd "M-k") 'forward-word)
   (global-set-key (kbd "M-l") 'forward-word)  ; For mispress.
 
+  ;; Bind extra keys to char movement, overwritting word movement.
+  (global-set-key (kbd "M-b") 'backward-char)
+  (global-set-key (kbd "M-f") 'forward-char)
+
   ;; Adjust font size like web browsers. Doesn't work in terminal.
   (global-set-key (kbd "C-=") 'text-scale-increase)
   (global-set-key (kbd "C--") 'text-scale-decrease)
@@ -998,13 +1000,6 @@ Is it useful?
   (global-set-key (kbd "C-x C-s") (lambda ()
 				    (interactive)
 				    (message "Use C-s, dude.")))
-
-  (global-set-key (kbd "M-b") (lambda ()
-				(interactive)
-				(message "Use M-j, M-k, dude.")))
-  (global-set-key (kbd "M-f") (lambda ()
-				(interactive)
-				(message "Use M-j, M-k, dude.")))
 
   ;; Somehow those two packages aren't installed automatically by `use-package`.
   ;; Need to install them manually first. And then bind them here. And you can't do
