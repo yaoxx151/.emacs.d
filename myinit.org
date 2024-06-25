@@ -94,7 +94,7 @@ Those are useful.
     :bind
     (("C-x K" . crux-kill-other-buffers)
      ("C-k" . crux-smart-kill-line)
-     ("C-j" . crux-smart-kill-line) ; In case for mispress.
+     ("C-j" . crux-smart-kill-line) ; For mispress.
      ("C-x <delete>" . crux-kill-whole-line)
      ("C-x DEL" . crux-kill-whole-line)
      ("C-c d" . crux-duplicate-current-line-or-region)
@@ -243,7 +243,7 @@ Can be slow.
     (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 #+end_src
 * Goto-chg
-Old package; might not work in the future too. Such a basic function that should be default.
+Old package; might not work in the future. Such a basic function that should be default.
 #+begin_src emacs-lisp
   (use-package goto-chg
     :ensure t
@@ -313,7 +313,7 @@ Useful because Emacs default completion sucks.
      ("C-c s" . swiper-isearch-thing-at-point)
      ("C-c f" . counsel-recentf)
      ("C-c g" . counsel-rg)
-     ("M-y" . counsel-yank-pop)
+     ("C-y" . counsel-yank-pop)
      ("C-c i" . counsel-imenu)
      ("C-x C-b" . ivy-switch-buffer) ; Additional binding when mispressing `C-x b`.
      (:map ivy-minibuffer-map
@@ -726,6 +726,7 @@ Emacs default undo/redo sucks.
     (global-set-key (kbd "C-z") 'undo-tree-undo)
     (global-set-key (kbd "M-z") 'undo-tree-undo) ; Emulate the normal cmd-z.
     (global-set-key (kbd "C-r") 'undo-tree-redo)
+    (global-set-key (kbd "M-r") 'undo-tree-redo)
     ;; Somehow you need both to unbind. Why emacs keybinding in modes and package is so confusing?
     (eval-after-load 'undo-tree '(unbind-key (kbd "C-x u")))
     ;; Unbind `C-/` to avoid overwriting for the globally set key mapped to
@@ -975,7 +976,9 @@ Is it useful?
   ;; Default word and char movement are always awkward to me. Char movement
   ;; is harder to change.
   (global-set-key (kbd "M-j") 'backward-word)
+  (global-set-key (kbd "M-h") 'backward-word) ; For mispress.
   (global-set-key (kbd "M-k") 'forward-word)
+  (global-set-key (kbd "M-l") 'forward-word)  ; For mispress.
 
   ;; Adjust font size like web browsers. Doesn't work in terminal.
   (global-set-key (kbd "C-=") 'text-scale-increase)
@@ -991,6 +994,13 @@ Is it useful?
   (global-set-key (kbd "C-x C-s") (lambda ()
 				    (interactive)
 				    (message "Use C-s, dude.")))
+
+  (global-set-key (kbd "M-b") (lambda ()
+				(interactive)
+				(message "Use M-j, M-k, dude.")))
+  (global-set-key (kbd "M-f") (lambda ()
+				(interactive)
+				(message "Use M-j, M-k, dude.")))
 
   ;; Somehow those two packages aren't installed automatically by `use-package`.
   ;; Need to install them manually first. And then bind them here. And you can't do
