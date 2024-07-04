@@ -43,7 +43,7 @@ Haven't found it useful. Maybe you would sleep better at night.
     kept-old-versions 10
     version-control t)
 #+end_src
-* Beacon Mode
+* Beacon
 Make switching window easier to see.
 #+begin_src emacs-lisp
   (use-package beacon
@@ -163,7 +163,8 @@ Why doesn't Emacs have better go-to-definition packages/commands? It should be a
   (xref-show-definitions-function 'xref-show-definitions-completing-read)
   :bind
   (:map prog-mode-map
-    ("C-c C-o" . dumb-jump-go-other-window))
+    ("C-c C-o" . dumb-jump-go-other-window)
+    ("C-c C-t" . dumb-jump-back))
   :config
   (add-hook 'xref-backend-functions 'dumb-jump-xref-activate))
 #+end_src emacs-lisp
@@ -782,7 +783,7 @@ Is it useful?
 #+end_src
 
 * My/Disable Useless Things
-Why does Emacs put those garbage by default?
+Why does Emacs put those by default?
 #+begin_src emacs-lisp
   (setq inhibit-startup-screen t)
   (setq initial-major-mode 'text-mode)
@@ -1023,6 +1024,7 @@ Why does Emacs put those garbage by default?
   (global-set-key (kbd "C-c <delete>") 'delete-blank-lines)
   (global-set-key (kbd "C-x k") 'kill-this-buffer) ; Don't ask.
   (global-set-key (kbd "C-c w") 'toggle-truncate-lines) ; Wrap.
+  (global-set-key (kbd "C-x q") 'query-replace)
   (global-set-key (kbd "C-x \\") 'sort-lines)
   (global-set-key (kbd "C-x ?") 'describe-key)
   (global-set-key (kbd "C-x c") 'call-last-kbd-macro)
@@ -1032,7 +1034,6 @@ Why does Emacs put those garbage by default?
   (defalias 'cf  'my/edit-configs)
   (defalias 'vce 'vc-ediff)
   (defalias 'rc  'recompile)
-  (defalias 'qr  'query-replace)
   (defalias 'rs  'replace-string)
 #+end_src
 * My/Small Configs
