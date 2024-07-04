@@ -19,7 +19,7 @@ Rebinding of basic commands:
 | `M-v`     | Paste (`yank`)                  |
 
 * Avy
-Try not to use mouse.
+Use less mouse.
 #+begin_src emacs-lisp
   (use-package avy
     :ensure t
@@ -52,7 +52,7 @@ Make switching window easier to see.
     (beacon-mode 1))
 #+end_src
 * Company
-Only some basic code completion. (Is that even too much?) No heavy LSP stuffs.
+Only basic code completion. (Is that even too much?) No heavy LSP stuffs.
 #+begin_src emacs-lisp
   (use-package company
     :ensure t
@@ -153,8 +153,9 @@ Those are useful.
 				     (find-alternate-file ".."))))))
 #+end_src
 * Dumb Jump
-Useful to go to code definitions. Old packages that might not work in the future.
-Why doesn't Emacs have better go-to-definition packages/commands? It should be a default feature.
+Useful to go to code definitions. Old packages that might not work in the
+future. Why doesn't Emacs have better go-to-definition packages/commands? It
+should be a default feature.
 #+begin_src emacs-lisp
 (use-package dumb-jump
   :ensure t
@@ -222,7 +223,8 @@ Can be slow.
     (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 #+end_src
 * Goto-chg
-Old package; might not work in the future. Such a basic function that should be default.
+Old package; might not work in the future. Such a basic function that should be
+default.
 #+begin_src emacs-lisp
   (use-package goto-chg
     :ensure t
@@ -368,7 +370,8 @@ Should be Emacs default.
     (marginalia-mode))
 #+end_src
 * Multi-cursor
-Useful but can be tempting to show off and waste time.
+Useful but can waste time to show off (though even greater temptation in
+keyboard macros).
 #+begin_src emacs-lisp
   (use-package multiple-cursors
     :ensure t
@@ -386,7 +389,7 @@ Quite useful. Agreed by Stevey.
     (global-set-key (kbd "C-e") 'mwim-end))
 #+end_src
 * Org
-Org is great as long as you don't spend your whole life on it.
+Org is great as long as you don't spend your life on it.
 #+begin_src emacs-lisp
   (use-package org
     :ensure nil
@@ -440,7 +443,7 @@ Org is great as long as you don't spend your whole life on it.
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 #+end_src
 * Projectile
-Shouldn't be used if GUI Emacs can isolate buffers in each instance.
+Shouldn't be needed if GUI Emacs can isolate buffers in each instance.
 #+begin_src emacs-lisp
   (use-package projectile
     :ensure t
