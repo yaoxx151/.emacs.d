@@ -100,7 +100,7 @@ Those are useful.
      ("C-c d" . crux-duplicate-current-line-or-region)
      ("C-c q" . crux-duplicate-and-comment-current-line-or-region)
      ("C-x 4 t" . crux-transpose-windows)
-     ("C-c t" . crux-visit-shell-buffer)
+     ("C-x C-t" . crux-visit-shell-buffer)
      ("C-<return>" . crux-smart-open-line)
      ("C-RET" . crux-smart-open-line)
      ("M-<return>" . crux-smart-open-line-above)
@@ -973,7 +973,9 @@ Why does Emacs put those by default?
 #+begin_src emacs-lisp
   ;; Stevey's suggestion.
   (global-set-key (kbd "C-x t") 'beginning-of-buffer)
+  (global-set-key (kbd "C-c t") 'beginning-of-buffer) ; Mispress.
   (global-set-key (kbd "C-x e") 'end-of-buffer)
+  (global-set-key (kbd "C-c e") 'end-of-buffer)       ; Mispress.
 
   ;; Conventional copy/paste.
   (global-set-key (kbd "M-c") 'kill-ring-save)
