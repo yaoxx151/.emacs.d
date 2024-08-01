@@ -165,7 +165,7 @@ should be a default feature.
   :bind
   (:map prog-mode-map
     ("C-c C-o" . dumb-jump-go-other-window)
-    ("C-c C-t" . dumb-jump-back))
+    ("C-c C-y" . dumb-jump-back))
   :config
   (add-hook 'xref-backend-functions 'dumb-jump-xref-activate))
 #+end_src emacs-lisp
@@ -1009,6 +1009,7 @@ Why does Emacs put those by default?
   ;; Need to install them manually first. And then bind them here. And you can't do
   ;; `eval-after-load` for some reason.
   (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
+  (global-set-key (kbd "C-c C-y") 'dumb-jump-back)
   (global-set-key (kbd "C-c b") 'goto-last-change)
 
   ;; Vim's `i`.
