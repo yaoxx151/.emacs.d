@@ -1,22 +1,22 @@
 #+STARTIP: overview
 Rebinding of basic commands:
-| Key       | Command                         |
-|-----------+---------------------------------|
-| `C-s`     | Save                            |
-| `C-o`     | Switch window                   |
-| `C-w`     | Backward-delete word or region  |
-| `C-x C-m` | M-x (thanks, Stevey)            |
-| `C-q`     | Search (q for query)            |
-| `C-z`     | Undo                            |
-| `C-r`     | Redo                            |
-| `M-j`     | Backward word                   |
-| `M-k`     | Forward word                    |
-| `C-x t`   | Beginning (t for top) of buffer |
-| `C-x e`   | End of buffer                   |
-| `M-p`     | Scroll up half page             |
-| `M-n`     | Scroll down half page           |
-| `M-c`     | Copy (`kill-ring-save`)         |
-| `M-v`     | Paste (`yank`)                  |
+| Key     | Command                         |
+|---------+---------------------------------|
+| C-s     | Save                            |
+| C-o     | Switch window                   |
+| C-w     | Backward-delete word or region  |
+| C-x C-m | M-x (thanks, Stevey)            |
+| C-q     | Search (q for query)            |
+| C-z     | Undo                            |
+| C-r     | Redo                            |
+| M-j     | Backward word                   |
+| M-k     | Forward word                    |
+| C-x t   | Beginning (t for top) of buffer |
+| C-x e   | End of buffer                   |
+| M-p     | Scroll up half page             |
+| M-n     | Scroll down half page           |
+| M-c     | Copy (kill-ring-save)           |
+| M-v     | Paste (yank)                    |
 
 * Avy
 Use less mouse.
