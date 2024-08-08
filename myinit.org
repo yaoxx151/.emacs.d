@@ -866,7 +866,7 @@ Why does Emacs put those by default?
   ;; Save all buffers.
   (defun my/save-all-buffers ()
     "Instead of `save-buffer', save all opened buffers by calling
-	      `save-some-buffers' with ARG t."
+		`save-some-buffers' with ARG t."
     (interactive)
     (save-some-buffers t))
 
@@ -875,7 +875,7 @@ Why does Emacs put those by default?
   ;; Mark until a char. A general version of `Zap-up-to-char`.
   (defun my/mark-until-char ()
     "Mark text from current cursor position until the first occurrence
-	   of a prompted character."
+	     of a prompted character."
     (interactive)
     (let ((prompt (read-char "Enter the character: ")))
       (save-excursion
@@ -961,6 +961,14 @@ Why does Emacs put those by default?
 		(message "Deleted file %s." filename)
 		(kill-buffer)))
 	(message "Not a file visiting buffer!"))))
+
+
+  ;; Unfill paragraph.
+  (defun my/unfill-paragraph ()
+    "Takes a multi-line paragraph and makes it into a single line of text."
+    (interactive)
+    (let ((fill-column (point-max)))
+      (fill-paragraph nil)))
 
   ;; C-a and C-e jump to visual line in visual-line-mode.
   (defun my/visual-line-mode-hook ()
@@ -1111,7 +1119,6 @@ Why does Emacs put those by default?
   (setq-default fill-column 80)
   (add-hook 'LaTeX-mode-hook 'auto-fill-mode)
   (add-hook 'tex-mode-hook 'auto-fill-mode)
-  (add-hook 'org-mode-hook 'auto-fill-mode)
   (add-hook 'text-mode-hook 'auto-fill-mode)
 
   ;; Visual line don't break the word.
