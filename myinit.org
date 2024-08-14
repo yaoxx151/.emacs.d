@@ -286,8 +286,8 @@ Useful because Emacs default completion sucks.
     (use-package swiper :ensure t :defer t)
     ;; Following Stevey's suggestion.
     (global-set-key (kbd "C-x C-m") 'counsel-M-x)
-    (global-set-key (kbd "C-x m") 'counsel-M-x)   ; For mispress.
-    (global-set-key (kbd "C-x C-,") 'counsel-M-x) ; For mispress.
+    (global-set-key (kbd "C-x m")   'counsel-M-x)   ; For mispress.
+    (global-set-key (kbd "C-x C-,") 'counsel-M-x)   ; For mispress.
     (ivy-mode 1)
     :bind
     (("C-q" . swiper-isearch)
@@ -308,28 +308,6 @@ Useful because Emacs default completion sucks.
     (ivy-wrap t)
     ;; `counsel-M-x` prompt doesn't start with `^` to match only beginning of string.
     (ivy-initial-inputs-alist nil))
-#+end_src
-* MacOS
-Handle copy/paste in OSX.
-#+begin_src emacs-lisp
-  (defun copy-from-osx ()
-    "Handle copy/paste intelligently on osx."
-    (let ((pbpaste (purecopy "/usr/bin/pbpaste")))
-      (if (and (eq system-type 'darwin)
-	       (file-exists-p pbpaste))
-	    (let ((tramp-mode nil)
-		  (default-directory "~"))
-	      (shell-command-to-string pbpaste)))))
-
-  (defun paste-to-osx (text &optional push)
-    (let ((process-connection-type nil))
-      (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
-	(process-send-string proc text)
-	(process-send-eof proc))))
-
-  (if *sys/mac*
-      (setq interprogram-cut-function 'paste-to-osx
-	    interprogram-paste-function 'copy-from-osx))
 #+end_src
 * Magit
 Make git slightly less painful, but git is still a pain in the ass.
@@ -370,7 +348,7 @@ Should be Emacs default.
     (marginalia-mode))
 #+end_src
 * Multi-cursor
-Useful but can waste time to show off (though even greater temptation in
+Useful but can waste time to show off (though even temptation is greater in
 keyboard macros).
 #+begin_src emacs-lisp
   (use-package multiple-cursors
@@ -1049,6 +1027,28 @@ Why does Emacs put those by default?
   (defalias 'vce 'vc-ediff)
   (defalias 'rc  'recompile)
   (defalias 'rs  'replace-string)
+#+end_src
+* My/MacOS
+Handle copy/paste in OSX.
+#+begin_src emacs-lisp
+  (defun copy-from-osx ()
+    "Handle copy/paste intelligently on osx."
+    (let ((pbpaste (purecopy "/usr/bin/pbpaste")))
+      (if (and (eq system-type 'darwin)
+	       (file-exists-p pbpaste))
+	    (let ((tramp-mode nil)
+		  (default-directory "~"))
+	      (shell-command-to-string pbpaste)))))
+
+  (defun paste-to-osx (text &optional push)
+    (let ((process-connection-type nil))
+      (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+	(process-send-string proc text)
+	(process-send-eof proc))))
+
+  (if *sys/mac*
+      (setq interprogram-cut-function 'paste-to-osx
+	    interprogram-paste-function 'copy-from-osx))
 #+end_src
 * My/Small Configs
 #+begin_src emacs-lisp
