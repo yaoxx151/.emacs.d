@@ -231,6 +231,23 @@ default.
     :init
     (global-set-key (kbd "C-c b") 'goto-last-change))
 #+end_src emacs-lisp
+* Gptel
+To prove I work on AI.
+#+begin_src emacs-lisp
+  (use-package gptel
+    :ensure t
+    :init
+    (setq gptel-model "claude-3-5-sonnet-20240620"
+	  gptel-backend (gptel-make-anthropic "Claude"
+			  :stream t
+			  :key (with-temp-buffer
+			       (insert-file-contents "~/.emacs.d/keys/claude.txt")
+			       (string-trim (buffer-string)))))
+    :config
+    (define-key gptel-mode-map (kbd "C-c C-<return>") 'gptel-send)
+    (define-key gptel-mode-map (kbd "C-c C-RET") 'gptel-send))
+#+end_src
+
 * Highlight
 #+begin_src emacs-lisp
   ;; Highlight indent.
