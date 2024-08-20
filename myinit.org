@@ -241,8 +241,11 @@ To prove I work on AI.
 	  gptel-backend (gptel-make-anthropic "Claude"
 			  :stream t
 			  :key (with-temp-buffer
-			       (insert-file-contents "~/.emacs.d/keys/claude.txt")
-			       (string-trim (buffer-string)))))
+				 (insert-file-contents "~/.emacs.d/keys/claude.txt")
+				 (string-trim (buffer-string)))))
+    (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
+    (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
+    (add-hook 'gptel-mode-hook (lambda () (auto-fill-mode -1)))
     :config
     (define-key gptel-mode-map (kbd "C-c C-<return>") 'gptel-send)
     (define-key gptel-mode-map (kbd "C-c C-RET") 'gptel-send))
