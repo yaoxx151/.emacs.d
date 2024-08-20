@@ -961,12 +961,16 @@ Why does Emacs put those by default?
 	(message "Not a file visiting buffer!"))))
 
 
-  ;; Unfill paragraph.
-  (defun my/unfill-paragraph ()
-    "Takes a multi-line paragraph and makes it into a single line of text."
+  ;; Unfill paragraph and region. Why aren't they built-in?
+  (defun unfill-paragraph ()
     (interactive)
     (let ((fill-column (point-max)))
       (fill-paragraph nil)))
+
+  (defun unfill-region ()
+    (interactive)
+    (let ((fill-column (point-max)))
+      (fill-region (region-beginning) (region-end) nil)))
 
   ;; C-a and C-e jump to visual line in visual-line-mode.
   (defun my/visual-line-mode-hook ()
@@ -1140,6 +1144,7 @@ Handle copy/paste in OSX.
   (add-hook 'LaTeX-mode-hook 'auto-fill-mode)
   (add-hook 'tex-mode-hook 'auto-fill-mode)
   (add-hook 'text-mode-hook 'auto-fill-mode)
+  (add-hook 'org-mode-hook 'auto-fill-mode)
 
   ;; Visual line don't break the word.
   (setq-default word-wrap t)
