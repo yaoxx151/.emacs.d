@@ -320,7 +320,8 @@ Useful because Emacs default completion sucks.
      ("C-c i" . counsel-imenu)
      ("C-x C-b" . ivy-switch-buffer) ; Additional binding when mispressing `C-x b`.
      (:map ivy-minibuffer-map
-	   ("M-RET" . ivy-immediate-done)))
+	   ("M-RET" . ivy-immediate-done)
+	   ("M-v" . yank))) ; yank works in mini buffer.
     :custom
     (ivy-display-style 'fancy)
     (ivy-height 10)
@@ -442,23 +443,56 @@ Org is great as long as you don't spend your life on it.
     :init
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
 #+end_src
-* Projectile
-Shouldn't be needed if GUI Emacs can isolate buffers in each instance.
+* Prog
+** Tree-sitter
+Newly supported. Can be buggy.
 #+begin_src emacs-lisp
-  (use-package projectile
-    :ensure t
-    :after ivy
-    :bind (:map projectile-mode-map
-		("C-x p" . projectile-command-map))
-    :custom
-    (projectile-completion-system 'ivy)
+  (use-package treesit
+    :ensure nil
     :init
-    (projectile-mode +1)
-    (setq projectile-switch-project-action 'projectile-dired)
-    (setq projectile-find-dir-includes-top-level t))
+    (setq treesit-language-source-alist
+	  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+	    (cmake "https://github.com/uyha/tree-sitter-cmake")
+	    (css "https://github.com/tree-sitter/tree-sitter-css")
+	    (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+	    (go "https://github.com/tree-sitter/tree-sitter-go")
+	    (html "https://github.com/tree-sitter/tree-sitter-html")
+	    (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+	    (json "https://github.com/tree-sitter/tree-sitter-json")
+	    (make "https://github.com/alemuller/tree-sitter-make")
+	    (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+	    (python "https://github.com/tree-sitter/tree-sitter-python")
+	    (toml "https://github.com/tree-sitter/tree-sitter-toml")
+	    (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+	    (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+	    (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+    ;; Hacky. https://www.masteringemacs.org/article/how-to-get-started-tree-sitter
+    (setq major-mode-remap-alist
+	  '((yaml-mode . yaml-ts-mode)
+	    (bash-mode . bash-ts-mode)
+	    (js2-mode . js-ts-mode)
+	    (typescript-mode . typescript-ts-mode)
+	    (json-mode . json-ts-mode)
+	    (css-mode . css-ts-mode)
+	    (python-mode . python-ts-mode)))
+    :bind
+    ("C-x ," . treesit-beginning-of-defun)
+    ("C-x ." . treesit-end-of-defun))
 #+end_src
 
-* Python
+** LSP Client
+Is LSP good or bad? Does it make me lazy?
+#+begin_src emacs-lisp
+  (use-package eglot
+    :ensure t
+    :config
+    (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
+    (add-to-list 'eglot-server-programs '(python-ts-mode . ("pyright-langserver" "--stdio")))
+    (add-hook 'python-mode-hook 'eglot-ensure)
+    (add-hook 'python-ts-mode-hook 'eglot-ensure))
+#+end_src
+
+** Python
 #+begin_src emacs-lisp
   (use-package python-mode
     :ensure nil
@@ -488,7 +522,39 @@ Shouldn't be needed if GUI Emacs can isolate buffers in each instance.
     (interactive)
     (python-black-buffer)
     (py-isort-buffer))
+
 #+end_src
+
+LSP server.
+#+begin_src emacs-lisp
+  (use-package lsp-pyright
+    :ensure t
+    :hook
+    (python-mode . (lambda ()
+		     (require 'lsp-pyright)
+		     (lsp)))
+    (python-ts-mode . (lambda ()
+			(require 'lsp-pyright)
+			(lsp)))
+    :init
+    (setq lsp-pyright-use-sticky-header nil)) ; No sticky head.
+#+end_src
+* Projectile
+Shouldn't be needed if GUI Emacs can isolate buffers in each instance.
+#+begin_src emacs-lisp
+  (use-package projectile
+    :ensure t
+    :after ivy
+    :bind (:map projectile-mode-map
+		("C-x p" . projectile-command-map))
+    :custom
+    (projectile-completion-system 'ivy)
+    :init
+    (projectile-mode +1)
+    (setq projectile-switch-project-action 'projectile-dired)
+    (setq projectile-find-dir-includes-top-level t))
+#+end_src
+
 * Recentf
 #+begin_src emacs-lisp
   (use-package recentf
@@ -658,41 +724,6 @@ Tune Zenburn theme.
     (custom-set-faces '(ivy-current-match ((t (:background "#333333")))))
     ;; Paren matching color.
     (set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#CCCCCC"))
-#+end_src
-* Tree-sitter
-Newly supported. Can be buggy.
-#+begin_src emacs-lisp
-  (use-package treesit
-    :ensure nil
-    :init
-    (setq treesit-language-source-alist
-	  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-	    (cmake "https://github.com/uyha/tree-sitter-cmake")
-	    (css "https://github.com/tree-sitter/tree-sitter-css")
-	    (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-	    (go "https://github.com/tree-sitter/tree-sitter-go")
-	    (html "https://github.com/tree-sitter/tree-sitter-html")
-	    (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-	    (json "https://github.com/tree-sitter/tree-sitter-json")
-	    (make "https://github.com/alemuller/tree-sitter-make")
-	    (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-	    (python "https://github.com/tree-sitter/tree-sitter-python")
-	    (toml "https://github.com/tree-sitter/tree-sitter-toml")
-	    (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-	    (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-	    (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
-    ;; Hacky. https://www.masteringemacs.org/article/how-to-get-started-tree-sitter
-    (setq major-mode-remap-alist
-	  '((yaml-mode . yaml-ts-mode)
-	    (bash-mode . bash-ts-mode)
-	    (js2-mode . js-ts-mode)
-	    (typescript-mode . typescript-ts-mode)
-	    (json-mode . json-ts-mode)
-	    (css-mode . css-ts-mode)
-	    (python-mode . python-ts-mode)))
-    :bind
-    ("C-x ," . treesit-beginning-of-defun)
-    ("C-x ." . treesit-end-of-defun))
 #+end_src
 * Undo Tree
 Emacs default undo/redo sucks.
