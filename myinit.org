@@ -353,9 +353,16 @@ Make git slightly less painful, but git is still a pain in the ass.
   (use-package diff-hl
     :ensure t
     :config
-    (global-diff-hl-mode +1)
+    (global-diff-hl-mode)
     (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
-    (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh))
+    (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+    (add-hook 'prog-mode-hook 'diff-hl-mode)
+    :bind
+    (:map diff-hl-mode-map ("<left-fringe> <mouse-1>" . diff-hl-diff-goto-hunk))
+    :hook
+    ((magit-post-refresh . diff-hl-magit-post-refresh)
+     (after-init . global-diff-hl-mode)
+     (dired-mode . diff-hl-dired-mode)))
 #+end_src emacs-lisp
 * Marginalia
 Should be Emacs default.
@@ -480,6 +487,15 @@ Newly supported. Can be buggy.
     ("C-x ." . treesit-end-of-defun))
 #+end_src
 
+** Formatter
+#+begin_src emacs-lisp
+(use-package apheleia
+  :ensure t
+  :bind ("C-x f" . apheleia-format-buffer)
+  :config
+  (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort black)))
+#+end_src
+
 ** LSP Client
 Is LSP good or bad? Does it make me lazy?
 #+begin_src emacs-lisp
@@ -489,7 +505,16 @@ Is LSP good or bad? Does it make me lazy?
     (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
     (add-to-list 'eglot-server-programs '(python-ts-mode . ("pyright-langserver" "--stdio")))
     (add-hook 'python-mode-hook 'eglot-ensure)
-    (add-hook 'python-ts-mode-hook 'eglot-ensure))
+    (add-hook 'python-ts-mode-hook 'eglot-ensure)
+    (setq read-process-output-max (* 1024 1024))
+    (setq eglot-events-buffer-size 0)
+    ;; Disable useless LSP UI. https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off
+    (setq lsp-headerline-breadcrumb-enable nil)
+    (setq lsp-ui-sideline-enable nil)
+    (setq lsp-ui-sideline-enable nil)
+    (setq lsp-modeline-code-actions-enable nil)
+    (setq lsp-modeline-diagnostics-enable nil)
+    :custom (eglot-report-progress nil))
 #+end_src
 
 ** Python
@@ -498,31 +523,20 @@ Is LSP good or bad? Does it make me lazy?
     :ensure nil
     :after flycheck
     :mode "\\.py\\'"
-    :init
-    (use-package python-black :ensure t :defer t)
-    (use-package py-isort :ensure t :defer t)
     :bind
     ;; Annoying you need to do keybinding twice to treesitter mode too.
     ;; When will they fix the hacky way of using ts mode?
-    (:map python-ts-mode-map
-	  ("C-x f" . my/format-python)
+    (:map python-mode-map
 	  ("C-c C-f" . nil))
     (:map python-ts-mode-map
-	  ("C-x f" . my/format-python)
 	  ("C-c C-f" . nil))
     :custom
     (python-indent-offset 4)
-    (flycheck-python-pycompile-executable "python3")
-    (python-shell-interpreter "python3")
-    (py-python-command "python3")
-    (python-shell-interpreter "python3"))
-
-  (defun my/format-python ()
-    "Format python."
-    (interactive)
-    (python-black-buffer)
-    (py-isort-buffer))
-
+    (flycheck-python-pycompile-executable "/usr/local/bin/python3")
+    (python-shell-interpreter "/usr/local/bin/python3")
+    (py-python-command "/usr/local/bin/python3")
+    (python-shell-interpreter "/usr/local/bin/python3")
+    (python-indent-guess-indent-offset-verbose nil))
 #+end_src
 
 LSP server.
@@ -535,9 +549,7 @@ LSP server.
 		     (lsp)))
     (python-ts-mode . (lambda ()
 			(require 'lsp-pyright)
-			(lsp)))
-    :init
-    (setq lsp-pyright-use-sticky-header nil)) ; No sticky head.
+			(lsp))))
 #+end_src
 * Projectile
 Shouldn't be needed if GUI Emacs can isolate buffers in each instance.
@@ -840,7 +852,6 @@ Why does Emacs put those by default?
   (global-unset-key (kbd "C-x C-z")) ; Easy to mispress.
   (global-unset-key (kbd "C-x C-u")) ; Easy to mispress.
   (global-unset-key (kbd "C-x C-l")) ; Easy to mispress.
-  (global-unset-key (kbd "C-x f"))   ; Don't overwrite my find recentf.
   ;; Too much to type for saving. Map to `C-s` instead.
   (global-unset-key (kbd "C-x C-s"))
 #+end_src
