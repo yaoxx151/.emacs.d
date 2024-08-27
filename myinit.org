@@ -497,25 +497,25 @@ Newly supported. Can be buggy.
 ** LSP Client
 Is LSP good or bad? Does it make me lazy?
 #+begin_src emacs-lisp
-  (use-package eglot
+  (use-package lsp-mode
     :ensure t
+    :defer t
+    :commands (lsp lsp-deferred)
+    :hook (prog-mode . lsp-deferred)
     :config
-    (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
-    (add-to-list 'eglot-server-programs '(python-ts-mode . ("pyright-langserver" "--stdio")))
-    (add-hook 'python-mode-hook 'eglot-ensure)
-    (add-hook 'python-ts-mode-hook 'eglot-ensure)
-    (setq read-process-output-max (* 1024 1024))
-    (setq eglot-events-buffer-size 0)
     ;; Disable useless LSP UI. https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off
     (setq lsp-headerline-breadcrumb-enable nil)
     (setq lsp-ui-sideline-enable nil)
     (setq lsp-ui-sideline-enable nil)
     (setq lsp-modeline-code-actions-enable nil)
-    (setq lsp-modeline-diagnostics-enable nil)
+    (setq lsp-modeline-diagnostics-enable nil))
+
+  (use-package eglot
+    :ensure t
+    :hook (prog-mode . eglot-ensure)
     :bind
     ("C-c l r" . eglot-rename)
-    ("C-c l e" . eldoc)
-    :custom (eglot-report-progress nil))
+    ("C-c l e" . eldoc))
 #+end_src
 
 ** Python
@@ -544,13 +544,14 @@ LSP server.
 #+begin_src emacs-lisp
   (use-package lsp-pyright
     :ensure t
-    :hook
-    (python-mode . (lambda ()
-		     (require 'lsp-pyright)
-		     (lsp)))
-    (python-ts-mode . (lambda ()
-			(require 'lsp-pyright)
-			(lsp))))
+    :defer t
+    :config
+    (setq lsp-pyright-disable-language-service nil
+	  lsp-pyright-disable-organize-imports nil
+	  lsp-pyright-auto-import-completions t
+	  lsp-pyright-use-library-code-for-types t
+    :hook ((python-mode . (lambda ()
+			    (require 'lsp-pyright) (lsp-deferred))))))
 #+end_src
 * Projectile
 Shouldn't be needed if GUI Emacs can isolate buffers in each instance.
@@ -1067,10 +1068,6 @@ Why does Emacs put those by default?
 				    (interactive)
 				    (message "Use C-s, dude.")))
 
-  (global-set-key (kbd "C-g") (lambda ()
-				(interactive)
-				(message "Use ESC, dude.")))
-
   ;; Somehow those two packages aren't installed automatically by `use-package`.
   ;; Need to install them manually first. And then bind them here. And you can't do
   ;; `eval-after-load` for some reason.
@@ -1290,11 +1287,11 @@ Handle copy/paste in OSX.
   (setq dumb-jump-force-searcher 'rg)
 
   ;; Sticky function head.
-  (use-package semantic
-    :ensure nil
-    :hook
-    (prog-mode . semantic-mode)
-    (prog-mode . global-semantic-stickyfunc-mode))
+  ;; (use-package semantic
+  ;;   :ensure nil
+  ;;   :hook
+  ;;   (prog-mode . semantic-mode)
+  ;;   (prog-mode . global-semantic-stickyfunc-mode))
 
   ;; Default some files to text-mode.
   (add-to-list 'auto-mode-alist '("\\.in\\'" . text-mode))
