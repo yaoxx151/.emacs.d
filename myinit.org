@@ -309,12 +309,14 @@ Useful because Emacs default completion sucks.
     ;; Following Stevey's suggestion.
     (global-set-key (kbd "C-x C-m") 'counsel-M-x)
     (global-set-key (kbd "C-x m")   'counsel-M-x)   ; For mispress.
+    (global-set-key (kbd "C-c m")   'counsel-M-x)   ; For mispress.
     (global-set-key (kbd "C-x C-,") 'counsel-M-x)   ; For mispress.
     (ivy-mode 1)
     :bind
     (("C-q" . swiper-isearch)
      ("C-c s" . swiper-isearch-thing-at-point)
      ("C-c f" . counsel-recentf)
+     ("C-x f" . counsel-recentf)
      ("C-c g" . counsel-rg)
      ("C-y" . counsel-yank-pop)
      ("C-c i" . counsel-imenu)
@@ -483,15 +485,15 @@ Newly supported. Can be buggy.
 	    (css-mode . css-ts-mode)
 	    (python-mode . python-ts-mode)))
     :bind
-    ("C-x ," . treesit-beginning-of-defun)
-    ("C-x ." . treesit-end-of-defun))
+    ("C-c l ," . treesit-beginning-of-defun)
+    ("C-c l ." . treesit-end-of-defun))
 #+end_src
 
 ** Formatter
 #+begin_src emacs-lisp
 (use-package apheleia
   :ensure t
-  :bind ("C-x f" . apheleia-format-buffer)
+  :bind ("C-c l f" . apheleia-format-buffer)
   :config
   (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort black)))
 #+end_src
@@ -514,6 +516,9 @@ Is LSP good or bad? Does it make me lazy?
     (setq lsp-ui-sideline-enable nil)
     (setq lsp-modeline-code-actions-enable nil)
     (setq lsp-modeline-diagnostics-enable nil)
+    :bind
+    ("C-c l r" . eglot-rename)
+    ("C-c l e" . eldoc)
     :custom (eglot-report-progress nil))
 #+end_src
 
@@ -602,8 +607,10 @@ Shouldn't be needed if GUI Emacs can isolate buffers in each instance.
     :init
     (global-set-key (kbd "C-<down>") 'View-scroll-half-page-forward)
     (global-set-key (kbd "C-<up>") 'View-scroll-half-page-backward)
-    (global-set-key (kbd "M-n") 'View-scroll-half-page-forward)
-    (global-set-key (kbd "M-p") 'View-scroll-half-page-backward))
+    (bind-key* "M-n" 'View-scroll-half-page-forward)
+    (bind-key* "M-p" 'View-scroll-half-page-backward))
+    ;; (global-set-key (kbd "M-n") 'View-scroll-half-page-forward)
+    ;; (global-set-key (kbd "M-p") 'View-scroll-half-page-backward))
 
   ;; Vertical Scroll.
   (setq scroll-step 1)
@@ -674,7 +681,7 @@ Shouldn't be needed if GUI Emacs can isolate buffers in each instance.
       (:map flyspell-mode-map
 	    ([remap flyspell-correct-word-before-point] .
 	      flyspell-correct-wrapper)
-	    ("C-c l" . flyspell-correct-wrapper))
+	    ("M-l" . flyspell-correct-wrapper))
       :custom (flyspell-correct-interface 'flyspell-correct-ivy)))
 #+end_src
 * Super-save
@@ -847,7 +854,6 @@ Why does Emacs put those by default?
   (global-unset-key (kbd "C-v"))
   (global-unset-key (kbd "C-t"))
   (global-unset-key (kbd "M-h"))
-  (global-unset-key (kbd "M-l"))
   (global-unset-key (kbd "M-m"))     ; Easy to mispress.
   (global-unset-key (kbd "C-x C-z")) ; Easy to mispress.
   (global-unset-key (kbd "C-x C-u")) ; Easy to mispress.
@@ -867,7 +873,8 @@ Why does Emacs put those by default?
 
   (global-set-key (kbd "C-w") 'my/backward-kill-word-or-region)
 
-  ;; When splitting window, automatically balance them and switch focus to the newly splitted window.
+  ;; When splitting window, automatically balance them and switch focus to the
+  ;; newly splitted window.
   (global-set-key (kbd "C-x 2")
 		  (lambda ()
 		    (interactive)
