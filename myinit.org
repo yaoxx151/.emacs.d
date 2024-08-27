@@ -1,25 +1,25 @@
 #+STARTIP: overview
 Rebinding of basic commands:
-| Key     | Command                         |
-|---------+---------------------------------|
-| C-s     | Save                            |
-| C-o     | Switch window                   |
-| C-w     | Backward-delete word or region  |
-| C-x C-m | M-x (thanks, Stevey)            |
-| M-j     | Backward word                   |
-| M-k     | Forward word                    |
-| C-j     | Backward char                   |
-| C-k     | Forward char                    |
-| C-b     | Kill (C-k is overwritten)       |
-| C-q     | Search (q for query)            |
-| C-z     | Undo                            |
-| C-r     | Redo                            |
-| C-x t   | Beginning (t for top) of buffer |
-| C-x e   | End of buffer                   |
-| M-p     | Scroll up half page             |
-| M-n     | Scroll down half page           |
-| M-c     | Copy (kill-ring-save)           |
-| M-v     | Paste (yank)                    |
+| Key   | Command                         |
+|-------+---------------------------------|
+| C-s   | Save                            |
+| C-o   | Switch window                   |
+| C-w   | Backward-delete word or region  |
+| M-j   | Backward word                   |
+| M-k   | Forward word                    |
+| C-j   | Backward char                   |
+| C-k   | Forward char                    |
+| C-b   | Kill (C-k is overwritten)       |
+| C-f   | M-x (it's freed, why not?)      |
+| C-q   | Search (q for query)            |
+| C-z   | Undo                            |
+| C-r   | Redo                            |
+| C-x t | Beginning (t for top) of buffer |
+| C-x e | End of buffer                   |
+| M-p   | Scroll up half page             |
+| M-n   | Scroll down half page           |
+| M-c   | Copy (kill-ring-save)           |
+| M-v   | Paste (yank)                    |
 
 * Avy
 Use less mouse.
@@ -306,14 +306,10 @@ Useful because Emacs default completion sucks.
     (use-package amx :ensure t :defer t)
     (use-package counsel :ensure t :diminish :config (counsel-mode 1))
     (use-package swiper :ensure t :defer t)
-    ;; Following Stevey's suggestion.
-    (global-set-key (kbd "C-x C-m") 'counsel-M-x)
-    (global-set-key (kbd "C-x m")   'counsel-M-x)   ; For mispress.
-    (global-set-key (kbd "C-c m")   'counsel-M-x)   ; For mispress.
-    (global-set-key (kbd "C-x C-,") 'counsel-M-x)   ; For mispress.
     (ivy-mode 1)
     :bind
-    (("C-q" . swiper-isearch)
+    (("C-f" . 'counsel-M-x)   ; Because C-f is freed.
+     ("C-q" . swiper-isearch)
      ("C-c s" . swiper-isearch-thing-at-point)
      ("C-c f" . counsel-recentf)
      ("C-x f" . counsel-recentf)
@@ -854,7 +850,9 @@ Why does Emacs put those by default?
   (global-unset-key (kbd "C-v"))
   (global-unset-key (kbd "C-t"))
   (global-unset-key (kbd "M-h"))
-  (global-unset-key (kbd "M-m"))     ; Easy to mispress.
+  (global-unset-key (kbd "C-x C-m"))
+  (global-unset-key (kbd "C-x m"))
+  (global-unset-key (kbd "C-c m"))
   (global-unset-key (kbd "C-x C-z")) ; Easy to mispress.
   (global-unset-key (kbd "C-x C-u")) ; Easy to mispress.
   (global-unset-key (kbd "C-x C-l")) ; Easy to mispress.
@@ -1050,9 +1048,9 @@ Why does Emacs put those by default?
   (global-set-key (kbd "C-j") 'backward-char)
   (global-set-key (kbd "C-k") 'forward-char)
 
-  ;; Bind extra keys to char movement, overwritting word movement.
-  (global-set-key (kbd "M-b") 'backward-char)
-  (global-set-key (kbd "M-f") 'forward-char)
+  ;; C-g is always hard to press.
+  (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+  (define-key key-translation-map (kbd "<escape>") (kbd "C-g"))
 
   ;; Adjust font size like web browsers. Doesn't work in terminal.
   (global-set-key (kbd "C-=") 'text-scale-increase)
@@ -1069,6 +1067,10 @@ Why does Emacs put those by default?
 				    (interactive)
 				    (message "Use C-s, dude.")))
 
+  (global-set-key (kbd "C-g") (lambda ()
+				(interactive)
+				(message "Use ESC, dude.")))
+
   ;; Somehow those two packages aren't installed automatically by `use-package`.
   ;; Need to install them manually first. And then bind them here. And you can't do
   ;; `eval-after-load` for some reason.
@@ -1081,9 +1083,6 @@ Why does Emacs put those by default?
     :ensure t
     :init
     (global-set-key (kbd "M-i") 'change-inner))
-
-  ;; Keys easy to mispress.
-  (global-set-key (kbd "C-c C-f") (key-binding (kbd "C-x C-f")))
 
   ;; Misc.
   (global-set-key (kbd "C-o") 'other-window)
