@@ -233,7 +233,8 @@ default.
   (use-package goto-chg
     :ensure t
     :init
-    (global-set-key (kbd "C-c b") 'goto-last-change))
+    (bind-key* "C-c ," 'goto-last-change)
+    (bind-key* "C-c ." 'goto-last-change-reverse))
 #+end_src emacs-lisp
 * Gptel
 To prove I work on AI.
@@ -319,8 +320,10 @@ Useful because Emacs default completion sucks.
      ("C-y" . counsel-yank-pop)
      ("C-c i" . counsel-imenu)
      ("C-x C-b" . ivy-switch-buffer) ; Additional binding when mispressing `C-x b`.
+     ("C-c b" . ivy-switch-buffer)   ; Additional binding when mispressing `C-x b`.
      (:map ivy-minibuffer-map
 	   ("M-RET" . ivy-immediate-done)
+	   ("C-y" . yank)
 	   ("M-v" . yank))) ; yank works in mini buffer.
     :custom
     (ivy-display-style 'fancy)
@@ -556,7 +559,7 @@ LSP server.
 			    (require 'lsp-pyright) (lsp-deferred)))))
 #+end_src
 * Projectile
-Shouldn't be needed if GUI Emacs can isolate buffers in each instance.
+Is it needed? Can you just open multiple emacs instances from terminal?
 #+begin_src emacs-lisp
   (use-package projectile
     :ensure t
@@ -707,7 +710,7 @@ Make the paranoid sleep better.
 	  ("C-j" . nil)))
 #+end_src
 * Theme
-Tune Zenburn theme.
+Finetuned Zenburn theme.
 #+begin_src emacs-lisp
   (use-package zenburn-theme
     :ensure t
@@ -850,6 +853,9 @@ Why does Emacs put those by default?
   (setq initial-scratch-message "")
 
   ;; Useless keys.
+  (global-unset-key (kbd "C-b"))
+  (global-unset-key (kbd "M-b"))
+  (global-unset-key (kbd "M-f"))
   (global-unset-key (kbd "C-v"))
   (global-unset-key (kbd "C-t"))
   (global-unset-key (kbd "M-h"))
@@ -1075,7 +1081,8 @@ Why does Emacs put those by default?
   ;; `eval-after-load` for some reason.
   (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
   (global-set-key (kbd "C-c C-y") 'dumb-jump-back)
-  (global-set-key (kbd "C-c b") 'goto-last-change)
+  (bind-key* "C-c ," 'goto-last-change)
+  (bind-key* "C-c ." 'goto-last-change-reverse)
 
   ;; Vim's `i`.
   (use-package change-inner
