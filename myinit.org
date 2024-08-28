@@ -9,7 +9,7 @@ Rebinding of basic commands:
 | M-k   | Forward word                    |
 | C-j   | Backward char                   |
 | C-k   | Forward char                    |
-| C-b   | Kill (C-k is overwritten)       |
+| C-x k | Kill (C-k is overwritten)       |
 | C-f   | M-x (it's freed, why not?)      |
 | C-q   | Search (q for query)            |
 | C-z   | Undo                            |
@@ -95,8 +95,10 @@ Those are useful.
   (use-package crux
     :ensure t
     :bind
-    (("C-b" . crux-smart-kill-line)
-     ("C-x K" . crux-kill-other-buffers)
+    (("C-x k" . crux-smart-kill-line)
+     ("C-x C-k" . crux-smart-kill-line) ; For mispress.
+     ("C-c k" . crux-smart-kill-line)   ; For mispress.
+     ("C-c C-k" . crux-smart-kill-line) ; For mispress.
      ("C-x <delete>" . crux-kill-whole-line)
      ("C-x DEL" . crux-kill-whole-line)
      ("C-c d" . crux-duplicate-current-line-or-region)
@@ -501,7 +503,7 @@ Is LSP good or bad? Does it make me lazy?
     :ensure t
     :defer t
     :commands (lsp lsp-deferred)
-    :hook (prog-mode . lsp-deferred)
+    :hook (python-mode . lsp-deferred)
     :config
     ;; Disable useless LSP UI. https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off
     (setq lsp-headerline-breadcrumb-enable nil)
@@ -550,8 +552,8 @@ LSP server.
 	  lsp-pyright-disable-organize-imports nil
 	  lsp-pyright-auto-import-completions t
 	  lsp-pyright-use-library-code-for-types t
-    :hook ((python-mode . (lambda ()
-			    (require 'lsp-pyright) (lsp-deferred))))))
+    :hook (python-mode . (lambda ()
+			    (require 'lsp-pyright) (lsp-deferred)))))
 #+end_src
 * Projectile
 Shouldn't be needed if GUI Emacs can isolate buffers in each instance.
@@ -1086,7 +1088,7 @@ Why does Emacs put those by default?
   (global-set-key (kbd "M-g") 'goto-line)
   (global-set-key (kbd "C-c DEL") 'delete-blank-lines)
   (global-set-key (kbd "C-c <delete>") 'delete-blank-lines)
-  (global-set-key (kbd "C-x k") 'kill-this-buffer) ; Don't ask.
+  (global-set-key (kbd "C-x K") 'kill-this-buffer) ; Don't ask.
   (global-set-key (kbd "C-c w") 'toggle-truncate-lines) ; Wrap.
   (global-set-key (kbd "C-x q") 'query-replace)
   (global-set-key (kbd "C-x \\") 'sort-lines)
