@@ -1,25 +1,40 @@
 #+STARTIP: overview
-Rebinding of basic commands:
+Rebind basic commands.
+
+Commonly used commands should be binded to short, easy-to-reach keybindings:
 | Key   | Command                         |
 |-------+---------------------------------|
 | C-s   | Save                            |
 | C-o   | Switch window                   |
 | C-w   | Backward-delete word or region  |
-| M-j   | Backward word                   |
-| M-k   | Forward word                    |
-| C-j   | Backward char                   |
-| C-k   | Forward char                    |
-| C-x k | Kill (C-k is overwritten)       |
-| C-f   | M-x (it's freed, why not?)      |
+| M-p   | Scroll up half page             |
+| M-n   | Scroll down half page           |
 | C-q   | Search (q for query)            |
 | C-z   | Undo                            |
 | C-r   | Redo                            |
 | C-x t | Beginning (t for top) of buffer |
 | C-x e | End of buffer                   |
-| M-p   | Scroll up half page             |
-| M-n   | Scroll down half page           |
 | M-c   | Copy (kill-ring-save)           |
 | M-v   | Paste (yank)                    |
+
+Keybindings that end with `f` and `b` are always awkward to me since they're
+hard to reach even though they remind you it's forward and backward. Rebind for
+more symmetry:
+| Key   | Command                         |
+|-------+---------------------------------|
+| M-j   | Backward word                   |
+| M-k   | Forward word                    |
+| C-j   | Backward char                   |
+| C-k   | Forward char                    |
+
+Since the original C-b, C-f, M-b, M-f are free now, we can rebind them to
+common commands:
+| Key   | Command                           |
+|-------+-----------------------------------|
+| C-x k | Kill (C-k is overwritten)         |
+| C-f   | M-x (it's unbinded now, why not?) |
+| M-b   | Switch buffer                     |
+| M-f   | Find file                         |
 
 * Avy
 Use less mouse.
@@ -311,7 +326,9 @@ Useful because Emacs default completion sucks.
     (use-package swiper :ensure t :defer t)
     (ivy-mode 1)
     :bind
-    (("C-f" . 'counsel-M-x)   ; Because C-f is freed.
+    (("C-f" . counsel-M-x)        ; Because C-f is freed, why not?
+     ("M-f" . counsel-find-file)  ; Because M-f is freed, why not?
+     ("M-b" . ivy-switch-buffer)  ; Because M-b is freed, why not?
      ("C-q" . swiper-isearch)
      ("C-c s" . swiper-isearch-thing-at-point)
      ("C-c f" . counsel-recentf)
@@ -319,8 +336,6 @@ Useful because Emacs default completion sucks.
      ("C-c g" . counsel-rg)
      ("C-y" . counsel-yank-pop)
      ("C-c i" . counsel-imenu)
-     ("C-x C-b" . ivy-switch-buffer) ; Additional binding when mispressing `C-x b`.
-     ("C-c b" . ivy-switch-buffer)   ; Additional binding when mispressing `C-x b`.
      (:map ivy-minibuffer-map
 	   ("M-RET" . ivy-immediate-done)
 	   ("C-y" . yank)
@@ -853,9 +868,8 @@ Why does Emacs put those by default?
   (setq initial-scratch-message "")
 
   ;; Useless keys.
-  (global-unset-key (kbd "C-b"))
-  (global-unset-key (kbd "M-b"))
-  (global-unset-key (kbd "M-f"))
+  (global-unset-key (kbd "C-b"))    ; Original: backward char.
+  (global-unset-key (kbd "C-x b"))  ; Original: switch buffer.
   (global-unset-key (kbd "C-v"))
   (global-unset-key (kbd "C-t"))
   (global-unset-key (kbd "M-h"))
