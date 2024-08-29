@@ -33,8 +33,9 @@ common commands:
 |-------+---------------------------|
 | C-x k | Kill (C-k is overwritten) |
 | C-f   | M-x                       |
-| M-b   | Switch buffer             |
-| M-f   | Find file                 |
+| M-f   | M-x (extra)               |
+| C-b   | Switch buffer             |
+| M-b   | Switch buffer (extra)     |
 
 * Avy
 Use less mouse.
@@ -327,8 +328,9 @@ Useful because Emacs default completion sucks.
     (ivy-mode 1)
     :bind
     (("C-f" . counsel-M-x)        ; Because C-f is freed, why not?
-     ("M-f" . counsel-find-file)  ; Because M-f is freed, why not?
-     ("M-b" . ivy-switch-buffer)  ; Because M-b is freed, why not?
+     ("M-f" . counsel-M-x)        ; Extra binding.
+     ("C-b" . ivy-switch-buffer)  ; Because C-b is freed, why not?
+     ("M-b" . ivy-switch-buffer)  ; Extra binding.
      ("C-q" . swiper-isearch)
      ("C-c s" . swiper-isearch-thing-at-point)
      ("C-c f" . counsel-recentf)
@@ -698,7 +700,7 @@ Is it needed? Can you just open multiple emacs instances from terminal?
       (:map flyspell-mode-map
 	    ([remap flyspell-correct-word-before-point] .
 	      flyspell-correct-wrapper)
-	    ("M-l" . flyspell-correct-wrapper))
+	    ("M-m" . flyspell-correct-wrapper))
       :custom (flyspell-correct-interface 'flyspell-correct-ivy)))
 #+end_src
 * Super-save
@@ -868,7 +870,6 @@ Why does Emacs put those by default?
   (setq initial-scratch-message "")
 
   ;; Useless keys.
-  (global-unset-key (kbd "C-b"))      ; Original: backward char.
   (global-unset-key (kbd "C-x b"))    ; Original: switch buffer.
   (global-unset-key (kbd "C-x C-b"))  ; Original: buffer list.
   (global-unset-key (kbd "C-v"))
@@ -1080,8 +1081,10 @@ Why does Emacs put those by default?
   (global-set-key (kbd "C-=") 'text-scale-increase)
   (global-set-key (kbd "C--") 'text-scale-decrease)
 
-  ;; Bind extra keys to common commands around to reduce mispressing.
+  ;; Bind extra keys to common commands.
   (define-key key-translation-map (kbd "C-;") (kbd "C-l"))
+  (global-set-key (kbd "M-l") 'recenter-top-bottom)
+  (global-set-key (kbd "M-o") 'other-window)
 
   ;; For within-screen jump. No need after avy jump.
   ;; (global-set-key (kbd "M-s") 'isearch-forward)
