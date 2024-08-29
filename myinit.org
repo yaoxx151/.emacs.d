@@ -29,12 +29,12 @@ more symmetry:
 
 Since the original C-b, C-f, M-b, M-f are free now, we can rebind them to
 common commands:
-| Key   | Command                           |
-|-------+-----------------------------------|
-| C-x k | Kill (C-k is overwritten)         |
-| C-f   | M-x (it's unbinded now, why not?) |
-| M-b   | Switch buffer                     |
-| M-f   | Find file                         |
+| Key   | Command                   |
+|-------+---------------------------|
+| C-x k | Kill (C-k is overwritten) |
+| C-f   | M-x                       |
+| M-b   | Switch buffer             |
+| M-f   | Find file                 |
 
 * Avy
 Use less mouse.
@@ -868,8 +868,9 @@ Why does Emacs put those by default?
   (setq initial-scratch-message "")
 
   ;; Useless keys.
-  (global-unset-key (kbd "C-b"))    ; Original: backward char.
-  (global-unset-key (kbd "C-x b"))  ; Original: switch buffer.
+  (global-unset-key (kbd "C-b"))      ; Original: backward char.
+  (global-unset-key (kbd "C-x b"))    ; Original: switch buffer.
+  (global-unset-key (kbd "C-x C-b"))  ; Original: buffer list.
   (global-unset-key (kbd "C-v"))
   (global-unset-key (kbd "C-t"))
   (global-unset-key (kbd "M-h"))
@@ -1071,13 +1072,16 @@ Why does Emacs put those by default?
   (global-set-key (kbd "C-j") 'backward-char)
   (global-set-key (kbd "C-k") 'forward-char)
 
-  ;; C-g is always hard to press.
+  ;; C-g is always hard to press but esc is also far away.
   (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
   (define-key key-translation-map (kbd "<escape>") (kbd "C-g"))
 
   ;; Adjust font size like web browsers. Doesn't work in terminal.
   (global-set-key (kbd "C-=") 'text-scale-increase)
   (global-set-key (kbd "C--") 'text-scale-decrease)
+
+  ;; Bind extra keys to common commands around to reduce mispressing.
+  (define-key key-translation-map (kbd "C-;") (kbd "C-l"))
 
   ;; For within-screen jump. No need after avy jump.
   ;; (global-set-key (kbd "M-s") 'isearch-forward)
