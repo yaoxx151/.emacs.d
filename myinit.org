@@ -43,7 +43,7 @@ Use less mouse.
   (use-package avy
     :ensure t
     :defer t
-    :bind
+    :bind*
     ("M-s" . avy-goto-char-timer)
     :custom
     (avy-timeout-seconds 0.3)
@@ -110,7 +110,7 @@ Those are useful.
 #+begin_src emacs-lisp
   (use-package crux
     :ensure t
-    :bind
+    :bind*
     (("C-x k" . crux-smart-kill-line)
      ("C-x C-k" . crux-smart-kill-line) ; For mispress.
      ("C-c k" . crux-smart-kill-line)   ; For mispress.
@@ -130,16 +130,13 @@ Those are useful.
     (crux-with-region-or-buffer untabify)
     (crux-with-region-or-line comment-or-uncomment-region) ; (Un)commenting works on line.
     (crux-with-region-or-point-to-eol kill-ring-save)
-    (defalias 'rename-file-and-buffer 'crux-rename-file-and-buffer)
-    :init
-    (global-set-key (kbd "M-;") 'comment-or-uncomment-region)
-    (global-set-key (kbd "C-/") 'comment-or-uncomment-region))
+    (defalias 'rename-file-and-buffer 'crux-rename-file-and-buffer))
 #+end_src
 * Dired
 #+begin_src emacs-lisp
   (use-package dired
     :ensure nil
-    :bind
+    :bind*
     (("C-x C-j" . dired-jump))
     :custom
     ;; Always delete and copy recursively.
@@ -326,7 +323,7 @@ Useful because Emacs default completion sucks.
     (use-package counsel :ensure t :diminish :config (counsel-mode 1))
     (use-package swiper :ensure t :defer t)
     (ivy-mode 1)
-    :bind
+    :bind*
     (("C-f" . counsel-M-x)        ; Because C-f is freed, why not?
      ("M-f" . counsel-M-x)        ; Extra binding.
      ("C-b" . ivy-switch-buffer)  ; Because C-b is freed, why not?
@@ -357,7 +354,7 @@ Make git slightly less painful, but git is still a pain in the ass.
 #+begin_src emacs-lisp
   (use-package magit
     :ensure t
-    :bind
+    :bind*
     (("C-x g" . magit-status)
     (:map magit-status-mode-map
     ("M-RET" . magit-diff-visit-file-other-window)))
@@ -424,13 +421,6 @@ Org is great as long as you don't spend your life on it.
     :defer t
     :bind
     (:map org-mode-map
-	  ("C-i" . nil)
-	  ("M-h" . nil)
-	  ("C-j" . nil)
-	  ("C-<return>" . nil) ; Don't overwrite my open line.
-	  ("C-RET" . nil)      ; Don't overwrite my open line.
-	  ("M-<return>" . nil) ; Don't overwrite my open line above.
-	  ("M-RET" . nil)      ; Don't overwrite my open line above.
 	  ;; Don't know why tab doesn't fold/unfold heading if using
 	  ;; `use-package` to config org setting (it works if org
 	  ;; setting is config without `use-package`).
@@ -502,7 +492,7 @@ Newly supported. Can be buggy.
 	    (json-mode . json-ts-mode)
 	    (css-mode . css-ts-mode)
 	    (python-mode . python-ts-mode)))
-    :bind
+    :bind*
     ("C-c l ," . treesit-beginning-of-defun)
     ("C-c l ." . treesit-end-of-defun))
 #+end_src
@@ -511,7 +501,7 @@ Newly supported. Can be buggy.
 #+begin_src emacs-lisp
 (use-package apheleia
   :ensure t
-  :bind ("C-c l f" . apheleia-format-buffer)
+  :bind* ("C-c l f" . apheleia-format-buffer)
   :config
   (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort black)))
 #+end_src
@@ -535,7 +525,7 @@ Is LSP good or bad? Does it make me lazy?
   (use-package eglot
     :ensure t
     :hook (prog-mode . eglot-ensure)
-    :bind
+    :bind*
     ("C-c l r" . eglot-rename)
     ("C-c l e" . eldoc))
 #+end_src
@@ -546,13 +536,6 @@ Is LSP good or bad? Does it make me lazy?
     :ensure nil
     :after flycheck
     :mode "\\.py\\'"
-    :bind
-    ;; Annoying you need to do keybinding twice to treesitter mode too.
-    ;; When will they fix the hacky way of using ts mode?
-    (:map python-mode-map
-	  ("C-c C-f" . nil))
-    (:map python-ts-mode-map
-	  ("C-c C-f" . nil))
     :custom
     (python-indent-offset 4)
     (flycheck-python-pycompile-executable "/usr/local/bin/python3")
@@ -581,7 +564,7 @@ Is it needed? Can you just open multiple emacs instances from terminal?
   (use-package projectile
     :ensure t
     :after ivy
-    :bind (:map projectile-mode-map
+    :bind* (:map projectile-mode-map
 		("C-x p" . projectile-command-map))
     :custom
     (projectile-completion-system 'ivy)
@@ -719,12 +702,7 @@ Make the paranoid sleep better.
     :init
     (add-to-list 'auto-mode-alist '("\\.tex\\'" . LaTeX-mode))
     (add-hook 'LaTeX-mode-hook 'visual-line-mode)
-    (add-hook 'tex-mode-hook 'visual-line-mode)
-    :bind
-    (:map tex-mode-map
-	  ("C-j" . nil))
-    (:map LaTeX-mode-map
-	  ("C-j" . nil)))
+    (add-hook 'tex-mode-hook 'visual-line-mode))
 #+end_src
 * Theme
 Finetuned Zenburn theme.
@@ -780,7 +758,7 @@ Emacs default undo/redo sucks.
     (eval-after-load 'undo-tree '(unbind-key (kbd "C-x u")))
     ;; Unbind `C-/` to avoid overwriting for the globally set key mapped to
     ;; comment.
-    :bind (:map undo-tree-map
+    :bind* (:map undo-tree-map
 		("C-/" . nil))
     :custom
     (undo-tree-visualizer-diff t)
@@ -1068,10 +1046,10 @@ Why does Emacs put those by default?
   (global-set-key (kbd "M-v") 'yank)
 
   ;; Default word and char movement are always awkward to me.
-  (global-set-key (kbd "M-j") 'backward-word)
-  (global-set-key (kbd "M-k") 'forward-word)
-  (global-set-key (kbd "C-j") 'backward-char)
-  (global-set-key (kbd "C-k") 'forward-char)
+  (bind-key* "M-j" 'backward-word)
+  (bind-key* "M-k" 'forward-word)
+  (bind-key* "C-j" 'backward-char)
+  (bind-key* "C-k" 'forward-char)
 
   ;; C-g is always hard to press but esc is also far away.
   (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
@@ -1114,6 +1092,8 @@ Why does Emacs put those by default?
   ;; Misc.
   (global-set-key (kbd "C-o") 'other-window)
   (global-set-key (kbd "M-g") 'goto-line)
+  (global-set-key (kbd "M-;") 'comment-or-uncomment-region)
+  (global-set-key (kbd "C-/") 'comment-or-uncomment-region)
   (global-set-key (kbd "C-c DEL") 'delete-blank-lines)
   (global-set-key (kbd "C-c <delete>") 'delete-blank-lines)
   (global-set-key (kbd "C-x K") 'kill-this-buffer) ; Don't ask.
