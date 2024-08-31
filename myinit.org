@@ -198,8 +198,8 @@ Useful in coding.
 #+begin_src emacs-lisp
   (use-package expand-region
     :ensure t
-    :config
-    (global-set-key (kbd "M-e") 'er/expand-region))
+    :bind*
+    ("M-e" .'er/expand-region))
 #+end_src
 * Flycheck
 Can be slow.
@@ -297,7 +297,7 @@ To prove I work on AI.
       :commands (ibuffer-vc-set-filter-groups-by-vc-root)
       :custom
       (ibuffer-vc-skip-if-remote 'nil))
-    (global-set-key (kbd "C-x i") 'ibuffer)
+    :bind* ("C-x i" . 'ibuffer)
     :custom
     (ibuffer-formats
      '((mark modified read-only locked " "
@@ -400,9 +400,9 @@ keyboard macros).
 #+begin_src emacs-lisp
   (use-package multiple-cursors
     :ensure t
-    :init
-    (global-set-key (kbd "C-c <return>") 'mc/edit-lines)
-    (global-set-key (kbd "C-c RET") 'mc/edit-lines))
+    :bind*
+    (("C-c <return>" . 'mc/edit-lines)
+     ("C-c RET" . 'mc/edit-lines)))
 #+end_src
 * Mwim
 Quite useful. Agreed by Stevey.
@@ -410,8 +410,8 @@ Quite useful. Agreed by Stevey.
   (use-package mwim
     :ensure t
     :init
-    (global-set-key (kbd "C-a") 'mwim-beginning)
-    (global-set-key (kbd "C-e") 'mwim-end))
+    (bind-key* "C-a" 'mwim-beginning)
+    (bind-key* "C-e" 'mwim-end))
 #+end_src
 * Org
 Org is great as long as you don't spend your life on it.
@@ -607,12 +607,10 @@ Is it needed? Can you just open multiple emacs instances from terminal?
   (use-package view
     :ensure nil
     :init
-    (global-set-key (kbd "C-<down>") 'View-scroll-half-page-forward)
-    (global-set-key (kbd "C-<up>") 'View-scroll-half-page-backward)
+    (bind-key* "C-<down>" 'View-scroll-half-page-forward)
+    (bind-key* "C-<up>" 'View-scroll-half-page-backward)
     (bind-key* "M-n" 'View-scroll-half-page-forward)
     (bind-key* "M-p" 'View-scroll-half-page-backward))
-    ;; (global-set-key (kbd "M-n") 'View-scroll-half-page-forward)
-    ;; (global-set-key (kbd "M-p") 'View-scroll-half-page-backward))
 
   ;; Vertical Scroll.
   (setq scroll-step 1)
@@ -750,23 +748,16 @@ Emacs default undo/redo sucks.
     :diminish undo-tree-mode
     :init
     (global-undo-tree-mode)
-    (global-set-key (kbd "C-z") 'undo-tree-undo)
-    (global-set-key (kbd "M-z") 'undo-tree-undo) ; Emulate the normal cmd-z.
-    (global-set-key (kbd "C-r") 'undo-tree-redo)
-    (global-set-key (kbd "M-r") 'undo-tree-redo)
-    ;; Somehow you need both to unbind. Why emacs keybinding in modes and package is so confusing?
-    (eval-after-load 'undo-tree '(unbind-key (kbd "C-x u")))
-    ;; Unbind `C-/` to avoid overwriting for the globally set key mapped to
-    ;; comment.
-    :bind* (:map undo-tree-map
-		("C-/" . nil))
+    :bind*
+    (("C-z" . 'undo-tree-undo)
+     ("M-z" . 'undo-tree-undo) ; Emulate the normal cmd-z.
+     ("C-r" . 'undo-tree-redo)
+     ("M-r" . 'undo-tree-redo))
     :custom
     (undo-tree-visualizer-diff t)
     (undo-tree-history-directory-alist
        `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
-    (undo-tree-visualizer-timestamps t)
-    :config
-    (unbind-key (kbd "C-x u") undo-tree-map)) ; Unbind visualize key.
+    (undo-tree-visualizer-timestamps t))
 #+end_src
 * Whitespace
 Be tidy please.
