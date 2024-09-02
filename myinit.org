@@ -332,6 +332,7 @@ Useful because Emacs default completion sucks.
      ("C-c s" . swiper-isearch-thing-at-point)
      ("C-c f" . counsel-recentf)
      ("C-x f" . counsel-recentf)
+     ("C-c C-f" . counsel-find-file)  ; Mispress.
      ("C-c g" . counsel-rg)
      ("C-y" . counsel-yank-pop)
      ("C-c i" . counsel-imenu)
@@ -1300,4 +1301,12 @@ Handle copy/paste in OSX.
   (add-to-list 'auto-mode-alist '("\\.bb\\'" . shell-script-mode))
   (add-to-list 'auto-mode-alist '("\\.bbclass\\'" . shell-script-mode))
   (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . markdown-mode))
+
+  ;; Mark ring.
+  ;; Decrease saving ring so that jump more efficiently.
+  (setq mark-ring-max 6)
+  (setq global-mark-ring-max 8)
+
+  ;; C-u C-SPC and C-x C-SPC repeats with C-SPC after the first press.
+  (setq-default set-mark-command-repeat-pop t)
 #+end_src
