@@ -838,7 +838,7 @@ Why does Emacs put those by default?
   (setq ns-use-proxy-icon nil) ; Icon of filetype.
   (setq initial-scratch-message "")
 
-  ;; Useless keys.
+  ;; Useless keys that are easier to mispress.
   (global-unset-key (kbd "C-x b"))    ; Original: switch buffer.
   (global-unset-key (kbd "C-x C-b"))  ; Original: buffer list.
   (global-unset-key (kbd "C-v"))
@@ -847,11 +847,11 @@ Why does Emacs put those by default?
   (global-unset-key (kbd "C-x C-m"))
   (global-unset-key (kbd "C-x m"))
   (global-unset-key (kbd "C-c m"))
-  (global-unset-key (kbd "C-x C-z")) ; Easy to mispress.
-  (global-unset-key (kbd "C-x C-u")) ; Easy to mispress.
-  (global-unset-key (kbd "C-x C-l")) ; Easy to mispress.
-  ;; Too much to type for saving. Map to `C-s` instead.
-  (global-unset-key (kbd "C-x C-s"))
+  (global-unset-key (kbd "C-x C-z"))
+  (global-unset-key (kbd "C-x C-u"))
+  (global-unset-key (kbd "C-x C-l"))
+  (global-unset-key (kbd "C-x C-x"))
+  (global-unset-key (kbd "C-x C-s")) ; Use `C-s` instead.
 #+end_src
 * My/Functions
 #+begin_src emacs-lisp
@@ -909,7 +909,7 @@ Why does Emacs put those by default?
   ;; Save all buffers.
   (defun my/save-all-buffers ()
     "Instead of `save-buffer', save all opened buffers by calling
-		`save-some-buffers' with ARG t."
+		    `save-some-buffers' with ARG t."
     (interactive)
     (save-some-buffers t))
 
@@ -918,7 +918,7 @@ Why does Emacs put those by default?
   ;; Mark until a char. A general version of `Zap-up-to-char`.
   (defun my/mark-until-char ()
     "Mark text from current cursor position until the first occurrence
-	     of a prompted character."
+		 of a prompted character."
     (interactive)
     (let ((prompt (read-char "Enter the character: ")))
       (save-excursion
@@ -1023,6 +1023,26 @@ Why does Emacs put those by default?
     (define-key visual-line-mode-map (kbd "C-e") 'end-of-visual-line))
 
   (add-hook 'visual-line-mode-hook 'my/visual-line-mode-hook)
+
+  ;; Simplify local mark ring set and jump.
+  (defun push-mark-no-activate ()
+    "Pushes `point' to `mark-ring' and does not activate the region
+       Equivalent to \\[set-mark-command] when \\[transient-mark-mode] is disabled"
+    (interactive)
+    (push-mark (point) t nil)
+    (message "Pushed mark to ring"))
+
+  (bind-key* "C-'" 'push-mark-no-activate)
+
+  (defun jump-to-mark ()
+    "Jumps to the local mark, respecting the `mark-ring' order.
+    This is the same as using \\[set-mark-command] with the prefix argument."
+    (interactive)
+    (set-mark-command 1)
+    (message "Jumped to mark"))
+
+  (bind-key* "M-'" 'jump-to-mark)
+
 #+end_src
 * My/Keybindings
 #+begin_src emacs-lisp
