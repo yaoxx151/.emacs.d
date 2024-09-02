@@ -863,29 +863,29 @@ Why does Emacs put those by default?
 	(kill-region (region-beginning) (region-end))
       (backward-kill-word 1)))
 
-  (global-set-key (kbd "C-w") 'my/backward-kill-word-or-region)
+  (bind-key* "C-w" 'my/backward-kill-word-or-region)
 
   ;; When splitting window, automatically balance them and switch focus to the
   ;; newly splitted window.
-  (global-set-key (kbd "C-x 2")
-		  (lambda ()
-		    (interactive)
-		    (split-window-vertically)
-		    (balance-windows)
-		    (other-window 1)))
-  (global-set-key (kbd "C-x 3")
-		  (lambda ()
-		    (interactive)
-		    (split-window-horizontally)
-		    (balance-windows)
-		    (other-window 1)))
+  (bind-key* "C-x 2"
+	     (lambda ()
+	       (interactive)
+	       (split-window-vertically)
+	       (balance-windows)
+	       (other-window 1)))
+  (bind-key* "C-x 3"
+	     (lambda ()
+	       (interactive)
+	       (split-window-horizontally)
+	       (balance-windows)
+	       (other-window 1)))
 
   ;; Auto-balance window when deleting window.
-  (global-set-key (kbd "C-x 0")
-		  (lambda ()
-		    (interactive)
-		    (delete-window)
-		    (balance-windows)))
+  (bind-key* "C-x 0"
+	     (lambda ()
+	       (interactive)
+	       (delete-window)
+	       (balance-windows)))
 
   ;; Toggle column goal.
   (defun my/toggle-goal-column ()
@@ -899,7 +899,7 @@ Why does Emacs put those by default?
 	(setq goal-column (current-column))
 	(message "Set goal column at %d" goal-column))))
 
-  (global-set-key (kbd "C-x C-u") 'my/toggle-goal-column)
+  (bind-key* "C-x C-u" 'my/toggle-goal-column)
 
   ;; Reload init files.
   (defun my/reload-init-file ()
@@ -913,7 +913,7 @@ Why does Emacs put those by default?
     (interactive)
     (save-some-buffers t))
 
-  (global-set-key (kbd "C-s") 'my/save-all-buffers)
+  (bind-key* "C-s" 'my/save-all-buffers)
 
   ;; Mark until a char. A general version of `Zap-up-to-char`.
   (defun my/mark-until-char ()
@@ -927,7 +927,7 @@ Why does Emacs put those by default?
 	(goto-char (1- (point)))
 	(exchange-point-and-mark))))
 
-  (global-set-key (kbd "M-t") 'my/mark-until-char)
+  (bind-key* "M-t" 'my/mark-until-char)
 
   ;; Backward kill line.
   (defun my/backward-kill-line ()
@@ -935,7 +935,7 @@ Why does Emacs put those by default?
     (kill-line 0)
     (indent-according-to-mode))
 
-  (global-set-key (kbd "C-<backspace>") 'my/backward-kill-line) ; Doesn't work in terminal.
+  (bind-key* "C-<backspace>" 'my/backward-kill-line) ; Doesn't work in terminal.
 
   ;; Edit this file.
   (defun my/edit-configs ()
@@ -957,10 +957,10 @@ Why does Emacs put those by default?
       (when bounds
 	(kill-region (car bounds) (cdr bounds)))))
 
-  (global-set-key (kbd "M-w") 'my/kill-word-at-point)
+  (bind-key* "M-w" 'my/kill-word-at-point)
 
   ;; Stolen from Stevey.
-  (defun my/rename-file-and-buffer (new-name)
+  (defun rename-file-and-buffer (new-name)
     "Renames both current buffer and file it's visiting to NEW-NAME."
     (interactive "sNew name: ")
     (let ((name (buffer-name))
@@ -975,7 +975,7 @@ Why does Emacs put those by default?
 	    (set-visited-file-name new-name)
 	    (set-buffer-modified-p nil))))))
 
-  (defun my/move-buffer-file (dir)
+  (defun move-buffer-file (dir)
     "Moves both current buffer and file it's visiting to DIR."
     (interactive "DNew directory: ")
     (let* ((name (buffer-name))
@@ -993,7 +993,7 @@ Why does Emacs put those by default?
 	  (set-buffer-modified-p nil)  t))))
 
   ;; Delete this file.
-  (defun my/delete-this-file ()
+  (defun delete-this-file ()
     "Kill the current buffer and deletes the file it is visiting."
     (interactive)
     (let ((filename (buffer-file-name)))
@@ -1027,14 +1027,14 @@ Why does Emacs put those by default?
 * My/Keybindings
 #+begin_src emacs-lisp
   ;; Stevey's suggestion.
-  (global-set-key (kbd "C-x t") 'beginning-of-buffer)
-  (global-set-key (kbd "C-c t") 'beginning-of-buffer) ; Mispress.
-  (global-set-key (kbd "C-x e") 'end-of-buffer)
-  (global-set-key (kbd "C-c e") 'end-of-buffer)       ; Mispress.
+  (bind-key* "C-x t" 'beginning-of-buffer)
+  (bind-key* "C-c t" 'beginning-of-buffer) ; Mispress.
+  (bind-key* "C-x e" 'end-of-buffer)
+  (bind-key* "C-c e" 'end-of-buffer)       ; Mispress.
 
   ;; Conventional copy/paste.
-  (global-set-key (kbd "M-c") 'kill-ring-save)
-  (global-set-key (kbd "M-v") 'yank)
+  (bind-key* "M-c" 'kill-ring-save)
+  (bind-key* "M-v" 'yank)
 
   ;; Default word and char movement are always awkward to me.
   (bind-key* "M-j" 'backward-word)
@@ -1047,13 +1047,13 @@ Why does Emacs put those by default?
   (define-key key-translation-map (kbd "<escape>") (kbd "C-g"))
 
   ;; Adjust font size like web browsers. Doesn't work in terminal.
-  (global-set-key (kbd "C-=") 'text-scale-increase)
-  (global-set-key (kbd "C--") 'text-scale-decrease)
+  (bind-key* "C-=" 'text-scale-increase)
+  (bind-key* "C--" 'text-scale-decrease)
 
   ;; Bind extra keys to common commands.
   (define-key key-translation-map (kbd "C-;") (kbd "C-l"))
-  (global-set-key (kbd "M-l") 'recenter-top-bottom)
-  (global-set-key (kbd "M-o") 'other-window)
+  (bind-key* "M-l" 'recenter-top-bottom)
+  (bind-key* "M-o" 'other-window)
 
   ;; For within-screen jump. No need after avy jump.
   ;; (global-set-key (kbd "M-s") 'isearch-forward)
@@ -1062,15 +1062,15 @@ Why does Emacs put those by default?
   ;; (define-key isearch-mode-map (kbd "M-r") 'isearch-repeat-backward)
 
   ;; Cure bad habits.
-  (global-set-key (kbd "C-x C-s") (lambda ()
-				    (interactive)
-				    (message "Use C-s, dude.")))
+  (bind-key* "C-x C-s" (lambda ()
+			  (interactive)
+			  (message "Use C-s, dude.")))
 
   ;; Somehow those two packages aren't installed automatically by `use-package`.
   ;; Need to install them manually first. And then bind them here. And you can't do
   ;; `eval-after-load` for some reason.
-  (global-set-key (kbd "C-c C-o") 'dumb-jump-go-other-window)
-  (global-set-key (kbd "C-c C-y") 'dumb-jump-back)
+  (bind-key* "C-c C-o" 'dumb-jump-go-other-window)
+  (bind-key* "C-c C-y" 'dumb-jump-back)
   (bind-key* "C-c ," 'goto-last-change)
   (bind-key* "C-c ." 'goto-last-change-reverse)
 
@@ -1081,18 +1081,19 @@ Why does Emacs put those by default?
     ("M-i" . 'change-inner))
 
   ;; Misc.
-  (global-set-key (kbd "C-o") 'other-window)
-  (global-set-key (kbd "M-g") 'goto-line)
+  (bind-key* "C-o" 'other-window)
+  (bind-key* "M-g" 'goto-line)
+  (bind-key* "C-c DEL" 'delete-blank-lines)
+  (bind-key* "C-c <delete>" 'delete-blank-lines)
+  (bind-key* "C-x K" 'kill-this-buffer) ; Don't ask.
+  (bind-key* "C-c w" 'toggle-truncate-lines) ; Wrap.
+  (bind-key* "C-x q" 'query-replace)
+  (bind-key* "C-x \\" 'sort-lines)
+  (bind-key* "C-x ?" 'describe-key)
+  (bind-key* "C-x c" 'call-last-kbd-macro)
+  ;; Can't turn them to bind-key*; otherwise undo-tree-mode wouldn't enable. Strange.
   (global-set-key (kbd "M-;") 'comment-or-uncomment-region)
   (global-set-key (kbd "C-/") 'comment-or-uncomment-region)
-  (global-set-key (kbd "C-c DEL") 'delete-blank-lines)
-  (global-set-key (kbd "C-c <delete>") 'delete-blank-lines)
-  (global-set-key (kbd "C-x K") 'kill-this-buffer) ; Don't ask.
-  (global-set-key (kbd "C-c w") 'toggle-truncate-lines) ; Wrap.
-  (global-set-key (kbd "C-x q") 'query-replace)
-  (global-set-key (kbd "C-x \\") 'sort-lines)
-  (global-set-key (kbd "C-x ?") 'describe-key)
-  (global-set-key (kbd "C-x c") 'call-last-kbd-macro)
 
   ;; Aliases.
   (defalias 'rl  'my/reload-init-file)
