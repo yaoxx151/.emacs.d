@@ -1,21 +1,23 @@
 #+STARTIP: overview
 Rebind basic commands.
 
-Commonly used commands should be binded to short, easy-to-reach keybindings:
-| Key   | Command                         |
-|-------+---------------------------------|
-| C-s   | Save                            |
-| C-o   | Switch window                   |
-| C-w   | Backward-delete word or region  |
-| M-p   | Scroll up half page             |
-| M-n   | Scroll down half page           |
-| C-q   | Search (q for query)            |
-| C-z   | Undo                            |
-| C-r   | Redo                            |
-| C-x t | Beginning (t for top) of buffer |
-| C-x e | End of buffer                   |
-| M-c   | Copy (kill-ring-save)           |
-| M-v   | Paste (yank)                    |
+Commonly used commands should be binded to short, easy-to-reach
+keybindings. Emacs default keybindings are too long:
+| Key         | Command                          |
+|-------------+----------------------------------|
+| C-s         | Save                             |
+| C-o         | Switch window                    |
+| C-<0,1,2,3> | Window (instead of C-x <0,1,2,3> |
+| C-w         | Backward-delete word or region   |
+| M-p         | Scroll up half page              |
+| M-n         | Scroll down half page            |
+| C-q         | Search (q for query)             |
+| C-z         | Undo                             |
+| C-r         | Redo                             |
+| C-x t       | Beginning (t for top) of buffer  |
+| C-x e       | End of buffer                    |
+| M-c         | Copy (kill-ring-save)            |
+| M-v         | Paste (yank)                     |
 
 Keybindings that end with `f` and `b` are always awkward to me since they're
 hard to reach even though they remind you it's forward and backward. Rebind for
@@ -866,14 +868,16 @@ Why does Emacs put those by default?
   (bind-key* "C-w" 'my/backward-kill-word-or-region)
 
   ;; When splitting window, automatically balance them and switch focus to the
-  ;; newly splitted window.
-  (bind-key* "C-x 2"
+  ;; newly splitted window. And simplify key.
+  (define-key key-translation-map (kbd "C-1") (kbd "C-x 1"))
+
+  (bind-key* "C-2"
 	     (lambda ()
 	       (interactive)
 	       (split-window-vertically)
 	       (balance-windows)
 	       (other-window 1)))
-  (bind-key* "C-x 3"
+  (bind-key* "C-3"
 	     (lambda ()
 	       (interactive)
 	       (split-window-horizontally)
@@ -881,7 +885,7 @@ Why does Emacs put those by default?
 	       (other-window 1)))
 
   ;; Auto-balance window when deleting window.
-  (bind-key* "C-x 0"
+  (bind-key* "C-0"
 	     (lambda ()
 	       (interactive)
 	       (delete-window)
@@ -1085,6 +1089,18 @@ Why does Emacs put those by default?
   (bind-key* "C-x C-s" (lambda ()
 			  (interactive)
 			  (message "Use C-s, dude.")))
+  (bind-key* "C-x 0" (lambda ()
+			  (interactive)
+			  (message "Use C-0, dude.")))
+  (bind-key* "C-x 1" (lambda ()
+			  (interactive)
+			  (message "Use C-1, dude.")))
+  (bind-key* "C-x 2" (lambda ()
+			  (interactive)
+			  (message "Use C-2, dude.")))
+  (bind-key* "C-x 3" (lambda ()
+			  (interactive)
+			  (message "Use C-3, dude.")))
 
   ;; Somehow those two packages aren't installed automatically by `use-package`.
   ;; Need to install them manually first. And then bind them here. And you can't do
