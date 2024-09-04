@@ -1047,6 +1047,17 @@ Why does Emacs put those by default?
 
   (bind-key* "M-'" 'jump-to-mark)
 
+  ;; Jump to middle of line.
+  (defun move-to-middle-of-line ()
+    "Move point to the middle of the current line."
+    (interactive)
+    (let* ((begin (line-beginning-position))
+	   (end (line-end-position))
+	   (middle (/ (+ end begin) 2)))
+      (goto-char middle)))
+
+  (bind-key* "M-h" 'move-to-middle-of-line)
+
 #+end_src
 * My/Keybindings
 #+begin_src emacs-lisp
@@ -1074,11 +1085,6 @@ Why does Emacs put those by default?
   (bind-key* "C-=" 'text-scale-increase)
   (bind-key* "C--" 'text-scale-decrease)
 
-  ;; Bind extra keys to common commands.
-  (define-key key-translation-map (kbd "C-;") (kbd "C-l"))
-  (bind-key* "M-l" 'recenter-top-bottom)
-  (bind-key* "M-o" 'other-window)
-
   ;; For within-screen jump. No need after avy jump.
   ;; (global-set-key (kbd "M-s") 'isearch-forward)
   ;; (define-key isearch-mode-map (kbd "M-s") 'isearch-repeat-forward)
@@ -1092,9 +1098,6 @@ Why does Emacs put those by default?
   (bind-key* "C-x 0" (lambda ()
 			  (interactive)
 			  (message "Use C-0, dude.")))
-  (bind-key* "C-x 1" (lambda ()
-			  (interactive)
-			  (message "Use C-1, dude.")))
   (bind-key* "C-x 2" (lambda ()
 			  (interactive)
 			  (message "Use C-2, dude.")))
@@ -1127,6 +1130,10 @@ Why does Emacs put those by default?
   (bind-key* "C-x \\" 'sort-lines)
   (bind-key* "C-x ?" 'describe-key)
   (bind-key* "C-x c" 'call-last-kbd-macro)
+  ;; Bind extra keys to common commands.
+  (define-key key-translation-map (kbd "C-;") (kbd "C-l"))
+  (bind-key* "M-l" 'recenter-top-bottom)
+  (bind-key* "M-o" 'other-window)
   ;; Can't turn them to bind-key*; otherwise undo-tree-mode wouldn't enable. Strange.
   (global-set-key (kbd "M-;") 'comment-or-uncomment-region)
   (global-set-key (kbd "C-/") 'comment-or-uncomment-region)
