@@ -257,7 +257,7 @@ To prove I work on AI.
   (use-package gptel
     :ensure t
     :init
-    (setq gptel-model "claude-3-5-sonnet-20240620"
+    (setq gptel-model "claude-3-5-sonnet-20241022"
 	  gptel-backend (gptel-make-anthropic "Claude"
 			  :stream t
 			  :key (with-temp-buffer
@@ -708,39 +708,41 @@ Make the paranoid sleep better.
 * Theme
 Finetuned Zenburn theme.
 #+begin_src emacs-lisp
-  (use-package zenburn-theme
-    :ensure t
-    :config
-    (setq zenburn-override-colors-alist
-	  ;; Make main background lighter.
-	  '(("zenburn-bg" . "#494949")
-	    ;; Make main text light gold. Color borrowed from Jon Blow.
-	    ("zenburn-fg"  . "#CBB390")
-	    ;; Set original orange and yellow to dark rose and green since they conflict
-	    ;; with the main text.
-	    ("zenburn-orange" . "#CC9999")
-	    ("zenburn-yellow" . "#8FB28F")))
-    (load-theme 'zenburn t)
-    (set-cursor-color "#F0F0F0")
-    (set-face-attribute 'region nil :background "#666666")
-    ;; Search.
-    (set-face-attribute 'isearch nil :background "#ADD8E6" :foreground "#E0115F")
-    (set-face-attribute 'lazy-highlight nil :foreground "#E0115F")
-    ;; Indent highlight color.
-    (set-face-background 'highlight-indent-guides-odd-face "darkgray")
-    (set-face-background 'highlight-indent-guides-even-face "dimgray")
-    (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
-    ;; Mode line.
-    (set-face-attribute 'mode-line-buffer-id nil :foreground "#327232" :underline)
-    (set-face-attribute 'mode-line-inactive nil :foreground "gray40" :box nil)
-    (set-face-attribute 'mode-line nil
-			:foreground "#062329"
-			:background "#CBB390"
-			:box nil)
-    ;; Mini buffer current highlighted line color.
-    (custom-set-faces '(ivy-current-match ((t (:background "#333333")))))
-    ;; Paren matching color.
-    (set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#CCCCCC"))
+  (if (display-graphic-p)
+    (use-package zenburn-theme
+      :ensure t
+      :config
+      (setq zenburn-override-colors-alist
+	    ;; Make main background lighter.
+	    '(("zenburn-bg" . "#494949")
+	      ;; Make main text light gold. Color borrowed from Jon Blow.
+	      ("zenburn-fg"  . "#CBB390")
+	      ;; Set original orange and yellow to dark rose and green since they conflict
+	      ;; with the main text.
+	      ("zenburn-orange" . "#CC9999")
+	      ("zenburn-yellow" . "#8FB28F")))
+      (load-theme 'zenburn t)
+      (set-cursor-color "#F0F0F0")
+      (set-face-attribute 'region nil :background "#666666")
+      ;; Search.
+      (set-face-attribute 'isearch nil :background "#ADD8E6" :foreground "#E0115F")
+      (set-face-attribute 'lazy-highlight nil :foreground "#E0115F")
+      ;; Indent highlight color.
+      (set-face-background 'highlight-indent-guides-odd-face "darkgray")
+      (set-face-background 'highlight-indent-guides-even-face "dimgray")
+      (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
+      ;; Mode line.
+      (set-face-attribute 'mode-line-buffer-id nil :foreground "#327232" :underline)
+      (set-face-attribute 'mode-line-inactive nil :foreground "gray40" :box nil)
+      (set-face-attribute 'mode-line nil
+			  :foreground "#062329"
+			  :background "#CBB390"
+			  :box nil)
+      ;; Mini buffer current highlighted line color.
+      (custom-set-faces '(ivy-current-match ((t (:background "#333333")))))
+      ;; Paren matching color.
+      (set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#CCCCCC"))
+    (load-theme 'leuven))
 #+end_src
 * Undo Tree
 Emacs default undo/redo sucks.
@@ -1095,15 +1097,6 @@ Why does Emacs put those by default?
   (bind-key* "C-x C-s" (lambda ()
 			  (interactive)
 			  (message "Use C-s, dude.")))
-  (bind-key* "C-x 0" (lambda ()
-			  (interactive)
-			  (message "Use C-0, dude.")))
-  (bind-key* "C-x 2" (lambda ()
-			  (interactive)
-			  (message "Use C-2, dude.")))
-  (bind-key* "C-x 3" (lambda ()
-			  (interactive)
-			  (message "Use C-3, dude.")))
 
   ;; Somehow those two packages aren't installed automatically by `use-package`.
   ;; Need to install them manually first. And then bind them here. And you can't do
@@ -1121,7 +1114,7 @@ Why does Emacs put those by default?
 
   ;; Misc.
   (bind-key* "C-o" 'other-window)
-  (bind-key* "M-g" 'goto-line)
+  (bind-key* "M-u" 'goto-line)
   (bind-key* "C-c DEL" 'delete-blank-lines)
   (bind-key* "C-c <delete>" 'delete-blank-lines)
   (bind-key* "C-x K" 'kill-this-buffer) ; Don't ask.
@@ -1134,6 +1127,7 @@ Why does Emacs put those by default?
   (define-key key-translation-map (kbd "C-;") (kbd "C-l"))
   (bind-key* "M-l" 'recenter-top-bottom)
   (bind-key* "M-o" 'other-window)
+  (global-set-key (kbd "M-g") (kbd "C-g"))
   ;; Can't turn them to bind-key*; otherwise undo-tree-mode wouldn't enable. Strange.
   (global-set-key (kbd "M-;") 'comment-or-uncomment-region)
   (global-set-key (kbd "C-/") 'comment-or-uncomment-region)
@@ -1332,11 +1326,11 @@ Handle copy/paste in OSX.
   (setq dumb-jump-force-searcher 'rg)
 
   ;; Sticky function head.
-  ;; (use-package semantic
-  ;;   :ensure nil
-  ;;   :hook
-  ;;   (prog-mode . semantic-mode)
-  ;;   (prog-mode . global-semantic-stickyfunc-mode))
+  (use-package semantic
+    :ensure nil
+    :hook
+    (prog-mode . semantic-mode)
+    (prog-mode . global-semantic-stickyfunc-mode))
 
   ;; Default some files to text-mode.
   (add-to-list 'auto-mode-alist '("\\.in\\'" . text-mode))
