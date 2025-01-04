@@ -79,11 +79,11 @@ Only basic code completion. (Is that even too much?) No heavy LSP stuffs.
     :ensure t
     :config
     (add-hook 'prog-mode-hook 'company-mode)
-    (remove-hook 'text-mode-hook 'company-mode)
-    ;;  `company-debbrev` gives odd candidates.
-    (delete 'company-dabbrev company-backends)
+    (delete 'company-dabbrev company-backends) ; `company-debbrev` gives odd candidates.
+    ; Don't complete without being asked to!
+    (setq company-idle-delay nil)
+    (setq company-minimum-prefix-length 0)
     :custom
-    (company-minimum-prefix-length 3)
     (company-tooltip-align-annotations t)
     (company-require-match 'never)
     ;; Don't use company in the following modes.
@@ -92,9 +92,12 @@ Only basic code completion. (Is that even too much?) No heavy LSP stuffs.
     ;; Trigger completion immediately.
     (company-idle-delay 0.1)
     ;; Number the candidates (use M-1, M-2 etc to select completions).
-    (company-show-numbers t))
+    (company-show-numbers t)
+    :bind
+    (:map company-mode-map
+	  ("C-c C-c" . company-complete)))
 
-  ;; M-/ for Hippe expand.
+  ;; Hippe expand.
   (setq hippie-expand-try-functions-list '(try-expand-dabbrev
 					   try-expand-dabbrev-all-buffers
 					   try-expand-dabbrev-from-kill
@@ -106,6 +109,7 @@ Only basic code completion. (Is that even too much?) No heavy LSP stuffs.
 					   try-complete-lisp-symbol-partially
 					   try-complete-lisp-symbol))
   (global-set-key [remap dabbrev-expand] 'hippie-expand)
+  (global-set-key (kbd "C-t") 'hippie-expand)
 #+end_src
 * Crux
 Those are useful.
@@ -260,9 +264,12 @@ To prove I work on AI.
     (setq gptel-model "claude-3-5-sonnet-20241022"
 	  gptel-backend (gptel-make-anthropic "Claude"
 			  :stream t
-			  :key (with-temp-buffer
-				 (insert-file-contents "~/.emacs.d/keys/claude.txt")
-				 (string-trim (buffer-string)))))
+			  :key (let ((key-file-path "~/.emacs.d/keys/claude.txt"))
+				 (if (file-exists-p key-file-path)
+				     (with-temp-buffer
+				       (insert-file-contents key-file-path)
+				       (string-trim (buffer-string)))
+				   (message "File %s does not exist" key-file-path)))))
     (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
     (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
     (add-hook 'gptel-mode-hook (lambda () (auto-fill-mode -1)))
@@ -313,6 +320,20 @@ To prove I work on AI.
 	     (name 16 -1)
 	     " " filename))))
 #+end_src
+* Isearch
+#+begin_src emacs-lisp
+  (use-package isearch
+    :ensure nil
+     :defer t
+     :init
+     (global-set-key (kbd "C-q") 'isearch-forward)
+     (global-set-key (kbd "C-c s") 'isearch-forward-thing-at-point)
+     :bind
+     (:map isearch-mode-map
+		   ("C-n" . isearch-repeat-forward)
+		   ("C-p" . isearch-repeat-backward)
+		   ("C-w" . (lambda () (interactive) (isearch-del-char most-positive-fixnum)))))
+#+end_src
 * Ivy
 Useful because Emacs default completion sucks.
 #+begin_src emacs-lisp
@@ -323,15 +344,12 @@ Useful because Emacs default completion sucks.
     :init
     (use-package amx :ensure t :defer t)
     (use-package counsel :ensure t :diminish :config (counsel-mode 1))
-    (use-package swiper :ensure t :defer t)
     (ivy-mode 1)
     :bind*
     (("C-f" . counsel-M-x)        ; Because C-f is freed, why not?
      ("M-f" . counsel-M-x)        ; Extra binding.
      ("C-b" . ivy-switch-buffer)  ; Because C-b is freed, why not?
      ("M-b" . ivy-switch-buffer)  ; Extra binding.
-     ("C-q" . swiper-isearch)
-     ("C-c s" . swiper-isearch-thing-at-point)
      ("C-c f" . counsel-recentf)
      ("C-x f" . counsel-recentf)
      ("C-c C-f" . counsel-find-file)  ; Mispress.
@@ -347,7 +365,7 @@ Useful because Emacs default completion sucks.
     (ivy-height 10)
     (ivy-on-del-error-function nil)
     (ivy-magic-slash-non-match-action 'ivy-magic-slash-non-match-create)
-    (ivy-count-format "%d/%d")
+    (ivy-count-format "[%d/%d] ")
     (ivy-wrap t)
     ;; `counsel-M-x` prompt doesn't start with `^` to match only beginning of string.
     (ivy-initial-inputs-alist nil))
@@ -843,10 +861,8 @@ Why does Emacs put those by default?
   (setq initial-scratch-message "")
 
   ;; Useless keys that are easier to mispress.
-  (global-unset-key (kbd "C-x b"))    ; Original: switch buffer.
   (global-unset-key (kbd "C-x C-b"))  ; Original: buffer list.
   (global-unset-key (kbd "C-v"))
-  (global-unset-key (kbd "C-t"))
   (global-unset-key (kbd "M-h"))
   (global-unset-key (kbd "C-x C-m"))
   (global-unset-key (kbd "C-x m"))
