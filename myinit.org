@@ -2,26 +2,25 @@
 Rebind basic commands.
 
 Commonly used commands should be binded to short, easy-to-reach
-keybindings. Emacs default keybindings are too long:
-| Key         | Command                          |
-|-------------+----------------------------------|
-| C-s         | Save                             |
-| C-o         | Switch window                    |
-| C-<0,1,2,3> | Window (instead of C-x <0,1,2,3> |
-| C-w         | Backward-delete word or region   |
-| M-p         | Scroll up half page              |
-| M-n         | Scroll down half page            |
-| C-q         | Search (q for query)             |
-| C-z         | Undo                             |
-| C-r         | Redo                             |
-| C-x t       | Beginning (t for top) of buffer  |
-| C-x e       | End of buffer                    |
-| M-c         | Copy (kill-ring-save)            |
-| M-v         | Paste (yank)                     |
+keybindings. Emacs default keybindings can be bad:
+| Key            | Command                             |
+|----------------+-------------------------------------|
+| C-s            | Save                                |
+| C-o or M-o     | Switch window                       |
+| C-w            | Backward-delete word or kill region |
+| M-p            | Scroll up half page                 |
+| M-n            | Scroll down half page               |
+| C-q            | Search (q for query)                |
+| C-z or M-z     | Undo                                |
+| C-r or M-r     | Redo                                |
+| C-x t or C-c t | Beginning (t for top) of buffer     |
+| C-x e or C-c e | End of buffer                       |
+| M-c            | Copy (kill-ring-save)               |
+| M-v            | Paste (yank)                        |
+| C-<0,1,2,3>    | Window (instead of C-x <0,1,2,3>    |
 
-Keybindings that end with `f` and `b` are always awkward to me since they're
-hard to reach even though they remind you it's forward and backward. Rebind for
-more symmetry:
+Keybindings that end with `f` and `b` are awkward since they're hard to reach
+even though they remind you it's forward and backward. Rebind for more symmetry:
 | Key   | Command                         |
 |-------+---------------------------------|
 | M-j   | Backward word                   |
@@ -29,15 +28,12 @@ more symmetry:
 | C-j   | Backward char                   |
 | C-k   | Forward char                    |
 
-Since the original C-b, C-f, M-b, M-f are free now, we can rebind them to
-common commands:
-| Key   | Command                   |
-|-------+---------------------------|
-| C-x k | Kill (C-k is overwritten) |
-| C-f   | M-x                       |
-| M-f   | M-x (extra)               |
-| C-b   | Switch buffer             |
-| M-b   | Switch buffer (extra)     |
+Since the original C-b, C-f, M-b, M-f are free now, we can rebind them:
+| Key            | Command                   |
+|----------------+---------------------------|
+| C-x k or C-c k | Kill (C-k is overwritten) |
+| C-f or M-f     | M-x                       |
+| C-b or M-b     | Switch buffer             |
 
 * Avy
 Use less mouse.
@@ -71,6 +67,14 @@ Make switching window easier to see.
     :ensure t
     :init
     (beacon-mode 1))
+#+end_src
+* Change-inner
+Vim's `i`.
+#+begin_src emacs-lisp
+  (use-package change-inner
+    :ensure t
+    :bind*
+    ("M-i" . 'change-inner))
 #+end_src
 * Company
 Only basic code completion. (Is that even too much?) No heavy LSP stuffs.
@@ -112,7 +116,7 @@ Only basic code completion. (Is that even too much?) No heavy LSP stuffs.
   (global-set-key (kbd "C-t") 'hippie-expand)
 #+end_src
 * Crux
-Those are useful.
+Useful.
 #+begin_src emacs-lisp
   (use-package crux
     :ensure t
@@ -274,8 +278,7 @@ To prove I work on AI.
     (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
     (add-hook 'gptel-mode-hook (lambda () (auto-fill-mode -1)))
     :config
-    (define-key gptel-mode-map (kbd "C-c C-<return>") 'gptel-send)
-    (define-key gptel-mode-map (kbd "C-c C-RET") 'gptel-send))
+    (define-key gptel-mode-map (kbd "C-c C-c") 'gptel-send))
 #+end_src
 
 * Highlight
@@ -328,6 +331,7 @@ To prove I work on AI.
      :init
      (global-set-key (kbd "C-q") 'isearch-forward)
      (global-set-key (kbd "C-c s") 'isearch-forward-thing-at-point)
+     (add-hook 'isearch-update-post-hook '(lambda () (recenter))) ; Center the screen when search. Why is this not the default?
      :bind
      (:map isearch-mode-map
 		   ("C-n" . isearch-repeat-forward)
@@ -350,8 +354,8 @@ Useful because Emacs default completion sucks.
      ("M-f" . counsel-M-x)        ; Extra binding.
      ("C-b" . ivy-switch-buffer)  ; Because C-b is freed, why not?
      ("M-b" . ivy-switch-buffer)  ; Extra binding.
-     ("C-c f" . counsel-recentf)
-     ("C-x f" . counsel-recentf)
+     ("C-x r" . counsel-recentf)
+     ("C-x C-r" . counsel-recentf)
      ("C-c C-f" . counsel-find-file)  ; Mispress.
      ("C-c g" . counsel-rg)
      ("C-y" . counsel-yank-pop)
@@ -435,7 +439,7 @@ Quite useful. Agreed by Stevey.
     (global-set-key (kbd "C-e") 'mwim-end))
 #+end_src
 * Org
-Org is great as long as you don't spend your life on it.
+Org mode is great as long as you don't spend your life on it.
 #+begin_src emacs-lisp
   (use-package org
     :ensure nil
@@ -579,22 +583,6 @@ LSP server.
     :hook (python-mode . (lambda ()
 			    (require 'lsp-pyright) (lsp-deferred)))))
 #+end_src
-* Projectile
-Is it needed? Can you just open multiple emacs instances from terminal?
-#+begin_src emacs-lisp
-  (use-package projectile
-    :ensure t
-    :after ivy
-    :bind* (:map projectile-mode-map
-		("C-x p" . projectile-command-map))
-    :custom
-    (projectile-completion-system 'ivy)
-    :init
-    (projectile-mode +1)
-    (setq projectile-switch-project-action 'projectile-dired)
-    (setq projectile-find-dir-includes-top-level t))
-#+end_src
-
 * Recentf
 #+begin_src emacs-lisp
   (use-package recentf
@@ -726,41 +714,39 @@ Make the paranoid sleep better.
 * Theme
 Finetuned Zenburn theme.
 #+begin_src emacs-lisp
-  (if (display-graphic-p)
-    (use-package zenburn-theme
-      :ensure t
-      :config
-      (setq zenburn-override-colors-alist
-	    ;; Make main background lighter.
-	    '(("zenburn-bg" . "#494949")
-	      ;; Make main text light gold. Color borrowed from Jon Blow.
-	      ("zenburn-fg"  . "#CBB390")
-	      ;; Set original orange and yellow to dark rose and green since they conflict
-	      ;; with the main text.
-	      ("zenburn-orange" . "#CC9999")
-	      ("zenburn-yellow" . "#8FB28F")))
-      (load-theme 'zenburn t)
-      (set-cursor-color "#F0F0F0")
-      (set-face-attribute 'region nil :background "#666666")
-      ;; Search.
-      (set-face-attribute 'isearch nil :background "#ADD8E6" :foreground "#E0115F")
-      (set-face-attribute 'lazy-highlight nil :foreground "#E0115F")
-      ;; Indent highlight color.
-      (set-face-background 'highlight-indent-guides-odd-face "darkgray")
-      (set-face-background 'highlight-indent-guides-even-face "dimgray")
-      (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
-      ;; Mode line.
-      (set-face-attribute 'mode-line-buffer-id nil :foreground "#327232" :underline)
-      (set-face-attribute 'mode-line-inactive nil :foreground "gray40" :box nil)
-      (set-face-attribute 'mode-line nil
-			  :foreground "#062329"
-			  :background "#CBB390"
-			  :box nil)
-      ;; Mini buffer current highlighted line color.
-      (custom-set-faces '(ivy-current-match ((t (:background "#333333")))))
-      ;; Paren matching color.
-      (set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#CCCCCC"))
-    (load-theme 'leuven))
+  (use-package zenburn-theme
+    :ensure t
+    :config
+    (setq zenburn-override-colors-alist
+	  ;; Make main background lighter.
+	  '(("zenburn-bg" . "#494949")
+	    ;; Make main text light gold. Color borrowed from Jon Blow.
+	    ("zenburn-fg"  . "#CBB390")
+	    ;; Set original orange and yellow to dark rose and green since they conflict
+	    ;; with the main text.
+	    ("zenburn-orange" . "#CC9999")
+	    ("zenburn-yellow" . "#8FB28F")))
+    (load-theme 'zenburn t)
+    (set-cursor-color "#F0F0F0")
+    (set-face-attribute 'region nil :background "#666666")
+    ;; Search.
+    (set-face-attribute 'isearch nil :background "#ADD8E6" :foreground "#E0115F")
+    (set-face-attribute 'lazy-highlight nil :foreground "#E0115F")
+    ;; Indent highlight color.
+    (set-face-background 'highlight-indent-guides-odd-face "darkgray")
+    (set-face-background 'highlight-indent-guides-even-face "dimgray")
+    (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
+    ;; Mode line.
+    (set-face-attribute 'mode-line-buffer-id nil :foreground "#327232" :underline)
+    (set-face-attribute 'mode-line-inactive nil :foreground "gray40" :box nil)
+    (set-face-attribute 'mode-line nil
+			:foreground "#062329"
+			:background "#CBB390"
+			:box nil)
+    ;; Mini buffer current highlighted line color.
+    (custom-set-faces '(ivy-current-match ((t (:background "#333333")))))
+    ;; Paren matching color.
+    (set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#CCCCCC"))
 #+end_src
 * Undo Tree
 Emacs default undo/redo sucks.
@@ -866,7 +852,6 @@ Why does Emacs put those by default?
   (global-unset-key (kbd "M-h"))
   (global-unset-key (kbd "C-x C-m"))
   (global-unset-key (kbd "C-x m"))
-  (global-unset-key (kbd "C-c m"))
   (global-unset-key (kbd "C-x C-z"))
   (global-unset-key (kbd "C-x C-u"))
   (global-unset-key (kbd "C-x C-l"))
@@ -886,16 +871,14 @@ Why does Emacs put those by default?
   (bind-key* "C-w" 'my/backward-kill-word-or-region)
 
   ;; When splitting window, automatically balance them and switch focus to the
-  ;; newly splitted window. And simplify key.
-  (define-key key-translation-map (kbd "C-1") (kbd "C-x 1"))
-
-  (bind-key* "C-2"
+  ;; newly splitted window.
+  (bind-key* "C-x 2"
 	     (lambda ()
 	       (interactive)
 	       (split-window-vertically)
 	       (balance-windows)
 	       (other-window 1)))
-  (bind-key* "C-3"
+  (bind-key* "C-x 3"
 	     (lambda ()
 	       (interactive)
 	       (split-window-horizontally)
@@ -903,11 +886,17 @@ Why does Emacs put those by default?
 	       (other-window 1)))
 
   ;; Auto-balance window when deleting window.
-  (bind-key* "C-0"
+  (bind-key* "C-x 0"
 	     (lambda ()
 	       (interactive)
 	       (delete-window)
 	       (balance-windows)))
+
+  ;; Simplify. Doesn't work in terminal.
+  (define-key key-translation-map (kbd "C-0") (kbd "C-x 0"))
+  (define-key key-translation-map (kbd "C-1") (kbd "C-x 1"))
+  (define-key key-translation-map (kbd "C-2") (kbd "C-x 2"))
+  (define-key key-translation-map (kbd "C-3") (kbd "C-x 3"))
 
   ;; Toggle column goal.
   (defun my/toggle-goal-column ()
@@ -966,7 +955,7 @@ Why does Emacs put those by default?
     (find-file "~/.emacs.d/myinit.org"))
 
   ;; Show buffer's file path.
-  (defun show-file-path ()
+  (defun my/show-file-path ()
     "Show the full path of the file in the minibuffer."
     (interactive)
     (message (buffer-file-name)))
@@ -982,7 +971,7 @@ Why does Emacs put those by default?
   (bind-key* "M-w" 'my/kill-word-at-point)
 
   ;; Stolen from Stevey.
-  (defun rename-file-and-buffer (new-name)
+  (defun my/rename-file-and-buffer (new-name)
     "Renames both current buffer and file it's visiting to NEW-NAME."
     (interactive "sNew name: ")
     (let ((name (buffer-name))
@@ -997,7 +986,7 @@ Why does Emacs put those by default?
 	    (set-visited-file-name new-name)
 	    (set-buffer-modified-p nil))))))
 
-  (defun move-buffer-file (dir)
+  (defun my/move-buffer-file (dir)
     "Moves both current buffer and file it's visiting to DIR."
     (interactive "DNew directory: ")
     (let* ((name (buffer-name))
@@ -1015,7 +1004,7 @@ Why does Emacs put those by default?
 	  (set-buffer-modified-p nil)  t))))
 
   ;; Delete this file.
-  (defun delete-this-file ()
+  (defun my/delete-this-file ()
     "Kill the current buffer and deletes the file it is visiting."
     (interactive)
     (let ((filename (buffer-file-name)))
@@ -1029,12 +1018,12 @@ Why does Emacs put those by default?
 
 
   ;; Unfill paragraph and region. Why aren't they built-in?
-  (defun unfill-paragraph ()
+  (defun my/unfill-paragraph ()
     (interactive)
     (let ((fill-column (point-max)))
       (fill-paragraph nil)))
 
-  (defun unfill-region ()
+  (defun my/unfill-region ()
     (interactive)
     (let ((fill-column (point-max)))
       (fill-region (region-beginning) (region-end) nil)))
@@ -1047,26 +1036,26 @@ Why does Emacs put those by default?
   (add-hook 'visual-line-mode-hook 'my/visual-line-mode-hook)
 
   ;; Simplify local mark ring set and jump.
-  (defun push-mark-no-activate ()
+  (defun my/mark-location ()
     "Pushes `point' to `mark-ring' and does not activate the region
        Equivalent to \\[set-mark-command] when \\[transient-mark-mode] is disabled"
     (interactive)
     (push-mark (point) t nil)
     (message "Pushed mark to ring"))
 
-  (bind-key* "C-'" 'push-mark-no-activate)
+  (bind-key* "C-c m" 'my/mark-location)
 
-  (defun jump-to-mark ()
+  (defun my/return-to-mark ()
     "Jumps to the local mark, respecting the `mark-ring' order.
     This is the same as using \\[set-mark-command] with the prefix argument."
     (interactive)
     (set-mark-command 1)
     (message "Jumped to mark"))
 
-  (bind-key* "M-'" 'jump-to-mark)
+  (bind-key* "C-c r" 'my/return-to-mark)
 
   ;; Jump to middle of line.
-  (defun move-to-middle-of-line ()
+  (defun my/move-to-middle-of-line ()
     "Move point to the middle of the current line."
     (interactive)
     (let* ((begin (line-beginning-position))
@@ -1074,7 +1063,7 @@ Why does Emacs put those by default?
 	   (middle (/ (+ end begin) 2)))
       (goto-char middle)))
 
-  (bind-key* "M-h" 'move-to-middle-of-line)
+  (bind-key* "M-h" 'my/move-to-middle-of-line)
 
 #+end_src
 * My/Keybindings
@@ -1095,19 +1084,9 @@ Why does Emacs put those by default?
   (bind-key* "C-j" 'backward-char)
   (bind-key* "C-k" 'forward-char)
 
-  ;; C-g is always hard to press but esc is also far away.
-  (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
-  (define-key key-translation-map (kbd "<escape>") (kbd "C-g"))
-
   ;; Adjust font size like web browsers. Doesn't work in terminal.
   (bind-key* "C-=" 'text-scale-increase)
   (bind-key* "C--" 'text-scale-decrease)
-
-  ;; For within-screen jump. No need after avy jump.
-  ;; (global-set-key (kbd "M-s") 'isearch-forward)
-  ;; (define-key isearch-mode-map (kbd "M-s") 'isearch-repeat-forward)
-  ;; (global-set-key (kbd "M-r") 'isearch-backward)
-  ;; (define-key isearch-mode-map (kbd "M-r") 'isearch-repeat-backward)
 
   ;; Cure bad habits.
   (bind-key* "C-x C-s" (lambda ()
@@ -1121,12 +1100,6 @@ Why does Emacs put those by default?
   (bind-key* "C-c C-y" 'dumb-jump-back)
   (bind-key* "C-c ," 'goto-last-change)
   (bind-key* "C-c ." 'goto-last-change-reverse)
-
-  ;; Vim's `i`.
-  (use-package change-inner
-    :ensure t
-    :bind*
-    ("M-i" . 'change-inner))
 
   ;; Misc.
   (bind-key* "C-o" 'other-window)
@@ -1155,10 +1128,10 @@ Why does Emacs put those by default?
   (defalias 'rc  'recompile)
   (defalias 'rs  'replace-string)
 #+end_src
-* My/MacOS
+* My/OS
 Handle copy/paste in OSX.
 #+begin_src emacs-lisp
-  (defun copy-from-osx ()
+  (defun my/copy-from-osx ()
     "Handle copy/paste intelligently on osx."
     (let ((pbpaste (purecopy "/usr/bin/pbpaste")))
       (if (and (eq system-type 'darwin)
@@ -1167,15 +1140,15 @@ Handle copy/paste in OSX.
 		  (default-directory "~"))
 	      (shell-command-to-string pbpaste)))))
 
-  (defun paste-to-osx (text &optional push)
+  (defun my/paste-to-osx (text &optional push)
     (let ((process-connection-type nil))
       (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
 	(process-send-string proc text)
 	(process-send-eof proc))))
 
   (if *sys/mac*
-      (setq interprogram-cut-function 'paste-to-osx
-	    interprogram-paste-function 'copy-from-osx))
+      (setq interprogram-cut-function 'my/paste-to-osx
+	    interprogram-paste-function 'my/copy-from-osx))
 #+end_src
 * My/Small Configs
 #+begin_src emacs-lisp
