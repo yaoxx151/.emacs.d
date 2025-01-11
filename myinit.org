@@ -805,32 +805,6 @@ Restore previous window layouts.
      "*Ibuffer*"
      "*esh command on file*")))
 #+end_src
-* Yasnippet
-Is it useful?
-#+begin_src emacs-lisp
-  (use-package yasnippet
-    :ensure t
-    :diminish yas-minor-mode
-    :init
-    (use-package yasnippet-snippets :ensure t :after yasnippet)
-    :hook ((prog-mode LaTeX-mode org-mode markdown-mode) . yas-minor-mode)
-    :bind
-    (:map yas-keymap
-	  (("TAB" . smarter-yas-expand-next-field)
-	   ([(tab)] . smarter-yas-expand-next-field)))
-    :config
-    (yas-reload-all)
-    (defun smarter-yas-expand-next-field ()
-      "Try to `yas-expand' then `yas-next-field' at current cursor position."
-      (interactive)
-      (let ((old-point (point))
-	    (old-tick (buffer-chars-modified-tick)))
-	(yas-expand)
-	(when (and (eq old-point (point))
-		   (eq old-tick (buffer-chars-modified-tick)))
-	  (ignore-errors (yas-next-field))))))
-#+end_src
-
 * My/Disable Useless Things
 Why does Emacs put those by default?
 #+begin_src emacs-lisp
@@ -920,7 +894,7 @@ Why does Emacs put those by default?
   ;; Save all buffers.
   (defun my/save-all-buffers ()
     "Instead of `save-buffer', save all opened buffers by calling
-		    `save-some-buffers' with ARG t."
+		     `save-some-buffers' with ARG t."
     (interactive)
     (save-some-buffers t))
 
@@ -929,7 +903,7 @@ Why does Emacs put those by default?
   ;; Mark until a char. A general version of `Zap-up-to-char`.
   (defun my/mark-until-char ()
     "Mark text from current cursor position until the first occurrence
-		 of a prompted character."
+		  of a prompted character."
     (interactive)
     (let ((prompt (read-char "Enter the character: ")))
       (save-excursion
@@ -1038,7 +1012,7 @@ Why does Emacs put those by default?
   ;; Simplify local mark ring set and jump.
   (defun my/mark-location ()
     "Pushes `point' to `mark-ring' and does not activate the region
-       Equivalent to \\[set-mark-command] when \\[transient-mark-mode] is disabled"
+	Equivalent to \\[set-mark-command] when \\[transient-mark-mode] is disabled"
     (interactive)
     (push-mark (point) t nil)
     (message "Pushed mark to ring"))
@@ -1047,7 +1021,7 @@ Why does Emacs put those by default?
 
   (defun my/return-to-mark ()
     "Jumps to the local mark, respecting the `mark-ring' order.
-    This is the same as using \\[set-mark-command] with the prefix argument."
+     This is the same as using \\[set-mark-command] with the prefix argument."
     (interactive)
     (set-mark-command 1)
     (message "Jumped to mark"))
@@ -1065,6 +1039,38 @@ Why does Emacs put those by default?
 
   (bind-key* "M-h" 'my/move-to-middle-of-line)
 
+  ;; Python indent.
+  (defun my/python-tab (&optional arg)
+    "Indent selected text or the current line."
+    (interactive "*P")
+    (if (use-region-p)
+	(save-excursion
+	  (let* ((beg (region-beginning))
+		 (end (region-end))
+		 (beg-line (progn (goto-char beg)
+				  (line-beginning-position)))
+		 (end-line (progn (goto-char end) (line-end-position))))
+	    (python-indent-shift-right beg-line end-line arg)))
+      (indent-for-tab-command arg)))
+
+  (defun my/python-backtab (&optional arg)
+    "Dedent selected text or the current line."
+    (interactive "*P")
+    (if (use-region-p)
+	(save-excursion (let* ((beg (region-beginning))
+			       (end (region-end))
+			       (beg-line (progn (goto-char beg)
+						(line-beginning-position)))
+			       (end-line (progn (goto-char end) (line-end-position))))
+			  (python-indent-shift-left beg-line end-line arg)))
+      (python-indent-shift-left (line-beginning-position) (line-end-position) arg)))
+
+  (define-key python-mode-map (kbd "TAB") 'my/python-tab)
+  (define-key python-ts-mode-map (kbd "TAB") 'my/python-tab)
+  (define-key python-mode-map (kbd "<tab>") 'my/python-tab)
+  (define-key python-ts-mode-map (kbd "<tab>") 'my/python-tab)
+  (define-key python-mode-map (kbd "<backtab>") 'my/python-backtab)
+  (define-key python-ts-mode-map (kbd "<backtab>") 'my/python-backtab)
 #+end_src
 * My/Keybindings
 #+begin_src emacs-lisp
