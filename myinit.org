@@ -77,7 +77,7 @@ Vim's `i`.
     ("M-i" . 'change-inner))
 #+end_src
 * Company
-Only basic code completion. (Is that even too much?) No heavy LSP stuffs.
+No LSP. Only code completion when *being asked to*.
 #+begin_src emacs-lisp
   (use-package company
     :ensure t
@@ -324,6 +324,7 @@ To prove I work on AI.
 	     " " filename))))
 #+end_src
 * Isearch
+Basic search.
 #+begin_src emacs-lisp
   (use-package isearch
     :ensure nil
@@ -531,30 +532,6 @@ Newly supported. Can be buggy.
   (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort black)))
 #+end_src
 
-** LSP Client
-Is LSP good or bad? Does it make me lazy?
-#+begin_src emacs-lisp
-  (use-package lsp-mode
-    :ensure t
-    :defer t
-    :commands (lsp lsp-deferred)
-    :hook (python-mode . lsp-deferred)
-    :config
-    ;; Disable useless LSP UI. https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off
-    (setq lsp-headerline-breadcrumb-enable nil)
-    (setq lsp-ui-sideline-enable nil)
-    (setq lsp-ui-sideline-enable nil)
-    (setq lsp-modeline-code-actions-enable nil)
-    (setq lsp-modeline-diagnostics-enable nil))
-
-  (use-package eglot
-    :ensure t
-    :hook (prog-mode . eglot-ensure)
-    :bind*
-    ("C-c l r" . eglot-rename)
-    ("C-c l e" . eldoc))
-#+end_src
-
 ** Python
 #+begin_src emacs-lisp
   (use-package python-mode
@@ -568,20 +545,6 @@ Is LSP good or bad? Does it make me lazy?
     (py-python-command "/usr/local/bin/python3")
     (python-shell-interpreter "/usr/local/bin/python3")
     (python-indent-guess-indent-offset-verbose nil))
-#+end_src
-
-LSP server.
-#+begin_src emacs-lisp
-  (use-package lsp-pyright
-    :ensure t
-    :defer t
-    :config
-    (setq lsp-pyright-disable-language-service nil
-	  lsp-pyright-disable-organize-imports nil
-	  lsp-pyright-auto-import-completions t
-	  lsp-pyright-use-library-code-for-types t
-    :hook (python-mode . (lambda ()
-			    (require 'lsp-pyright) (lsp-deferred)))))
 #+end_src
 * Recentf
 #+begin_src emacs-lisp
@@ -608,7 +571,7 @@ LSP server.
   (save-place-mode 1)
 
   ;; Set history-length longer.
-  (setq-default history-length 500)
+  (setq-default history-length 1000)
 #+end_src
 * Scroll
 #+begin_src emacs-lisp
@@ -643,7 +606,7 @@ LSP server.
     (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
     (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
 #+end_src
-* Shell/Terminal
+* Shell
 #+begin_src emacs-lisp
   (use-package exec-path-from-shell
     :ensure t
@@ -662,6 +625,7 @@ LSP server.
           ("C-o" . other-window)))
 #+end_src
 * Spell Checker
+Still need.
 #+begin_src emacs-lisp
   (use-package flyspell
     :ensure nil
@@ -1156,7 +1120,7 @@ Handle copy/paste in OSX.
       (setq interprogram-cut-function 'my/paste-to-osx
 	    interprogram-paste-function 'my/copy-from-osx))
 #+end_src
-* My/Small Configs
+* My/Configs
 #+begin_src emacs-lisp
   ;; C-p, C-n, etc uses visual lines.
   (setq line-move-visual t)
