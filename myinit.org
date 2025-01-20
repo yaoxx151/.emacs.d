@@ -1,26 +1,9 @@
 #+STARTIP: overview
 Rebind basic commands.
 
-Commonly used commands should be binded to short, easy-to-reach
-keybindings. Emacs default keybindings can be bad:
-| Key            | Command                             |
-|----------------+-------------------------------------|
-| C-s            | Save                                |
-| C-o or M-o     | Switch window                       |
-| C-w            | Backward-delete word or kill region |
-| M-p            | Scroll up half page                 |
-| M-n            | Scroll down half page               |
-| C-q            | Search (q for query)                |
-| C-z or M-z     | Undo                                |
-| C-r or M-r     | Redo                                |
-| C-x t or C-c t | Beginning (t for top) of buffer     |
-| C-x e or C-c e | End of buffer                       |
-| M-c            | Copy (kill-ring-save)               |
-| M-v            | Paste (yank)                        |
-| C-<0,1,2,3>    | Window (instead of C-x <0,1,2,3>    |
-
-Keybindings that end with `f` and `b` are awkward since they're hard to reach
-even though they remind you it's forward and backward. Rebind for more symmetry:
+First, movement keybindings that end with `f` and `b` are often awkward since
+they're hard to reach even though they remind you it's forward and
+backward. Rebind for more symmetry:
 | Key   | Command                         |
 |-------+---------------------------------|
 | M-j   | Backward word                   |
@@ -28,12 +11,27 @@ even though they remind you it's forward and backward. Rebind for more symmetry:
 | C-j   | Backward char                   |
 | C-k   | Forward char                    |
 
-Since the original C-b, C-f, M-b, M-f are free now, we can rebind them:
-| Key            | Command                   |
-|----------------+---------------------------|
-| C-x k or C-c k | Kill (C-k is overwritten) |
-| C-f or M-f     | M-x                       |
-| C-b or M-b     | Switch buffer             |
+
+Then rebind commonly used commands to short, easy-to-reach
+keybindings:
+| Key            | Command                             |
+|----------------+-------------------------------------|
+| C-s            | Save                                |
+| C-o or M-o     | Switch window                       |
+| C-w            | Backward-delete word or kill region |
+| M-p            | Scroll up half page                 |
+| M-n            | Scroll down half page               |
+| C-f            | isearch (C-f is free)               |
+| M-f            | M-x extra binding                   |
+| C-q            | Kill (C-k is overwritten)           |
+| C-b or M-b     | Switch buffer                       |
+| C-z or M-z     | Undo                                |
+| C-r or M-r     | Redo                                |
+| C-x t or C-c t | Beginning (t for top) of buffer     |
+| C-x e or C-c e | End of buffer                       |
+| M-c            | Copy (kill-ring-save)               |
+| M-v            | Paste (yank)                        |
+| C-<0,1,2,3>    | Window (instead of C-x <0,1,2,3>    |
 
 * Avy
 Use less mouse.
@@ -121,10 +119,7 @@ Useful.
   (use-package crux
     :ensure t
     :bind*
-    (("C-x k" . crux-smart-kill-line)
-     ("C-x C-k" . crux-smart-kill-line) ; For mispress.
-     ("C-c k" . crux-smart-kill-line)   ; For mispress.
-     ("C-c C-k" . crux-smart-kill-line) ; For mispress.
+    (("C-q" . crux-smart-kill-line)
      ("C-x <delete>" . crux-kill-whole-line)
      ("C-x DEL" . crux-kill-whole-line)
      ("C-c d" . crux-duplicate-current-line-or-region)
@@ -330,7 +325,7 @@ Basic search.
     :ensure nil
      :defer t
      :init
-     (global-set-key (kbd "C-q") 'isearch-forward)
+     (global-set-key (kbd "C-f") 'isearch-forward)
      (global-set-key (kbd "C-c s") 'isearch-forward-thing-at-point)
      (add-hook 'isearch-update-post-hook '(lambda () (recenter))) ; Center the screen when search. Why is this not the default?
      :bind
@@ -351,10 +346,9 @@ Useful because Emacs default completion sucks.
     (use-package counsel :ensure t :diminish :config (counsel-mode 1))
     (ivy-mode 1)
     :bind*
-    (("C-f" . counsel-M-x)        ; Because C-f is freed, why not?
-     ("M-f" . counsel-M-x)        ; Extra binding.
+    (("M-f" . counsel-M-x)        ; Extra binding for M-x.
      ("C-b" . ivy-switch-buffer)  ; Because C-b is freed, why not?
-     ("M-b" . ivy-switch-buffer)  ; Extra binding.
+     ("M-b" . ivy-switch-buffer)  ; Extra binding; C-b is often needed for tmux.
      ("C-x r" . counsel-recentf)
      ("C-x C-r" . counsel-recentf)
      ("C-c C-f" . counsel-find-file)  ; Mispress.
@@ -788,13 +782,14 @@ Why does Emacs put those by default?
   (global-unset-key (kbd "C-x C-b"))  ; Original: buffer list.
   (global-unset-key (kbd "C-v"))
   (global-unset-key (kbd "M-h"))
+  (global-unset-key (kbd "C-x k"))    ; Use `C-x K`.
   (global-unset-key (kbd "C-x C-m"))
   (global-unset-key (kbd "C-x m"))
   (global-unset-key (kbd "C-x C-z"))
   (global-unset-key (kbd "C-x C-u"))
   (global-unset-key (kbd "C-x C-l"))
   (global-unset-key (kbd "C-x C-x"))
-  (global-unset-key (kbd "C-x C-s")) ; Use `C-s` instead.
+  (global-unset-key (kbd "C-x C-s"))  ; Use `C-s`.
 #+end_src
 * My/Functions
 #+begin_src emacs-lisp
@@ -1101,24 +1096,24 @@ Why does Emacs put those by default?
 * My/OS
 Handle copy/paste in OSX.
 #+begin_src emacs-lisp
-  (defun my/copy-from-osx ()
-    "Handle copy/paste intelligently on osx."
-    (let ((pbpaste (purecopy "/usr/bin/pbpaste")))
-      (if (and (eq system-type 'darwin)
-	       (file-exists-p pbpaste))
-	    (let ((tramp-mode nil)
-		  (default-directory "~"))
-	      (shell-command-to-string pbpaste)))))
+  (when (eq system-type 'darwin)
+    (defun my/copy-from-osx ()
+      "Handle copy/paste intelligently on osx."
+      (let ((pbpaste (purecopy "/usr/bin/pbpaste")))
+	(if (and (eq system-type 'darwin)
+		 (file-exists-p pbpaste))
+	      (let ((tramp-mode nil)
+		    (default-directory "~"))
+		(shell-command-to-string pbpaste)))))
 
-  (defun my/paste-to-osx (text &optional push)
-    (let ((process-connection-type nil))
-      (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
-	(process-send-string proc text)
-	(process-send-eof proc))))
+    (defun my/paste-to-osx (text &optional push)
+      (let ((process-connection-type nil))
+	(let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+	  (process-send-string proc text)
+	  (process-send-eof proc))))
 
-  (if *sys/mac*
-      (setq interprogram-cut-function 'my/paste-to-osx
-	    interprogram-paste-function 'my/copy-from-osx))
+    (setq interprogram-cut-function 'my/paste-to-osx
+	  interprogram-paste-function 'my/copy-from-osx))
 #+end_src
 * My/Configs
 #+begin_src emacs-lisp
@@ -1187,10 +1182,10 @@ Handle copy/paste in OSX.
 
   ;; Width to wrap lines for `fill-paragraph` and `fill-region`.
   (setq-default fill-column 80)
-  (add-hook 'LaTeX-mode-hook 'auto-fill-mode)
-  (add-hook 'tex-mode-hook 'auto-fill-mode)
-  (add-hook 'text-mode-hook 'auto-fill-mode)
-  (add-hook 'org-mode-hook 'auto-fill-mode)
+  ;; (add-hook 'LaTeX-mode-hook 'auto-fill-mode)
+  ;; (add-hook 'tex-mode-hook 'auto-fill-mode)
+  ;; (add-hook 'text-mode-hook 'auto-fill-mode)
+  ;; (add-hook 'org-mode-hook 'auto-fill-mode)
 
   ;; Visual line don't break the word.
   (setq-default word-wrap t)
