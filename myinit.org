@@ -22,7 +22,6 @@ keybindings:
 | M-p            | Scroll up half page                 |
 | M-n            | Scroll down half page               |
 | C-f            | isearch (C-f is free)               |
-| M-f            | M-x extra binding                   |
 | C-q            | Kill (C-k is overwritten)           |
 | C-b or M-b     | Switch buffer                       |
 | C-z or M-z     | Undo                                |
@@ -326,6 +325,7 @@ Basic search.
      :defer t
      :init
      (global-set-key (kbd "C-f") 'isearch-forward)
+     (global-set-key (kbd "M-f") 'isearch-backward)
      (global-set-key (kbd "C-c s") 'isearch-forward-thing-at-point)
      (add-hook 'isearch-update-post-hook '(lambda () (recenter))) ; Center the screen when search. Why is this not the default?
      :bind
@@ -346,8 +346,7 @@ Useful because Emacs default completion sucks.
     (use-package counsel :ensure t :diminish :config (counsel-mode 1))
     (ivy-mode 1)
     :bind*
-    (("M-f" . counsel-M-x)        ; Extra binding for M-x.
-     ("C-b" . ivy-switch-buffer)  ; Because C-b is freed, why not?
+    (("C-b" . ivy-switch-buffer)  ; Because C-b is freed, why not?
      ("M-b" . ivy-switch-buffer)  ; Extra binding; C-b is often needed for tmux.
      ("C-x r" . counsel-recentf)
      ("C-x C-r" . counsel-recentf)
@@ -1023,6 +1022,15 @@ Why does Emacs put those by default?
 			       (end-line (progn (goto-char end) (line-end-position))))
 			  (python-indent-shift-left beg-line end-line arg)))
       (python-indent-shift-left (line-beginning-position) (line-end-position) arg)))
+
+  (defun my/copy-line-to-clipboard ()
+    "Copy the current line to the macOS clipboard."
+    (interactive)
+    (let ((line (buffer-substring (line-beginning-position) (line-end-position))))
+      (kill-new line)
+      (shell-command (concat "echo " (shell-quote-argument line) " | pbcopy"))))
+
+  (bind-key* "C-c c" 'my/copy-line-to-clipboard)
 
   (define-key python-mode-map (kbd "TAB") 'my/python-tab)
   (define-key python-ts-mode-map (kbd "TAB") 'my/python-tab)
