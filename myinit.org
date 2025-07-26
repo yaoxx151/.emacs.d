@@ -1,36 +1,36 @@
 #+STARTIP: overview
-Rebind basic commands.
-
-First, movement keybindings that end with `f` and `b` are often awkward since
-they're hard to reach even though they remind you it's forward and
-backward. Rebind for more symmetry:
-| Key   | Command                         |
-|-------+---------------------------------|
-| M-j   | Backward word                   |
-| M-k   | Forward word                    |
-| C-j   | Backward char                   |
-| C-k   | Forward char                    |
-
-
-Then rebind commonly used commands to short, easy-to-reach
-keybindings:
-| Key            | Command                             |
-|----------------+-------------------------------------|
-| C-s            | Save                                |
-| C-o or M-o     | Switch window                       |
-| C-w            | Backward-delete word or kill region |
-| M-p            | Scroll up half page                 |
-| M-n            | Scroll down half page               |
-| C-f            | isearch (C-f is free)               |
-| C-q            | Kill (C-k is overwritten)           |
-| C-b or M-b     | Switch buffer                       |
-| C-z or M-z     | Undo                                |
-| C-r or M-r     | Redo                                |
-| C-x t or C-c t | Beginning (t for top) of buffer     |
-| C-x e or C-c e | End of buffer                       |
-| M-c            | Copy (kill-ring-save)               |
-| M-v            | Paste (yank)                        |
-| C-<0,1,2,3>    | Window (instead of C-x <0,1,2,3>    |
+My customized keybindings:
+| Keybinding  | Command                             |
+|-------------+-------------------------------------|
+| M-j         | Backward word                       |
+| M-k         | Forward word                        |
+| C-j         | Backward char                       |
+| C-k         | Forward char                        |
+| C-s         | Save                                |
+| C-o         | Switch window                       |
+| C-w         | Backward-delete word or kill region |
+| M-p         | Scroll up half page                 |
+| M-n         | Scroll down half page               |
+| C-f         | isearch (C-f is free)               |
+| C-q         | Kill (C-k is overwritten)           |
+| M-b         | Switch buffer                       |
+| C-z         | Undo                                |
+| C-r         | Redo                                |
+| C-<0,1,2,3> | Window (instead of C-x <0,1,2,3>    |
+| C-x t       | Beginning of buffer (from Stevey)   |
+| C-x e       | End of buffer (from Stevey)         |
+| M-c         | Copy (kill-ring-save)               |
+| M-v         | Paste (yank)                        |
+| M-s         | Jump within the screen              |
+| C-x q       | query-replace                       |
+| M-g         | Go to line                          |
+| C-c c       | Copy the current line               |
+| C-c d       | Duplicate the current line          |
+| M-w         | Delete the current word             |
+| C-x r       | Open recent file                    |
+| C-x DEL     | Delete the current line             |
+| M-e         | Expand region                       |
+| C-x ?       | Describe key (from Linus)           |
 
 * Avy
 Use less mouse.
@@ -332,6 +332,7 @@ Basic search.
      (:map isearch-mode-map
 		   ("C-n" . isearch-repeat-forward)
 		   ("C-p" . isearch-repeat-backward)
+		   ("M-v" . isearch-yank-kill)
 		   ("C-w" . (lambda () (interactive) (isearch-del-char most-positive-fixnum)))))
 #+end_src
 * Ivy
@@ -986,17 +987,6 @@ Why does Emacs put those by default?
 
   (bind-key* "C-c r" 'my/return-to-mark)
 
-  ;; Jump to middle of line.
-  (defun my/move-to-middle-of-line ()
-    "Move point to the middle of the current line."
-    (interactive)
-    (let* ((begin (line-beginning-position))
-	   (end (line-end-position))
-	   (middle (/ (+ end begin) 2)))
-      (goto-char middle)))
-
-  (bind-key* "M-h" 'my/move-to-middle-of-line)
-
   ;; Python indent.
   (defun my/python-tab (&optional arg)
     "Indent selected text or the current line."
@@ -1076,7 +1066,7 @@ Why does Emacs put those by default?
 
   ;; Misc.
   (bind-key* "C-o" 'other-window)
-  (bind-key* "M-u" 'goto-line)
+  (bind-key* "M-g" 'goto-line)
   (bind-key* "C-c DEL" 'delete-blank-lines)
   (bind-key* "C-c <delete>" 'delete-blank-lines)
   (bind-key* "C-x K" 'kill-this-buffer) ; Don't ask.
@@ -1089,7 +1079,6 @@ Why does Emacs put those by default?
   (define-key key-translation-map (kbd "C-;") (kbd "C-l"))
   (bind-key* "M-l" 'recenter-top-bottom)
   (bind-key* "M-o" 'other-window)
-  (global-set-key (kbd "M-g") (kbd "C-g"))
   ;; Can't turn them to bind-key*; otherwise undo-tree-mode wouldn't enable. Strange.
   (global-set-key (kbd "M-;") 'comment-or-uncomment-region)
   (global-set-key (kbd "C-/") 'comment-or-uncomment-region)
