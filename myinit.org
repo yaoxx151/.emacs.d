@@ -790,6 +790,10 @@ Why does Emacs put those by default?
   (global-unset-key (kbd "C-x C-l"))
   (global-unset-key (kbd "C-x C-x"))
   (global-unset-key (kbd "C-x C-s"))  ; Use `C-s`.
+
+  ;; Unbind M-0 through M-9
+  (dotimes (n 10)
+    (global-unset-key (kbd (format "M-%d" n))))
 #+end_src
 * My/Functions
 #+begin_src emacs-lisp
