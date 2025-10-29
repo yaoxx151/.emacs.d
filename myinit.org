@@ -320,20 +320,20 @@ To prove I work on AI.
 * Isearch
 Basic search.
 #+begin_src emacs-lisp
-  (use-package isearch
-    :ensure nil
-     :defer t
-     :init
-     (global-set-key (kbd "C-f") 'isearch-forward)
-     (global-set-key (kbd "M-f") 'isearch-backward)
-     (global-set-key (kbd "C-c s") 'isearch-forward-thing-at-point)
-     (add-hook 'isearch-update-post-hook '(lambda () (recenter))) ; Center the screen when search. Why is this not the default?
-     :bind
-     (:map isearch-mode-map
-		   ("C-n" . isearch-repeat-forward)
-		   ("C-p" . isearch-repeat-backward)
-		   ("M-v" . isearch-yank-kill)
-		   ("C-w" . (lambda () (interactive) (isearch-del-char most-positive-fixnum)))))
+  ;; (use-package isearch
+  ;;   :ensure nil
+  ;;    :defer t
+  ;;    :init
+  ;;    (global-set-key (kbd "C-f") 'isearch-forward)
+  ;;    (global-set-key (kbd "M-f") 'isearch-backward)
+  ;;    (global-set-key (kbd "C-c s") 'isearch-forward-thing-at-point)
+  ;;    (add-hook 'isearch-update-post-hook '(lambda () (recenter))) ; Center the screen when search. Why is this not the default?
+  ;;    :bind
+  ;;    (:map isearch-mode-map
+  ;; 		 ("C-n" . isearch-repeat-forward)
+  ;; 		 ("C-p" . isearch-repeat-backward)
+  ;; 		 ("M-v" . isearch-yank-kill)
+  ;; 		 ("C-w" . (lambda () (interactive) (isearch-del-char most-positive-fixnum)))))
 #+end_src
 * Ivy
 Useful because Emacs default completion sucks.
@@ -345,6 +345,7 @@ Useful because Emacs default completion sucks.
     :init
     (use-package amx :ensure t :defer t)
     (use-package counsel :ensure t :diminish :config (counsel-mode 1))
+    (use-package swiper :defer t)
     (ivy-mode 1)
     :bind*
     (("C-b" . ivy-switch-buffer)  ; Because C-b is freed, why not?
@@ -355,6 +356,8 @@ Useful because Emacs default completion sucks.
      ("C-c g" . counsel-rg)
      ("C-y" . counsel-yank-pop)
      ("C-c i" . counsel-imenu)
+     ("C-f" . swiper-isearch)
+     ("C-c s" . swiper-isearch-thing-at-point)
      (:map ivy-minibuffer-map
 	   ("M-RET" . ivy-immediate-done)
 	   ("C-y" . yank)
