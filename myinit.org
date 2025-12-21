@@ -460,6 +460,15 @@ Org mode is great as long as you don't spend your life on it.
     :init
     (add-hook 'org-mode-hook 'visual-line-mode))
 #+end_src
+* SSH
+#+begin_src emacs-lisp
+;; Use macOS clipboard via iTerm2 (OSC 52)
+(setq select-enable-clipboard t)
+(setq select-enable-primary t)
+(setq save-interprogram-paste-before-kill t)
+(xterm-mouse-mode 1)
+#+end_src
+
 * Parens
 #+begin_src emacs-lisp
   (use-package smartparens
