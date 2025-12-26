@@ -512,8 +512,6 @@ Paste image to org mode.
 (setq save-interprogram-paste-before-kill t)
 (xterm-mouse-mode 1)
 #+end_src
-
->>>>>>> 827edea2fc0ec96566485080d3c588d87a15bb51
 * Parens
 #+begin_src emacs-lisp
   (use-package smartparens
