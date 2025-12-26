@@ -504,6 +504,16 @@ Paste image to org mode.
             (lambda ()
               (yank-media-handler "image/.*" #'my-org-yank-image-handler))))
 #+end_src
+* SSH
+#+begin_src emacs-lisp
+;; Use macOS clipboard via iTerm2 (OSC 52)
+(setq select-enable-clipboard t)
+(setq select-enable-primary t)
+(setq save-interprogram-paste-before-kill t)
+(xterm-mouse-mode 1)
+#+end_src
+
+>>>>>>> 827edea2fc0ec96566485080d3c588d87a15bb51
 * Parens
 #+begin_src emacs-lisp
   (use-package smartparens
