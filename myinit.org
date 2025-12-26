@@ -460,6 +460,50 @@ Org mode is great as long as you don't spend your life on it.
     :init
     (add-hook 'org-mode-hook 'visual-line-mode))
 #+end_src
+
+Paste image to org mode.
+#+begin_src emacs-lisp
+(use-package yank-media
+  :ensure t
+  :bind (("C-c v" . yank-media))
+  :config
+  (setq yank-media-create-directory t)
+  (setq yank-media-image-directory "assets/images")
+  ;; Auto-select image/png when available
+  (defun my-yank-media-auto-png (orig-fun &rest args)
+    "Automatically select image/png when available."
+    (cl-letf (((symbol-function 'completing-read)
+               (lambda (prompt collection &optional predicate require-match
+                               initial-input hist def inherit-input-method)
+                 (let ((options (all-completions "" collection predicate)))
+                   (if (member "image/png" options)
+                       "image/png"
+                     (completing-read-default prompt collection predicate require-match
+                                              initial-input hist def inherit-input-method))))))
+      (apply orig-fun args)))
+  (advice-add 'yank-media :around #'my-yank-media-auto-png))
+
+(defun my-org-yank-image-handler (type image)
+  "Handle pasting images in org-mode."
+  (let* ((dir (expand-file-name yank-media-image-directory default-directory))
+         (filename (format-time-string "%Y%m%d_%H%M%S.png")))
+    (unless (file-directory-p dir)
+      (make-directory dir t))
+    (let ((file (expand-file-name filename dir)))
+      (with-temp-file file
+        (set-buffer-multibyte nil)
+        (insert image))
+      (insert (format "[[file:%s]]" (file-relative-name file)))
+      (org-display-inline-images))))
+
+(with-eval-after-load 'org
+  (setq org-startup-with-inline-images t)
+  (setq org-image-actual-width 800)
+  (define-key org-mode-map (kbd "C-c v") #'yank-media)
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (yank-media-handler "image/.*" #'my-org-yank-image-handler))))
+#+end_src
 * Parens
 #+begin_src emacs-lisp
   (use-package smartparens
