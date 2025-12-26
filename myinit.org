@@ -594,6 +594,40 @@ Newly supported. Can be buggy.
     (py-python-command "/usr/local/bin/python3")
     (python-shell-interpreter "/usr/local/bin/python3")
     (python-indent-guess-indent-offset-verbose nil))
+
+
+  ;; Python indent.
+  (defun my/python-tab (&optional arg)
+    "Indent selected text or the current line."
+    (interactive "*P")
+    (if (use-region-p)
+	(save-excursion
+	  (let* ((beg (region-beginning))
+		 (end (region-end))
+		 (beg-line (progn (goto-char beg)
+				  (line-beginning-position)))
+		 (end-line (progn (goto-char end) (line-end-position))))
+	    (python-indent-shift-right beg-line end-line arg)))
+      (indent-for-tab-command arg)))
+
+  (defun my/python-backtab (&optional arg)
+    "Dedent selected text or the current line."
+    (interactive "*P")
+    (if (use-region-p)
+	(save-excursion (let* ((beg (region-beginning))
+			       (end (region-end))
+			       (beg-line (progn (goto-char beg)
+						(line-beginning-position)))
+			       (end-line (progn (goto-char end) (line-end-position))))
+			  (python-indent-shift-left beg-line end-line arg)))
+      (python-indent-shift-left (line-beginning-position) (line-end-position) arg)))
+
+  (define-key python-mode-map (kbd "TAB") 'my/python-tab)
+  (define-key python-ts-mode-map (kbd "TAB") 'my/python-tab)
+  (define-key python-mode-map (kbd "<tab>") 'my/python-tab)
+  (define-key python-ts-mode-map (kbd "<tab>") 'my/python-tab)
+  (define-key python-mode-map (kbd "<backtab>") 'my/python-backtab)
+  (define-key python-ts-mode-map (kbd "<backtab>") 'my/python-backtab)
 #+end_src
 * Recentf
 #+begin_src emacs-lisp
@@ -674,7 +708,7 @@ Newly supported. Can be buggy.
           ("C-o" . other-window)))
 #+end_src
 * Spell Checker
-Still need.
+Still needed, unfortunately.
 #+begin_src emacs-lisp
   (use-package flyspell
     :ensure nil
@@ -1046,32 +1080,6 @@ Why does Emacs put those by default?
 
   (bind-key* "C-c r" 'my/return-to-mark)
 
-  ;; Python indent.
-  (defun my/python-tab (&optional arg)
-    "Indent selected text or the current line."
-    (interactive "*P")
-    (if (use-region-p)
-	(save-excursion
-	  (let* ((beg (region-beginning))
-		 (end (region-end))
-		 (beg-line (progn (goto-char beg)
-				  (line-beginning-position)))
-		 (end-line (progn (goto-char end) (line-end-position))))
-	    (python-indent-shift-right beg-line end-line arg)))
-      (indent-for-tab-command arg)))
-
-  (defun my/python-backtab (&optional arg)
-    "Dedent selected text or the current line."
-    (interactive "*P")
-    (if (use-region-p)
-	(save-excursion (let* ((beg (region-beginning))
-			       (end (region-end))
-			       (beg-line (progn (goto-char beg)
-						(line-beginning-position)))
-			       (end-line (progn (goto-char end) (line-end-position))))
-			  (python-indent-shift-left beg-line end-line arg)))
-      (python-indent-shift-left (line-beginning-position) (line-end-position) arg)))
-
   (defun my/copy-line-to-clipboard ()
     "Copy the current line to the macOS clipboard."
     (interactive)
@@ -1080,13 +1088,6 @@ Why does Emacs put those by default?
       (shell-command (concat "echo " (shell-quote-argument line) " | pbcopy"))))
 
   (bind-key* "C-c c" 'my/copy-line-to-clipboard)
-
-  (define-key python-mode-map (kbd "TAB") 'my/python-tab)
-  (define-key python-ts-mode-map (kbd "TAB") 'my/python-tab)
-  (define-key python-mode-map (kbd "<tab>") 'my/python-tab)
-  (define-key python-ts-mode-map (kbd "<tab>") 'my/python-tab)
-  (define-key python-mode-map (kbd "<backtab>") 'my/python-backtab)
-  (define-key python-ts-mode-map (kbd "<backtab>") 'my/python-backtab)
 #+end_src
 * My/Keybindings
 #+begin_src emacs-lisp
