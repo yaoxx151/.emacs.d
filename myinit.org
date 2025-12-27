@@ -12,6 +12,7 @@ My customized keybindings:
 | M-p         | Scroll up half page                 |
 | M-n         | Scroll down half page               |
 | C-f         | isearch (C-f is free)               |
+| M-s         | Jump within the screen              |
 | C-q         | Kill (C-k is overwritten)           |
 | M-b         | Switch buffer                       |
 | C-z         | Undo                                |
@@ -28,8 +29,10 @@ My customized keybindings:
 | C-c d       | Duplicate the current line          |
 | M-w         | Delete the current word             |
 | C-x r       | Open recent file                    |
-| C-x DEL     | Delete the current line             |
+| C-x DEL     | Kill the current line               |
 | M-e         | Expand region                       |
+| C-x r       | Open recent file                    |
+| C-c RET     | Multi-cursor                        |
 | C-x ?       | Describe key (from Linus)           |
 
 * Avy
@@ -453,6 +456,12 @@ Org mode is great as long as you don't spend your life on it.
      'org-babel-load-languages
      '((C . t)
        (python . t)))
+    (defun my/org-insert-checklist-item ()
+      "Insert a checklist item at the beginning of the line."
+      (interactive)
+      (beginning-of-line)
+      (insert "- [ ] "))
+    (define-key org-mode-map (kbd "C-c k") 'my/org-insert-checklist-item)
     :custom
     (org-src-tab-acts-natively t)      ; Make tab work in Org-mode code block.
     (org-src-fontify-natively t)       ; Highlight code block.
@@ -470,7 +479,7 @@ Paste image to org mode.
   (setq yank-media-create-directory t)
   (setq yank-media-image-directory "assets/images")
   ;; Auto-select image/png when available
-  (defun my-yank-media-auto-png (orig-fun &rest args)
+  (defun my/yank-media-auto-png (orig-fun &rest args)
     "Automatically select image/png when available."
     (cl-letf (((symbol-function 'completing-read)
                (lambda (prompt collection &optional predicate require-match
@@ -481,9 +490,9 @@ Paste image to org mode.
                      (completing-read-default prompt collection predicate require-match
                                               initial-input hist def inherit-input-method))))))
       (apply orig-fun args)))
-  (advice-add 'yank-media :around #'my-yank-media-auto-png))
+  (advice-add 'yank-media :around #'my/yank-media-auto-png))
 
-(defun my-org-yank-image-handler (type image)
+(defun my/org-yank-image-handler (type image)
   "Handle pasting images in org-mode."
   (let* ((dir (expand-file-name yank-media-image-directory default-directory))
          (filename (format-time-string "%Y%m%d_%H%M%S.png")))
@@ -498,12 +507,13 @@ Paste image to org mode.
 
 (with-eval-after-load 'org
   (setq org-startup-with-inline-images t)
-  (setq org-image-actual-width 800)
+  (setq org-image-actual-width 600)
   (define-key org-mode-map (kbd "C-c v") #'yank-media)
   (add-hook 'org-mode-hook
             (lambda ()
-              (yank-media-handler "image/.*" #'my-org-yank-image-handler))))
+              (yank-media-handler "image/.*" #'my/org-yank-image-handler))))
 #+end_src
+
 * SSH
 #+begin_src emacs-lisp
 ;; Use macOS clipboard via iTerm2 (OSC 52)
