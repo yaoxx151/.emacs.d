@@ -462,6 +462,11 @@ Org mode is great as long as you don't spend your life on it.
       (beginning-of-line)
       (insert "- [ ] "))
     (define-key org-mode-map (kbd "C-c k") 'my/org-insert-checklist-item)
+    (defun my/insert-org-date-heading ()
+      "Insert today's date as an org-mode heading in the format YYYY-MM-DD"
+      (interactive)
+      (insert (format-time-string "* %Y-%m-%d\n")))
+    (define-key org-mode-map (kbd "C-c j") 'my/insert-org-date-heading)
     :custom
     (org-src-tab-acts-natively t)      ; Make tab work in Org-mode code block.
     (org-src-fontify-natively t)       ; Highlight code block.
