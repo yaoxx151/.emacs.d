@@ -439,6 +439,33 @@ Quite useful. Agreed by Stevey.
     (global-set-key (kbd "C-a") 'mwim-beginning)
     (global-set-key (kbd "C-e") 'mwim-end))
 #+end_src
+* Olivetti
+Wrap lines (but not at window edge in `visual-line-mode`) for text file and center text.
+
+#+begin_src emacs-lisp
+  (use-package olivetti
+    :ensure t
+    :defer t
+    :hook ((org-mode . olivetti-mode)
+	   (markdown-mode . olivetti-mode)
+	   (text-mode . olivetti-mode)
+	   (latex-mode . olivetti-mode)
+	   (tex-mode . olivetti-mode)
+	   (org-mode . visual-line-mode)
+	   (markdown-mode . visual-line-mode)
+	   (text-mode . visual-line-mode)
+	   (latex-mode . visual-line-mode)
+	   (tex-mode . visual-line-mode))
+    :custom
+    (olivetti-body-width 100)
+    (olivetti-minimum-body-width 100)
+    :config
+    ; No fringe around
+    (defun my/olivetti-set-colors ()
+      (face-remap-add-relative 'fringe :background (face-background 'default)))
+    (add-hook 'olivetti-mode-hook #'my/olivetti-set-colors))
+#+end_src
+
 * Org
 Org mode is great as long as you don't spend your life on it.
 #+begin_src emacs-lisp
@@ -468,11 +495,9 @@ Org mode is great as long as you don't spend your life on it.
       (insert (format-time-string "* %Y-%m-%d\n")))
     (define-key org-mode-map (kbd "C-c j") 'my/insert-org-date-heading)
     :custom
-    (org-src-tab-acts-natively t)      ; Make tab work in Org-mode code block.
-    (org-src-fontify-natively t)       ; Highlight code block.
-    (org-confirm-babel-evaluate 'nil)  ; Don't ask when running code.
-    :init
-    (add-hook 'org-mode-hook 'visual-line-mode))
+    (org-src-tab-acts-natively t)       ; Make tab work in Org-mode code block.
+    (org-src-fontify-natively t)        ; Highlight code block.
+    (org-confirm-babel-evaluate 'nil))  ; Don't ask when running code.
 #+end_src
 
 Paste image to org mode.
@@ -829,6 +854,7 @@ Emacs default undo/redo sucks.
      `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
     (undo-tree-visualizer-timestamps t))
 #+end_src
+
 * Whitespace
 Be tidy please.
 #+begin_src emacs-lisp
