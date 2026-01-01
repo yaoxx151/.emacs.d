@@ -494,6 +494,12 @@ Org mode is great as long as you don't spend your life on it.
       (interactive)
       (insert (format-time-string "* %Y-%m-%d\n")))
     (define-key org-mode-map (kbd "C-c j") 'my/insert-org-date-heading)
+
+    (defun my/insert-line ()
+      "Insert hyphens."
+      (interactive)
+      (insert (make-string 60 ?-)))
+    (define-key org-mode-map (kbd "C-c -") 'my/insert-line)
     :custom
     (org-src-tab-acts-natively t)       ; Make tab work in Org-mode code block.
     (org-src-fontify-natively t)        ; Highlight code block.
@@ -537,7 +543,7 @@ Paste image to org mode.
 
 (with-eval-after-load 'org
   (setq org-startup-with-inline-images t)
-  (setq org-image-actual-width 600)
+  (setq org-image-actual-width 1000)
   (define-key org-mode-map (kbd "C-c v") #'yank-media)
   (add-hook 'org-mode-hook
             (lambda ()
