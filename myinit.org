@@ -47,7 +47,7 @@ Use less mouse.
     (avy-timeout-seconds 0.3)
     (avy-style 'pre)
     :custom-face
-    (avy-lead-face ((t (:background "#ADD8E6" :foreground "#E0115F" :weight bold)))))
+    (avy-lead-face ((t (:background "#f0ce43" :foreground "#000000" :weight bold)))))
 #+end_src
 * Backup
 Haven't found it useful. Maybe you would sleep better at night.
@@ -231,7 +231,20 @@ Can be slow.
 #+end_src
 * Font
 #+begin_src emacs-lisp
-  (set-frame-font "consolas 12" nil t)
+  (defvar my/default-font "Consolas 12")
+  (add-to-list 'default-frame-alist `(font . ,my/default-font))
+
+  (defun my/apply-default-font (&optional frame)
+    "Apply my default font to FRAME, or the selected frame."
+    (when (display-graphic-p frame)
+      (with-selected-frame (or frame (selected-frame))
+	(set-frame-font my/default-font nil t)
+	(set-face-attribute 'default nil :font my/default-font)
+	(set-face-attribute 'fixed-pitch nil :font my/default-font)
+	(set-face-attribute 'variable-pitch nil :font my/default-font))))
+
+  (my/apply-default-font)
+  (add-hook 'after-make-frame-functions #'my/apply-default-font)
 
   ;; UTF-8.
   (set-selection-coding-system 'utf-8)
@@ -439,31 +452,13 @@ Quite useful. Agreed by Stevey.
     (global-set-key (kbd "C-a") 'mwim-beginning)
     (global-set-key (kbd "C-e") 'mwim-end))
 #+end_src
-* Olivetti
-Wrap lines (but not at window edge in `visual-line-mode`) for text file and center text.
-
+* Text Wrapping
 #+begin_src emacs-lisp
-  (use-package olivetti
-    :ensure t
-    :defer t
-    :hook ((org-mode . olivetti-mode)
-	   (markdown-mode . olivetti-mode)
-	   (text-mode . olivetti-mode)
-	   (latex-mode . olivetti-mode)
-	   (tex-mode . olivetti-mode)
-	   (org-mode . visual-line-mode)
-	   (markdown-mode . visual-line-mode)
-	   (text-mode . visual-line-mode)
-	   (latex-mode . visual-line-mode)
-	   (tex-mode . visual-line-mode))
-    :custom
-    (olivetti-body-width 100)
-    (olivetti-minimum-body-width 100)
-    :config
-    ; No fringe around
-    (defun my/olivetti-set-colors ()
-      (face-remap-add-relative 'fringe :background (face-background 'default)))
-    (add-hook 'olivetti-mode-hook #'my/olivetti-set-colors))
+  (add-hook 'org-mode-hook #'visual-line-mode)
+  (add-hook 'markdown-mode-hook #'visual-line-mode)
+  (add-hook 'text-mode-hook #'visual-line-mode)
+  (add-hook 'latex-mode-hook #'visual-line-mode)
+  (add-hook 'tex-mode-hook #'visual-line-mode)
 #+end_src
 
 * Org
@@ -805,41 +800,139 @@ Make the paranoid sleep better.
     (add-hook 'tex-mode-hook 'visual-line-mode))
 #+end_src
 * Theme
-Finetuned Zenburn theme.
+Finetuned Leuven theme.
 #+begin_src emacs-lisp
-  (use-package zenburn-theme
-    :ensure t
-    :config
-    (setq zenburn-override-colors-alist
-	  ;; Make main background lighter.
-	  '(("zenburn-bg" . "#494949")
-	    ;; Make main text light gold. Color borrowed from Jon Blow.
-	    ("zenburn-fg"  . "#CBB390")
-	    ;; Set original orange and yellow to dark rose and green since they conflict
-	    ;; with the main text.
-	    ("zenburn-orange" . "#CC9999")
-	    ("zenburn-yellow" . "#8FB28F")))
-    (load-theme 'zenburn t)
-    (set-cursor-color "#F0F0F0")
-    (set-face-attribute 'region nil :background "#666666")
-    ;; Search.
-    (set-face-attribute 'isearch nil :background "#ADD8E6" :foreground "#E0115F")
-    (set-face-attribute 'lazy-highlight nil :foreground "#E0115F")
-    ;; Indent highlight color.
-    (set-face-background 'highlight-indent-guides-odd-face "darkgray")
-    (set-face-background 'highlight-indent-guides-even-face "dimgray")
-    (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
-    ;; Mode line.
-    (set-face-attribute 'mode-line-buffer-id nil :foreground "#327232" :underline)
-    (set-face-attribute 'mode-line-inactive nil :foreground "gray40" :box nil)
-    (set-face-attribute 'mode-line nil
-			:foreground "#062329"
-			:background "#CBB390"
-			:box nil)
-    ;; Mini buffer current highlighted line color.
-    (custom-set-faces '(ivy-current-match ((t (:background "#333333")))))
-    ;; Paren matching color.
-    (set-face-attribute 'show-paren-match nil :foreground "#E0115F" :background "#CCCCCC"))
+  (setq leuven-scale-outline-headlines nil
+	leuven-scale-org-agenda-structure nil)
+  (load-theme 'leuven t)
+  (my/apply-default-font)
+  (set-cursor-color "#000000")
+  (set-face-attribute 'region nil :background "#d7e9ff")
+  ;; Search.
+  (set-face-attribute 'isearch nil :background "#9fcfff" :foreground "#000000" :weight 'bold)
+  (set-face-attribute 'lazy-highlight nil :background "#dbeeff" :foreground "#000000")
+  ;; Indent highlight color.
+  (set-face-background 'highlight-indent-guides-odd-face "#f4f8ff")
+  (set-face-background 'highlight-indent-guides-even-face "#e8f1ff")
+  (set-face-foreground 'highlight-indent-guides-character-face "#b7c9e2")
+  ;; Mode line.
+  (set-face-attribute 'mode-line-buffer-id nil :foreground "#003f8e" :underline)
+  (set-face-attribute 'mode-line-inactive nil :foreground "#5f6f8f" :background "#edf4ff" :box nil)
+  (set-face-attribute 'mode-line nil
+		      :foreground "#000000"
+		      :background "#bcdcff"
+		      :box nil)
+  ;; Mini buffer current highlighted line color.
+  (custom-set-faces
+   '(ivy-current-match ((t (:background "#d7e9ff" :foreground "#000000" :extend t))))
+   '(ivy-highlight-face ((t (:background "#d7e9ff" :foreground "#000000"))))
+   '(ivy-cursor ((t (:background "#4f6f8f" :foreground "#ffffff"))))
+   '(ivy-yanked-word ((t (:background "#d7e9ff" :foreground "#000000" :weight bold))))
+   '(ivy-minibuffer-match-highlight ((t (:background "#9fcfff" :foreground "#000000" :weight bold))))
+   '(ivy-minibuffer-match-face-1 ((t (:background "#edf4ff" :foreground "#000000"))))
+   '(ivy-minibuffer-match-face-2 ((t (:background "#9fcfff" :foreground "#000000" :weight bold))))
+   '(ivy-minibuffer-match-face-3 ((t (:background "#bcdcff" :foreground "#000000" :weight bold))))
+   '(ivy-minibuffer-match-face-4 ((t (:background "#d7e9ff" :foreground "#000000" :weight bold))))
+   '(swiper-match-face-1 ((t (:background "#9fcfff" :foreground "#000000" :weight bold))))
+   '(swiper-match-face-2 ((t (:background "#9fcfff" :foreground "#000000" :weight bold))))
+   '(swiper-match-face-3 ((t (:background "#9fcfff" :foreground "#000000" :weight bold))))
+   '(swiper-match-face-4 ((t (:background "#9fcfff" :foreground "#000000" :weight bold))))
+   '(swiper-background-match-face-1 ((t (:background "#dbeeff" :foreground "#000000"))))
+   '(swiper-background-match-face-2 ((t (:background "#dbeeff" :foreground "#000000"))))
+   '(swiper-background-match-face-3 ((t (:background "#dbeeff" :foreground "#000000"))))
+   '(swiper-background-match-face-4 ((t (:background "#dbeeff" :foreground "#000000"))))
+   '(swiper-line-face ((t (:background "#f4f8ff" :extend t))))
+   '(org-document-title ((t (:foreground "#2f2f2f" :background nil :weight bold :height 1.15 :underline nil))))
+   '(org-document-info ((t (:foreground "#5f5f5f" :background nil :height 1.0))))
+   '(org-document-info-keyword ((t (:foreground "#8a8a8a" :background nil :height 1.0))))
+   '(org-level-1 ((t (:foreground "#2f6f4e" :background nil :weight bold :height 1.08 :overline nil))))
+   '(org-level-2 ((t (:foreground "#7a3f6a" :background nil :weight bold :height 1.03 :overline nil))))
+   '(org-level-3 ((t (:foreground "#8a5a00" :background nil :weight bold :height 1.0))))
+   '(org-level-4 ((t (:foreground "#3f6f73" :background nil :weight bold :height 1.0))))
+   '(org-checkbox ((t (:weight bold :foreground "#2f6f4e" :background nil :box nil))))
+   '(org-list-dt ((t (:weight bold :foreground "#335EA8" :background nil))))
+   '(org-meta-line ((t (:slant normal :foreground "#008ED1" :background nil))))
+   '(org-block-begin-line ((t (:foreground "#555555" :background nil :underline "#A7A6AA"))))
+   '(org-block-end-line ((t (:foreground "#555555" :background nil :overline "#A7A6AA"))))
+   '(highlight ((t (:background "#edf4ff" :foreground "#000000"))))
+   '(match ((t (:background "#9fcfff" :foreground "#000000" :weight bold))))
+   '(minibuffer-prompt ((t (:background nil :foreground "#2f6f4e" :weight bold))))
+   '(minibuffer-noticeable-prompt ((t (:background nil :foreground "#7a3f6a" :weight bold)))))
+
+  (defun my/apply-ivy-faces ()
+    (set-face-attribute 'ivy-current-match nil
+			:background "#d7e9ff" :foreground "#000000" :extend t)
+    (set-face-attribute 'ivy-highlight-face nil
+			:background "#d7e9ff" :foreground "#000000")
+    (set-face-attribute 'ivy-cursor nil
+			:background "#4f6f8f" :foreground "#ffffff")
+    (set-face-attribute 'ivy-yanked-word nil
+			:background "#d7e9ff" :foreground "#000000" :weight 'bold)
+    (set-face-attribute 'ivy-minibuffer-match-highlight nil
+			:background "#9fcfff" :foreground "#000000" :weight 'bold)
+    (set-face-attribute 'ivy-minibuffer-match-face-1 nil
+			:background "#edf4ff" :foreground "#000000")
+    (set-face-attribute 'ivy-minibuffer-match-face-2 nil
+			:background "#9fcfff" :foreground "#000000" :weight 'bold)
+    (set-face-attribute 'ivy-minibuffer-match-face-3 nil
+			:background "#bcdcff" :foreground "#000000" :weight 'bold)
+    (set-face-attribute 'ivy-minibuffer-match-face-4 nil
+			:background "#d7e9ff" :foreground "#000000" :weight 'bold)
+    (set-face-attribute 'highlight nil
+			:background "#edf4ff" :foreground "#000000")
+    (set-face-attribute 'match nil
+			:background "#9fcfff" :foreground "#000000" :weight 'bold)
+    (set-face-attribute 'minibuffer-prompt nil
+			:background nil :foreground "#2f6f4e" :weight 'bold)
+    (when (facep 'minibuffer-noticeable-prompt)
+      (set-face-attribute 'minibuffer-noticeable-prompt nil
+			  :background nil :foreground "#7a3f6a" :weight 'bold)))
+
+  (with-eval-after-load 'ivy
+    (my/apply-ivy-faces))
+  (add-hook 'minibuffer-setup-hook #'my/apply-ivy-faces)
+
+  (defun my/apply-org-title-faces ()
+    (set-face-attribute 'org-document-title nil
+			:foreground "#2f2f2f" :background nil
+			:weight 'bold :height 1.15 :underline nil)
+    (set-face-attribute 'org-document-info nil
+			:foreground "#5f5f5f" :background nil :height 1.0)
+    (set-face-attribute 'org-document-info-keyword nil
+			:foreground "#8a8a8a" :background nil :height 1.0)
+    (set-face-attribute 'org-level-1 nil
+			:foreground "#2f6f4e" :background nil
+			:weight 'bold :height 1.08 :overline nil)
+    (set-face-attribute 'org-level-2 nil
+			:foreground "#7a3f6a" :background nil
+			:weight 'bold :height 1.03 :overline nil)
+    (set-face-attribute 'org-level-3 nil
+			:foreground "#8a5a00" :background nil
+			:weight 'bold :height 1.0)
+    (set-face-attribute 'org-level-4 nil
+			:foreground "#3f6f73" :background nil
+			:weight 'bold :height 1.0)
+    (when (facep 'org-checkbox)
+      (set-face-attribute 'org-checkbox nil
+			  :weight 'bold :foreground "#2f6f4e"
+			  :background 'unspecified :box nil))
+    (when (facep 'org-list-dt)
+      (set-face-attribute 'org-list-dt nil
+			  :weight 'bold :foreground "#335EA8" :background 'unspecified))
+    (when (facep 'org-meta-line)
+      (set-face-attribute 'org-meta-line nil
+			  :slant 'normal :foreground "#008ED1" :background 'unspecified))
+    (when (facep 'org-block-begin-line)
+      (set-face-attribute 'org-block-begin-line nil
+			  :foreground "#555555" :background 'unspecified :underline "#A7A6AA"))
+    (when (facep 'org-block-end-line)
+      (set-face-attribute 'org-block-end-line nil
+			  :foreground "#555555" :background 'unspecified :overline "#A7A6AA")))
+
+  (with-eval-after-load 'org
+    (my/apply-org-title-faces))
+  ;; Paren matching color.
+  (set-face-attribute 'show-paren-match nil :foreground "#000000" :background "#b7e3c0" :weight 'bold)
 #+end_src
 * Undo Tree
 Emacs default undo/redo sucks.
