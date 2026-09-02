@@ -1,4 +1,8 @@
-#+STARTIP: overview
+#+STARTUP: overview
+#+begin_src emacs-lisp
+;;; myinit.el --- Personal Emacs configuration -*- lexical-binding: t; -*-
+#+end_src
+
 My customized keybindings:
 | Keybinding  | Command                             |
 |-------------+-------------------------------------|
@@ -41,7 +45,7 @@ Use less mouse.
   (use-package avy
     :ensure t
     :defer t
-    :bind*
+    :bind
     ("M-s" . avy-goto-char-timer)
     :custom
     (avy-timeout-seconds 0.3)
@@ -52,13 +56,17 @@ Use less mouse.
 * Backup
 Haven't found it useful. Maybe you would sleep better at night.
 #+begin_src emacs-lisp
-  (setq backup-directory-alist `(("." . "~/.saves")))
-  (setq auto-save-list-file-prefix "~/.saves/.saves-")
-  (setq backup-by-copying t)
-  (setq delete-old-versions t
-    kept-new-versions 20
-    kept-old-versions 10
-    version-control t)
+  (let ((backup-dir (locate-user-emacs-file ".backup/")))
+    (make-directory backup-dir t)
+    (set-file-modes backup-dir #o700)
+    (setq backup-directory-alist `(("." . ,backup-dir))
+          auto-save-file-name-transforms `((".*" ,backup-dir t))
+          auto-save-list-file-prefix (expand-file-name ".saves-" backup-dir)))
+  (setq backup-by-copying t
+        delete-old-versions t
+	kept-new-versions 10
+	kept-old-versions 3
+	version-control t)
 #+end_src
 * Beacon
 Make switching window easier to see.
@@ -73,7 +81,8 @@ Vim's `i`.
 #+begin_src emacs-lisp
   (use-package change-inner
     :ensure t
-    :bind*
+    :defer t
+    :bind
     ("M-i" . 'change-inner))
 #+end_src
 * Company
@@ -81,25 +90,19 @@ No LSP. Only code completion when *being asked to*.
 #+begin_src emacs-lisp
   (use-package company
     :ensure t
-    :config
-    (add-hook 'prog-mode-hook 'company-mode)
-    (delete 'company-dabbrev company-backends) ; `company-debbrev` gives odd candidates.
-    ; Don't complete without being asked to!
-    (setq company-idle-delay nil)
-    (setq company-minimum-prefix-length 0)
+    :hook (prog-mode . company-mode)
     :custom
     (company-tooltip-align-annotations t)
     (company-require-match 'never)
-    ;; Don't use company in the following modes.
-    (company-global-modes
-     '(not shell-mode eaf-mode text-mode-hook latex-mode-hook))
-    ;; Trigger completion immediately.
-    (company-idle-delay 0.1)
-    ;; Number the candidates (use M-1, M-2 etc to select completions).
-    (company-show-numbers t)
+    ;; Complete only when explicitly requested.
+    (company-idle-delay nil)
+    (company-minimum-prefix-length 1)
+    (company-show-quick-access t)
     :bind
     (:map company-mode-map
-	  ("C-c C-c" . company-complete)))
+	  ("C-c C-c" . company-complete))
+    :config
+    (setq company-backends (delete 'company-dabbrev company-backends)))
 
   ;; Hippe expand.
   (setq hippie-expand-try-functions-list '(try-expand-dabbrev
@@ -120,7 +123,7 @@ Useful.
 #+begin_src emacs-lisp
   (use-package crux
     :ensure t
-    :bind*
+    :bind
     (("C-q" . crux-smart-kill-line)
      ("C-x <delete>" . crux-kill-whole-line)
      ("C-x DEL" . crux-kill-whole-line)
@@ -143,7 +146,7 @@ Useful.
 #+begin_src emacs-lisp
   (use-package dired
     :ensure nil
-    :bind*
+    :bind
     (("C-x C-j" . dired-jump))
     :custom
     ;; Always delete and copy recursively.
@@ -159,10 +162,8 @@ Useful.
     (delete-by-moving-to-trash t)
     ;; Load the newest version of a file.
     (load-prefer-newer t)
-    ;; Detect external file changes and auto refresh file.
-    (auto-revert-use-notify nil)
-    ;; Auto revert every 3 sec.
-    (auto-revert-interval 3)
+    ;; Prefer filesystem notifications, with polling as Emacs' fallback.
+    (auto-revert-use-notify t)
     :config
     ;; Reuse same dired buffer, to prevent numerous buffers while navigating in
     ;; dired.
@@ -183,6 +184,7 @@ should be a default feature.
 #+begin_src emacs-lisp
 (use-package dumb-jump
   :ensure t
+  :defer t
   :custom
   (dumb-jump-selector 'ivy)
   (xref-show-definitions-function 'xref-show-definitions-completing-read)
@@ -190,13 +192,14 @@ should be a default feature.
   (:map prog-mode-map
     ("C-c C-o" . dumb-jump-go-other-window)
     ("C-c C-y" . dumb-jump-back))
-  :config
+  :init
   (add-hook 'xref-backend-functions 'dumb-jump-xref-activate))
-#+end_src emacs-lisp
+#+end_src
 * Ediff
 #+begin_src emacs-lisp
-(use-package ediff
-  :custom
+  (use-package ediff
+    :defer t
+    :custom
   (ediff-split-window-function 'split-window-horizontally)
   (ediff-window-setup-function 'ediff-setup-windows-plain))
 #+end_src
@@ -205,7 +208,8 @@ Useful in coding.
 #+begin_src emacs-lisp
   (use-package expand-region
     :ensure t
-    :bind*
+    :defer t
+    :bind
     ("M-e" . 'er/expand-region))
 #+end_src
 * Flycheck
@@ -214,34 +218,30 @@ Can be slow.
   (use-package flycheck
     :defer t
     :diminish
-    :hook (after-init . global-flycheck-mode)
+    :hook (prog-mode . flycheck-mode)
     :commands (flycheck-add-mode)
     :custom
-    (flycheck-global-modes
-     '(not outline-mode diff-mode shell-mode eshell-mode term-mode))
     (flycheck-emacs-lisp-load-path 'inherit)
     (flycheck-indication-mode (if (display-graphic-p)
 				  'right-fringe 'right-margin))
     :bind
     (:map flycheck-mode-map
 	  ("C-c p" . flycheck-previous-error)
-	  ("C-c n" . flycheck-next-error))
-    :init
-    (add-hook 'prog-mode-hook 'flycheck-mode))
+	  ("C-c n" . flycheck-next-error)))
 #+end_src
 * Font
 #+begin_src emacs-lisp
   (defvar my/default-font "Consolas 12")
-  (add-to-list 'default-frame-alist `(font . ,my/default-font))
 
   (defun my/apply-default-font (&optional frame)
     "Apply my default font to FRAME, or the selected frame."
     (when (display-graphic-p frame)
       (with-selected-frame (or frame (selected-frame))
-	(set-frame-font my/default-font nil t)
-	(set-face-attribute 'default nil :font my/default-font)
-	(set-face-attribute 'fixed-pitch nil :font my/default-font)
-	(set-face-attribute 'variable-pitch nil :font my/default-font))))
+	(when (find-font (font-spec :name my/default-font))
+	  (set-frame-font my/default-font nil t)
+	  (set-face-attribute 'default nil :font my/default-font)
+	  (set-face-attribute 'fixed-pitch nil :font my/default-font)
+	  (set-face-attribute 'variable-pitch nil :font my/default-font)))))
 
   (my/apply-default-font)
   (add-hook 'after-make-frame-functions #'my/apply-default-font)
@@ -265,29 +265,38 @@ default.
 #+begin_src emacs-lisp
   (use-package goto-chg
     :ensure t
-    :bind*
+    :defer t
+    :bind
     ("C-c ," . 'goto-last-change)
     ("C-c ." . 'goto-last-change-reverse))
-#+end_src emacs-lisp
+#+end_src
 * Gptel
 To prove I work on AI.
 #+begin_src emacs-lisp
   (use-package gptel
     :ensure t
-    :init
-    (setq gptel-model "claude-3-5-sonnet-20241022"
-	  gptel-backend (gptel-make-anthropic "Claude"
-			  :stream t
-			  :key (let ((key-file-path "~/.emacs.d/keys/claude.txt"))
-				 (if (file-exists-p key-file-path)
-				     (with-temp-buffer
-				       (insert-file-contents key-file-path)
-				       (string-trim (buffer-string)))
-				   (message "File %s does not exist" key-file-path)))))
-    (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
-    (add-hook 'gptel-post-response-functions 'gptel-end-of-response)
-    (add-hook 'gptel-mode-hook (lambda () (auto-fill-mode -1)))
+    :commands (gptel gptel-send)
+    :hook (gptel-mode . (lambda () (auto-fill-mode -1)))
+    :custom
+    (gptel-model "claude-sonnet-4-6")
     :config
+    (defun my/gptel-anthropic-key ()
+      "Read the Anthropic key from auth-source, with a legacy-file fallback."
+      (condition-case nil
+          (gptel-api-key-from-auth-source "api.anthropic.com" "apikey")
+        (user-error
+         (let ((legacy-key-file (locate-user-emacs-file "keys/claude.txt")))
+           (unless (file-readable-p legacy-key-file)
+             (user-error "No Anthropic key in auth-source or %s" legacy-key-file))
+           (with-temp-buffer
+             (insert-file-contents legacy-key-file)
+             (string-trim (buffer-string)))))))
+    (setq gptel-backend (gptel-make-anthropic "Claude"
+			    :models '("claude-sonnet-4-6")
+			    :stream t
+			    :key #'my/gptel-anthropic-key))
+    (add-hook 'gptel-post-stream-hook #'gptel-auto-scroll)
+    (add-hook 'gptel-post-response-functions #'gptel-end-of-response)
     (define-key gptel-mode-map (kbd "C-c C-c") 'gptel-send))
 #+end_src
 
@@ -296,8 +305,7 @@ To prove I work on AI.
   ;; Highlight indent.
   (use-package highlight-indent-guides
     :ensure t
-    :init
-    (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+    :hook (prog-mode . highlight-indent-guides-mode)
     :custom
     (highlight-indent-guides-method 'character)
     (highlight-indent-guides-auto-enabled nil)
@@ -307,8 +315,7 @@ To prove I work on AI.
   ;; Highlight current word.
   (use-package symbol-overlay
     :ensure t
-    :init
-    (add-hook 'prog-mode-hook 'symbol-overlay-mode))
+    :hook (prog-mode . symbol-overlay-mode))
 #+end_src
 * Ibuffer
 #+begin_src emacs-lisp
@@ -319,7 +326,7 @@ To prove I work on AI.
       :commands (ibuffer-vc-set-filter-groups-by-vc-root)
       :custom
       (ibuffer-vc-skip-if-remote 'nil))
-    :bind* ("C-x i" . 'ibuffer)
+    :bind ("C-x i" . 'ibuffer)
     :custom
     (ibuffer-formats
      '((mark modified read-only locked " "
@@ -363,7 +370,7 @@ Useful because Emacs default completion sucks.
     (use-package counsel :ensure t :diminish :config (counsel-mode 1))
     (use-package swiper :defer t)
     (ivy-mode 1)
-    :bind*
+    :bind
     (("C-b" . ivy-switch-buffer)  ; Because C-b is freed, why not?
      ("M-b" . ivy-switch-buffer)  ; Extra binding; C-b is often needed for tmux.
      ("C-x r" . counsel-recentf)
@@ -393,7 +400,7 @@ Make git slightly less painful, but git is still a pain in the ass.
 #+begin_src emacs-lisp
   (use-package magit
     :ensure t
-    :bind*
+    :bind
     (("C-x g" . magit-status)
     (:map magit-status-mode-map
     ("M-RET" . magit-diff-visit-file-other-window)))
@@ -408,18 +415,13 @@ Make git slightly less painful, but git is still a pain in the ass.
 
   (use-package diff-hl
     :ensure t
-    :config
-    (global-diff-hl-mode)
-    (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
-    (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-    (add-hook 'prog-mode-hook 'diff-hl-mode)
     :bind
     (:map diff-hl-mode-map ("<left-fringe> <mouse-1>" . diff-hl-diff-goto-hunk))
     :hook
     ((magit-post-refresh . diff-hl-magit-post-refresh)
      (after-init . global-diff-hl-mode)
      (dired-mode . diff-hl-dired-mode)))
-#+end_src emacs-lisp
+#+end_src
 * Marginalia
 Should be Emacs default.
 #+begin_src emacs-lisp
@@ -439,7 +441,8 @@ keyboard macros).
 #+begin_src emacs-lisp
   (use-package multiple-cursors
     :ensure t
-    :bind*
+    :defer t
+    :bind
     ("C-c <return>" . 'mc/edit-lines)
     ("C-c RET" . 'mc/edit-lines))
 #+end_src
@@ -498,7 +501,7 @@ Org mode is great as long as you don't spend your life on it.
     :custom
     (org-src-tab-acts-natively t)       ; Make tab work in Org-mode code block.
     (org-src-fontify-natively t)        ; Highlight code block.
-    (org-confirm-babel-evaluate 'nil))  ; Don't ask when running code.
+    (org-confirm-babel-evaluate t))     ; Confirm before running code.
 #+end_src
 
 Paste image to org mode.
@@ -523,13 +526,14 @@ Paste image to org mode.
       (apply orig-fun args)))
   (advice-add 'yank-media :around #'my/yank-media-auto-png))
 
-(defun my/org-yank-image-handler (type image)
+(defun my/org-yank-image-handler (_type image)
   "Handle pasting images in org-mode."
-  (let* ((dir (expand-file-name yank-media-image-directory default-directory))
-         (filename (format-time-string "%Y%m%d_%H%M%S.png")))
+  (let ((dir (expand-file-name yank-media-image-directory default-directory)))
     (unless (file-directory-p dir)
       (make-directory dir t))
-    (let ((file (expand-file-name filename dir)))
+    (let ((file (make-temp-file
+                 (expand-file-name (format-time-string "%Y%m%d_%H%M%S_") dir)
+                 nil ".png")))
       (with-temp-file file
         (set-buffer-multibyte nil)
         (insert image))
@@ -573,8 +577,7 @@ Paste image to org mode.
 
   (use-package rainbow-delimiters
     :ensure t
-    :init
-    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+    :hook (prog-mode . rainbow-delimiters-mode))
 #+end_src
 * Prog
 ** Tree-sitter
@@ -582,7 +585,8 @@ Newly supported. Can be buggy.
 #+begin_src emacs-lisp
   (use-package treesit
     :ensure nil
-    :init
+    :demand t
+    :config
     (setq treesit-language-source-alist
 	  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
 	    (cmake "https://github.com/uyha/tree-sitter-cmake")
@@ -599,16 +603,19 @@ Newly supported. Can be buggy.
 	    (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
 	    (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
 	    (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
-    ;; Hacky. https://www.masteringemacs.org/article/how-to-get-started-tree-sitter
-    (setq major-mode-remap-alist
-	  '((yaml-mode . yaml-ts-mode)
-	    (bash-mode . bash-ts-mode)
-	    (js2-mode . js-ts-mode)
-	    (typescript-mode . typescript-ts-mode)
-	    (json-mode . json-ts-mode)
-	    (css-mode . css-ts-mode)
-	    (python-mode . python-ts-mode)))
-    :bind*
+    ;; Remap only when the corresponding grammar is actually usable, and
+    ;; preserve remaps installed by Emacs or machine-local configuration.
+    (dolist (spec '((python-mode python-ts-mode python)
+		    (css-mode css-ts-mode css)
+		    (javascript-mode js-ts-mode javascript)
+		    (js-json-mode json-ts-mode json)
+		    (typescript-mode typescript-ts-mode typescript)
+		    (yaml-mode yaml-ts-mode yaml)))
+      (pcase-let ((`(,source-mode ,target-mode ,language) spec))
+	(when (treesit-ready-p language t)
+	  (add-to-list 'major-mode-remap-alist
+		       (cons source-mode target-mode)))))
+    :bind
     ("C-c l ," . treesit-beginning-of-defun)
     ("C-c l ." . treesit-end-of-defun))
 #+end_src
@@ -617,26 +624,13 @@ Newly supported. Can be buggy.
 #+begin_src emacs-lisp
 (use-package apheleia
   :ensure t
-  :bind* ("C-c l f" . apheleia-format-buffer)
+  :bind ("C-c l f" . apheleia-format-buffer)
   :config
   (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort black)))
 #+end_src
 
 ** Python
 #+begin_src emacs-lisp
-  (use-package python-mode
-    :ensure nil
-    :after flycheck
-    :mode "\\.py\\'"
-    :custom
-    (python-indent-offset 4)
-    (flycheck-python-pycompile-executable "/usr/local/bin/python3")
-    (python-shell-interpreter "/usr/local/bin/python3")
-    (py-python-command "/usr/local/bin/python3")
-    (python-shell-interpreter "/usr/local/bin/python3")
-    (python-indent-guess-indent-offset-verbose nil))
-
-
   ;; Python indent.
   (defun my/python-tab (&optional arg)
     "Indent selected text or the current line."
@@ -663,12 +657,27 @@ Newly supported. Can be buggy.
 			  (python-indent-shift-left beg-line end-line arg)))
       (python-indent-shift-left (line-beginning-position) (line-end-position) arg)))
 
-  (define-key python-mode-map (kbd "TAB") 'my/python-tab)
-  (define-key python-ts-mode-map (kbd "TAB") 'my/python-tab)
-  (define-key python-mode-map (kbd "<tab>") 'my/python-tab)
-  (define-key python-ts-mode-map (kbd "<tab>") 'my/python-tab)
-  (define-key python-mode-map (kbd "<backtab>") 'my/python-backtab)
-  (define-key python-ts-mode-map (kbd "<backtab>") 'my/python-backtab)
+  (use-package python
+    :ensure nil
+    :mode ("\\.py\\'" . python-mode)
+    :bind
+    (:map python-mode-map
+	  ("TAB" . my/python-tab)
+	  ("<tab>" . my/python-tab)
+	  ("<backtab>" . my/python-backtab)
+     :map python-ts-mode-map
+	  ("TAB" . my/python-tab)
+	  ("<tab>" . my/python-tab)
+	  ("<backtab>" . my/python-backtab))
+    :custom
+    (python-indent-offset 4)
+    (python-shell-interpreter (or (executable-find "python3") "python3"))
+    (python-indent-guess-indent-offset-verbose nil))
+
+  (with-eval-after-load 'flycheck
+    (setq flycheck-python-pycompile-executable
+	  (or (executable-find "python3") "python3")))
+
 #+end_src
 * Recentf
 #+begin_src emacs-lisp
@@ -678,7 +687,7 @@ Newly supported. Can be buggy.
     :custom
     (recentf-auto-cleanup "05:00am")
     (recentf-max-saved-items 200)
-    (recentf-exclude '((expand-file-name package-user-dir)
+    (recentf-exclude `(,(regexp-quote (expand-file-name package-user-dir))
 		       ".cache"
 		       ".cask"
 		       ".elfeed"
@@ -703,14 +712,14 @@ Newly supported. Can be buggy.
   (use-package view
     :ensure nil
     :init
-    (bind-key* "C-<down>" 'View-scroll-half-page-forward)
-    (bind-key* "C-<up>" 'View-scroll-half-page-backward)
-    (bind-key* "M-n" 'View-scroll-half-page-forward)
-    (bind-key* "M-p" 'View-scroll-half-page-backward))
+    (bind-key "C-<down>" 'View-scroll-half-page-forward)
+    (bind-key "C-<up>" 'View-scroll-half-page-backward)
+    (bind-key "M-n" 'View-scroll-half-page-forward)
+    (bind-key "M-p" 'View-scroll-half-page-backward))
 
   ;; Vertical Scroll.
   (setq scroll-step 1)
-  (setq scroll-margin 1)
+  (setq scroll-margin 4)
   (setq scroll-conservatively 100000)
   (setq scroll-up-aggressively 0.01)
   (setq scroll-down-aggressively 0.01)
@@ -751,25 +760,32 @@ Newly supported. Can be buggy.
 * Spell Checker
 Still needed, unfortunately.
 #+begin_src emacs-lisp
+  (defun my/hunspell-en-us-available-p ()
+    "Return non-nil when Hunspell and an en_US dictionary are available."
+    (and (executable-find "hunspell")
+	 (catch 'found
+	   (dolist (dictionary
+		    (list (expand-file-name "~/Library/Spelling/en_US.aff")
+			  "/Library/Spelling/en_US.aff"
+			  "/usr/local/share/hunspell/en_US.aff"
+			  "/opt/homebrew/share/hunspell/en_US.aff"
+			  "/usr/share/hunspell/en_US.aff"))
+	     (when (file-readable-p dictionary)
+	       (throw 'found t))))))
+
   (use-package flyspell
     :ensure nil
     :diminish
-    :if (executable-find "hunspell")
+    :if (my/hunspell-en-us-available-p)
     :hook (((text-mode outline-mode
 	     latex-mode org-mode markdown-mode) . flyspell-mode))
     :init
     (add-hook 'prog-mode-hook 'flyspell-prog-mode)
     :custom
     (flyspell-issue-message-flag nil)
-    (ispell-program-name "/usr/local/bin/hunspell")
-    (ispell-hunspell-dict-paths-alist
-      '(("en_US" "/Applications/dict-en-20230701_lo/en_US.aff")))
+    (ispell-program-name (executable-find "hunspell"))
+    (ispell-dictionary "en_US")
     (ispell-local-dictionary "en_US")
-    (ispell-local-dictionary-alist
-    ;; Please note the list `("-d" "en_US")` contains ACTUAL parameters
-    ;; passed to hunspell. You could use `("-d" "en_US,en_US-med")` to check
-    ;; with multiple dictionaries.
-    '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8)))
     :config
     (use-package flyspell-correct-ivy
       :after ivy
@@ -812,9 +828,10 @@ Finetuned Leuven theme.
   (set-face-attribute 'isearch nil :background "#9fcfff" :foreground "#000000" :weight 'bold)
   (set-face-attribute 'lazy-highlight nil :background "#dbeeff" :foreground "#000000")
   ;; Indent highlight color.
-  (set-face-background 'highlight-indent-guides-odd-face "#f4f8ff")
-  (set-face-background 'highlight-indent-guides-even-face "#e8f1ff")
-  (set-face-foreground 'highlight-indent-guides-character-face "#b7c9e2")
+  (with-eval-after-load 'highlight-indent-guides
+    (set-face-background 'highlight-indent-guides-odd-face "#f4f8ff")
+    (set-face-background 'highlight-indent-guides-even-face "#e8f1ff")
+    (set-face-foreground 'highlight-indent-guides-character-face "#b7c9e2"))
   ;; Mode line.
   (set-face-attribute 'mode-line-buffer-id nil :foreground "#003f8e" :underline)
   (set-face-attribute 'mode-line-inactive nil :foreground "#5f6f8f" :background "#edf4ff" :box nil)
@@ -890,7 +907,6 @@ Finetuned Leuven theme.
 
   (with-eval-after-load 'ivy
     (my/apply-ivy-faces))
-  (add-hook 'minibuffer-setup-hook #'my/apply-ivy-faces)
 
   (defun my/apply-org-title-faces ()
     (set-face-attribute 'org-document-title nil
@@ -939,10 +955,9 @@ Emacs default undo/redo sucks.
 #+begin_src emacs-lisp
   (use-package undo-tree
     :ensure t
-    :defer t
     :init
     (global-undo-tree-mode)
-    :bind*
+    :bind
     (("C-z" . 'undo-tree-undo)
      ("M-z" . 'undo-tree-undo) ; Emulate the normal cmd-z.
      ("C-r" . 'undo-tree-redo)
@@ -958,10 +973,10 @@ Emacs default undo/redo sucks.
 Be tidy please.
 #+begin_src emacs-lisp
   (use-package whitespace
-    :ensure t
+    :ensure nil
+    :hook ((prog-mode . whitespace-mode)
+	   (latex-mode . whitespace-mode))
     :init
-    (add-hook 'prog-mode-hook 'whitespace-mode)
-    (add-hook 'latex-mode-hook 'whitespace-mode)
     (remove-hook 'before-save-hook 'delete-trailing-whitespace)
     :custom
     (whitespace-line-column nil)
@@ -976,7 +991,7 @@ Be tidy please.
 Restore previous window layouts.
 #+begin_src emacs-lisp
 (use-package winner
-  :ensure t
+  :ensure nil
   :init
   (winner-mode 1)
   :custom
@@ -1034,17 +1049,17 @@ Why does Emacs put those by default?
 	(kill-region (region-beginning) (region-end))
       (backward-kill-word 1)))
 
-  (bind-key* "C-w" 'my/backward-kill-word-or-region)
+  (bind-key "C-w" 'my/backward-kill-word-or-region)
 
   ;; When splitting window, automatically balance them and switch focus to the
   ;; newly splitted window.
-  (bind-key* "C-x 2"
+  (bind-key "C-x 2"
 	     (lambda ()
 	       (interactive)
 	       (split-window-vertically)
 	       (balance-windows)
 	       (other-window 1)))
-  (bind-key* "C-x 3"
+  (bind-key "C-x 3"
 	     (lambda ()
 	       (interactive)
 	       (split-window-horizontally)
@@ -1052,7 +1067,7 @@ Why does Emacs put those by default?
 	       (other-window 1)))
 
   ;; Auto-balance window when deleting window.
-  (bind-key* "C-x 0"
+  (bind-key "C-x 0"
 	     (lambda ()
 	       (interactive)
 	       (delete-window)
@@ -1076,12 +1091,18 @@ Why does Emacs put those by default?
 	(setq goal-column (current-column))
 	(message "Set goal column at %d" goal-column))))
 
-  (bind-key* "C-x C-u" 'my/toggle-goal-column)
+  (bind-key "C-x C-u" 'my/toggle-goal-column)
 
   ;; Reload init files.
   (defun my/reload-init-file ()
+    "Retangle and reload the main configuration without rerunning early init."
     (interactive)
-    (load-file user-init-file))
+    (let ((org-config (locate-user-emacs-file "myinit.org"))
+	  (el-config (locate-user-emacs-file "myinit.el")))
+      (require 'ob-tangle)
+      (org-babel-tangle-file org-config el-config "emacs-lisp")
+      (load-file el-config)
+      (message "Reloaded %s" el-config)))
 
   ;; Save all buffers.
   (defun my/save-all-buffers ()
@@ -1090,7 +1111,7 @@ Why does Emacs put those by default?
     (interactive)
     (save-some-buffers t))
 
-  (bind-key* "C-s" 'my/save-all-buffers)
+  (bind-key "C-s" 'my/save-all-buffers)
 
   ;; Mark until a char. A general version of `Zap-up-to-char`.
   (defun my/mark-until-char ()
@@ -1104,7 +1125,7 @@ Why does Emacs put those by default?
 	(goto-char (1- (point)))
 	(exchange-point-and-mark))))
 
-  (bind-key* "M-t" 'my/mark-until-char)
+  (bind-key "M-t" 'my/mark-until-char)
 
   ;; Backward kill line.
   (defun my/backward-kill-line ()
@@ -1112,19 +1133,21 @@ Why does Emacs put those by default?
     (kill-line 0)
     (indent-according-to-mode))
 
-  (bind-key* "C-<backspace>" 'my/backward-kill-line) ; Doesn't work in terminal.
+  (bind-key "C-<backspace>" 'my/backward-kill-line) ; Doesn't work in terminal.
 
   ;; Edit this file.
   (defun my/edit-configs ()
     "Opens this file."
     (interactive)
-    (find-file "~/.emacs.d/myinit.org"))
+    (find-file (locate-user-emacs-file "myinit.org")))
 
   ;; Show buffer's file path.
   (defun my/show-file-path ()
     "Show the full path of the file in the minibuffer."
     (interactive)
-    (message (buffer-file-name)))
+    (if-let ((filename (buffer-file-name)))
+	(message "%s" filename)
+      (user-error "Current buffer is not visiting a file")))
 
   ;; Kill a word when the cursor is in the middle.
   (defun my/kill-word-at-point ()
@@ -1134,7 +1157,7 @@ Why does Emacs put those by default?
       (when bounds
 	(kill-region (car bounds) (cdr bounds)))))
 
-  (bind-key* "M-w" 'my/kill-word-at-point)
+  (bind-key "M-w" 'my/kill-word-at-point)
 
   ;; Stolen from Stevey.
   (defun my/rename-file-and-buffer (new-name)
@@ -1155,19 +1178,13 @@ Why does Emacs put those by default?
   (defun my/move-buffer-file (dir)
     "Moves both current buffer and file it's visiting to DIR."
     (interactive "DNew directory: ")
-    (let* ((name (buffer-name))
-	   (filename (buffer-file-name))
-	   (dir
-	    (if (string-match dir "\\(?:/\\|\\\\)$")
-		(substring dir 0 -1) dir))
-	   (newname (concat dir "/" name)))
-      (if (not filename)
-	  (message "Buffer '%s' is not visiting a file!" name)
+    (if-let* ((filename (buffer-file-name))
+	      (newname (expand-file-name (file-name-nondirectory filename) dir)))
 	(progn
-	  (copy-file filename newname 1)
-	  (delete-file filename)
-	  (set-visited-file-name newname)
-	  (set-buffer-modified-p nil)  t))))
+	  (rename-file filename newname 1)
+	  (set-visited-file-name newname t)
+	  (set-buffer-modified-p nil))
+      (user-error "Current buffer is not visiting a file")))
 
   ;; Delete this file.
   (defun my/delete-this-file ()
@@ -1177,7 +1194,7 @@ Why does Emacs put those by default?
       (if filename
 	  (if (y-or-n-p (concat "Do you really want to delete file " filename " ?"))
 	      (progn
-		(delete-file filename)
+		(delete-file filename delete-by-moving-to-trash)
 		(message "Deleted file %s." filename)
 		(kill-buffer)))
 	(message "Not a file visiting buffer!"))))
@@ -1209,7 +1226,7 @@ Why does Emacs put those by default?
     (push-mark (point) t nil)
     (message "Pushed mark to ring"))
 
-  (bind-key* "C-c m" 'my/mark-location)
+  (bind-key "C-c m" 'my/mark-location)
 
   (defun my/return-to-mark ()
     "Jumps to the local mark, respecting the `mark-ring' order.
@@ -1218,68 +1235,67 @@ Why does Emacs put those by default?
     (set-mark-command 1)
     (message "Jumped to mark"))
 
-  (bind-key* "C-c r" 'my/return-to-mark)
+  (bind-key "C-c r" 'my/return-to-mark)
 
   (defun my/copy-line-to-clipboard ()
     "Copy the current line to the macOS clipboard."
     (interactive)
     (let ((line (buffer-substring (line-beginning-position) (line-end-position))))
-      (kill-new line)
-      (shell-command (concat "echo " (shell-quote-argument line) " | pbcopy"))))
+      (kill-new line)))
 
-  (bind-key* "C-c c" 'my/copy-line-to-clipboard)
+  (bind-key "C-c c" 'my/copy-line-to-clipboard)
 #+end_src
 * My/Keybindings
 #+begin_src emacs-lisp
   ;; Stevey's suggestion.
-  (bind-key* "C-x t" 'beginning-of-buffer)
-  (bind-key* "C-c t" 'beginning-of-buffer) ; Mispress.
-  (bind-key* "C-x e" 'end-of-buffer)
-  (bind-key* "C-c e" 'end-of-buffer)       ; Mispress.
+  (bind-key "C-x t" 'beginning-of-buffer)
+  (bind-key "C-c t" 'beginning-of-buffer) ; Mispress.
+  (bind-key "C-x e" 'end-of-buffer)
+  (bind-key "C-c e" 'end-of-buffer)       ; Mispress.
 
   ;; Conventional copy/paste.
-  (bind-key* "M-c" 'kill-ring-save)
-  (bind-key* "M-v" 'yank)
+  (bind-key "M-c" 'kill-ring-save)
+  (bind-key "M-v" 'yank)
 
   ;; Default word and char movement are always awkward to me.
-  (bind-key* "M-j" 'backward-word)
-  (bind-key* "M-k" 'forward-word)
-  (bind-key* "C-j" 'backward-char)
-  (bind-key* "C-k" 'forward-char)
+  (bind-key "M-j" 'backward-word)
+  (bind-key "M-k" 'forward-word)
+  (bind-key "C-j" 'backward-char)
+  (bind-key "C-k" 'forward-char)
 
   ;; Adjust font size like web browsers. Doesn't work in terminal.
-  (bind-key* "C-=" 'text-scale-increase)
-  (bind-key* "C--" 'text-scale-decrease)
+  (bind-key "C-=" 'text-scale-increase)
+  (bind-key "C--" 'text-scale-decrease)
 
   ;; Cure bad habits.
-  (bind-key* "C-x C-s" (lambda ()
+  (bind-key "C-x C-s" (lambda ()
 			  (interactive)
 			  (message "Use C-s, dude.")))
 
   ;; Somehow those two packages aren't installed automatically by `use-package`.
   ;; Need to install them manually first. And then bind them here. And you can't do
   ;; `eval-after-load` for some reason.
-  (bind-key* "C-c C-o" 'dumb-jump-go-other-window)
-  (bind-key* "C-c C-y" 'dumb-jump-back)
-  (bind-key* "C-c ," 'goto-last-change)
-  (bind-key* "C-c ." 'goto-last-change-reverse)
+  (bind-key "C-c C-o" 'dumb-jump-go-other-window)
+  (bind-key "C-c C-y" 'dumb-jump-back)
+  (bind-key "C-c ," 'goto-last-change)
+  (bind-key "C-c ." 'goto-last-change-reverse)
 
   ;; Misc.
-  (bind-key* "C-o" 'other-window)
-  (bind-key* "M-g" 'goto-line)
-  (bind-key* "C-c DEL" 'delete-blank-lines)
-  (bind-key* "C-c <delete>" 'delete-blank-lines)
-  (bind-key* "C-x K" 'kill-this-buffer) ; Don't ask.
-  (bind-key* "C-c w" 'toggle-truncate-lines) ; Wrap.
-  (bind-key* "C-x q" 'query-replace)
-  (bind-key* "C-x \\" 'sort-lines)
-  (bind-key* "C-x ?" 'describe-key)
-  (bind-key* "C-x c" 'call-last-kbd-macro)
+  (bind-key "C-o" 'other-window)
+  (bind-key "M-g" 'goto-line)
+  (bind-key "C-c DEL" 'delete-blank-lines)
+  (bind-key "C-c <delete>" 'delete-blank-lines)
+  (bind-key "C-x K" 'kill-this-buffer) ; Don't ask.
+  (bind-key "C-c w" 'toggle-truncate-lines) ; Wrap.
+  (bind-key "C-x q" 'query-replace)
+  (bind-key "C-x \\" 'sort-lines)
+  (bind-key "C-x ?" 'describe-key)
+  (bind-key "C-x c" 'call-last-kbd-macro)
   ;; Bind extra keys to common commands.
   (define-key key-translation-map (kbd "C-;") (kbd "C-l"))
-  (bind-key* "M-l" 'recenter-top-bottom)
-  (bind-key* "M-o" 'other-window)
-  ;; Can't turn them to bind-key*; otherwise undo-tree-mode wouldn't enable. Strange.
+  (bind-key "M-l" 'recenter-top-bottom)
+  (bind-key "M-o" 'other-window)
+  ;; Keep these as ordinary global bindings so mode-local maps can take precedence.
   (global-set-key (kbd "M-;") 'comment-or-uncomment-region)
   (global-set-key (kbd "C-/") 'comment-or-uncomment-region)
 
@@ -1303,22 +1319,23 @@ Handle copy/paste in OSX.
 		    (default-directory "~"))
 		(shell-command-to-string pbpaste)))))
 
-    (defun my/paste-to-osx (text &optional push)
+    (defun my/paste-to-osx (text &optional _push)
       (let ((process-connection-type nil))
 	(let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
 	  (process-send-string proc text)
 	  (process-send-eof proc))))
 
-    (setq interprogram-cut-function 'my/paste-to-osx
-	  interprogram-paste-function 'my/copy-from-osx))
+    (unless (display-graphic-p)
+      (setq interprogram-cut-function 'my/paste-to-osx
+	    interprogram-paste-function 'my/copy-from-osx)))
 #+end_src
 * My/Configs
 #+begin_src emacs-lisp
   ;; C-p, C-n, etc uses visual lines.
   (setq line-move-visual t)
 
-  ;; y or n.
-  (fset 'yes-or-no-p 'y-or-n-p)
+  ;; Use short answers without redefining the prompting function.
+  (setq use-short-answers t)
 
   ;; Ask before killing emacs.
   (setq confirm-kill-emacs 'y-or-n-p)
@@ -1326,32 +1343,17 @@ Handle copy/paste in OSX.
   ;; No dialgue!
   (setq use-dialog-box nil)
 
-  ;; Move the backup fies to user-emacs-directory/.backup.
-  (setq backup-directory-alist
-	`(("." . ,(expand-file-name ".backup" user-emacs-directory))))
-
-  ;; Automatically kill all active processes when closing Emacs.
-  (setq confirm-kill-processes nil)
-
   ;; Turn Off Cursor Alarms.
   (setq ring-bell-function 'ignore)
 
   ;; Show Keystrokes in Progress Instantly.
   (setq echo-keystrokes 0.1)
 
-  ;; Don't Lock Files.
-  (setq-default create-lockfiles nil)
-
-  ;; ad-handle-definition warnings are generated when functions are
-  ;; redefined with `defadvice', they are not helpful.
-  (setq ad-redefinition-action 'accept)
-
   ;; Move Custom-Set-Variables to Different File.
-  (setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
+  (setq custom-file (locate-user-emacs-file "custom-set-variables.el"))
   (load custom-file 'noerror 'nomessage)
 
   ;; So Long mitigates slowness due to extremely long lines.
-  ;; Currently available in Emacs master branch *only*!
   (when (fboundp 'global-so-long-mode)
     (global-so-long-mode))
 
@@ -1388,44 +1390,24 @@ Handle copy/paste in OSX.
   (setq-default word-wrap t)
 
   ;; Paren match.
-  (add-hook 'prog-mode-hook 'show-paren-mode)
+  (show-paren-mode 1)
 
   ;; Automatically update a buffer if a file changes on disk.
   (global-auto-revert-mode 1)
-  (add-hook 'dired-mode-hook 'auto-revert-mode) ; Refresh dired too.
 
-  ;; Give context to cursor.
-  (setq scroll-margin 4)
-
-  ;; Show unfinished keystrokes early.
-  (setq echo-keystrokes 0.1)
-
-  ;; Don't show useless things in mode line.
+  ;; Show time in the default mode line without load-average or mail checks.
   (setq display-time-format "[%m-%d (%a) %H:%M]")
   (setq display-time-24hr-format t)
   (setq display-time-default-load-average nil)
   (setq display-time-mail-string "")
   (display-time-mode 1)
-  (setq-default mode-line-format
-		(list
-		 "  "                  ; Don't understand why Emacs puts "-" here.
-		 'mode-line-modified
-		 "  "
-		 'mode-line-buffer-identification
-		 "  (%l, %c)  "        ; Buffer name  (line number, column number).
-		 'display-time-string  ; Time.
-		 "  Focus!"))          ; Of course.
-
-  ;; Don't ask when killing a buffer with a live process.
-  (setq kill-buffer-query-functions
-	(remq 'process-kill-buffer-query-function
-	      kill-buffer-query-functions))
 
   ;; Tramp.
   (setq tramp-default-method "ssh")
 
   ;; Uses system trash rather than deleting forever.
-  (setq trash-directory "~/.Trash")
+  (when (eq system-type 'darwin)
+    (setq trash-directory (expand-file-name "~/.Trash")))
   (setq delete-by-moving-to-trash t)
 
   ;; Compilation.
@@ -1433,18 +1415,11 @@ Handle copy/paste in OSX.
   (setq-default compilation-ask-about-save nil)
   (setq-default compilation-scroll-output t)
 
-  ;; Move `custom-set-variables` to a different file.
-  (setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
-  (load custom-file 'noerror)
-
   ;; Switch to help buffers automatically.
   (setq help-window-select t)
 
-  ;; Reduce a little typing latency.
-  (setq redisplay-dont-pause t)
-
   ;; Electric indent.
-  (add-hook 'prog-mode-hook 'electric-indent-mode)
+  (electric-indent-mode 1)
   ;; Cause annoying auto indent in org mode.
   (add-hook 'org-mode-hook (lambda () (electric-indent-local-mode 0)))
 
@@ -1466,7 +1441,6 @@ Handle copy/paste in OSX.
   (delete-selection-mode t)
 
   ;; Savehist.
-  (setq history-length 100)
   (savehist-mode 1)
 
   ;; Column width indicator.
@@ -1479,9 +1453,10 @@ Handle copy/paste in OSX.
   ;; Sticky function head.
   (use-package semantic
     :ensure nil
-    :hook
-    (prog-mode . semantic-mode)
-    (prog-mode . global-semantic-stickyfunc-mode))
+    :defer 1
+    :config
+    (semantic-mode 1)
+    (global-semantic-stickyfunc-mode 1))
 
   ;; Default some files to text-mode.
   (add-to-list 'auto-mode-alist '("\\.in\\'" . text-mode))

@@ -1,5 +1,25 @@
-# Ignore everything but
-*
-!.gitignore
-!myinit.org
-!init.el
+# Generated configuration and runtime state.
+.backup/
+.chatgpt-shell.el
+.claude/
+.mc-lists.el
+amx-items
+auto-save-list/
+chatgpt/
+custom-set-variables.el
+early-init-do-not-edit/
+elpa/
+eshell/
+history
+keys/
+myinit.el
+package-quickstart.el
+package-quickstart.elc
+places
+projectile-bookmarks.eld
+recentf
+semanticdb/
+speed-type/
+transient/
+tree-sitter/
+work.el
