@@ -13,7 +13,9 @@ git clone https://github.com/yaoxx151/.emacs.d.git ~/.emacs.d
 ```
 
 The first startup installs missing packages from GNU ELPA, NonGNU ELPA, and
-MELPA. After changing packages, run `M-x package-quickstart-refresh`.
+MELPA. Direct dependencies are listed in `my/package-manifest`; update that
+list whenever a package is added or removed. After changing packages, run
+`M-x package-quickstart-refresh`.
 
 Machine-local configuration belongs in ignored `work.el`. Store API keys in
 `auth-source` (for example, encrypted `~/.authinfo.gpg`) rather than in the

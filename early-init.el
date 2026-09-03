@@ -4,6 +4,7 @@
 ;; file, so these settings must live here.
 (setq package-enable-at-startup nil
       package-quickstart t
+      load-prefer-newer t
       site-run-file nil)
 
 ;; Minimize collections during startup, then return to a moderate threshold.

@@ -136,10 +136,6 @@ Useful.
      ("M-<return>" . crux-smart-open-line-above)
      ("M-RET" . crux-smart-open-line-above))
     :config
-    (crux-with-region-or-buffer indent-region)
-    (crux-with-region-or-buffer untabify)
-    (crux-with-region-or-line comment-or-uncomment-region) ; (Un)commenting works on line.
-    (crux-with-region-or-point-to-eol kill-ring-save)
     (defalias 'rename-file-and-buffer 'crux-rename-file-and-buffer))
 #+end_src
 * Dired
@@ -160,8 +156,6 @@ Useful.
     (dired-dwim-target t)
     ;; Move files to trash when deleting.
     (delete-by-moving-to-trash t)
-    ;; Load the newest version of a file.
-    (load-prefer-newer t)
     ;; Prefer filesystem notifications, with polling as Emacs' fallback.
     (auto-revert-use-notify t)
     :config
@@ -190,8 +184,8 @@ should be a default feature.
   (xref-show-definitions-function 'xref-show-definitions-completing-read)
   :bind
   (:map prog-mode-map
-    ("C-c C-o" . dumb-jump-go-other-window)
-    ("C-c C-y" . dumb-jump-back))
+    ("C-c C-o" . xref-find-definitions-other-window)
+    ("C-c C-y" . xref-go-back))
   :init
   (add-hook 'xref-backend-functions 'dumb-jump-xref-activate))
 #+end_src
@@ -457,8 +451,15 @@ Quite useful. Agreed by Stevey.
 #+end_src
 * Text Wrapping
 #+begin_src emacs-lisp
+  (use-package markdown-mode
+    :ensure t
+    :defer t
+    :mode (("\\.md\\'" . markdown-mode)
+	   ("\\.markdown\\'" . markdown-mode)
+	   ("\\.Rmd\\'" . markdown-mode))
+    :hook (markdown-mode . visual-line-mode))
+
   (add-hook 'org-mode-hook #'visual-line-mode)
-  (add-hook 'markdown-mode-hook #'visual-line-mode)
   (add-hook 'text-mode-hook #'visual-line-mode)
   (add-hook 'latex-mode-hook #'visual-line-mode)
   (add-hook 'tex-mode-hook #'visual-line-mode)
@@ -745,7 +746,9 @@ Newly supported. Can be buggy.
     :ensure t
     :if (memq window-system '(mac ns x))
     :init
-    (setq explicit-shell-file-name "/bin/zsh")
+    (let ((zsh (executable-find "zsh")))
+      (when zsh
+	(setq explicit-shell-file-name zsh)))
     :config
     (exec-path-from-shell-initialize))
 
@@ -802,6 +805,10 @@ Make the paranoid sleep better.
 #+begin_src emacs-lisp
   (use-package super-save
     :ensure t
+    :custom
+    (super-save-all-buffers nil)
+    (super-save-auto-save-when-idle nil)
+    (super-save-remote-files nil)
     :config
     (super-save-mode +1))
 #+end_src
@@ -963,6 +970,9 @@ Emacs default undo/redo sucks.
      ("C-r" . 'undo-tree-redo)
      ("M-r" . 'undo-tree-redo))
     :custom
+    ;; Serializing large undo trees on every save can block Emacs for seconds.
+    ;; Keep the visual in-session history without writing it synchronously.
+    (undo-tree-auto-save-history nil)
     (undo-tree-visualizer-diff t)
     (undo-tree-history-directory-alist
      `(("." . ,(expand-file-name ".backup" user-emacs-directory))))
@@ -1041,6 +1051,41 @@ Why does Emacs put those by default?
 #+end_src
 * My/Functions
 #+begin_src emacs-lisp
+  (defun my/indent-region-or-buffer (beg end)
+    "Indent the active region, or the entire buffer when no region is active."
+    (interactive
+     (if (use-region-p)
+	 (list (region-beginning) (region-end))
+       (list (point-min) (point-max))))
+    (indent-region beg end))
+
+  (defun my/untabify-region-or-buffer (beg end)
+    "Untabify the active region, or the entire buffer when no region is active."
+    (interactive
+     (if (use-region-p)
+	 (list (region-beginning) (region-end))
+       (list (point-min) (point-max))))
+    (untabify beg end))
+
+  (defun my/comment-region-or-line (beg end)
+    "Comment the active region, or the current line when no region is active."
+    (interactive
+     (if (use-region-p)
+	 (list (region-beginning) (region-end))
+       (list (line-beginning-position) (line-beginning-position 2))))
+    (comment-or-uncomment-region beg end))
+
+  (defun my/copy-region-or-rest-of-line (beg end)
+    "Copy the active region, or from point to the end of the current line."
+    (interactive
+     (if (use-region-p)
+	 (list (region-beginning) (region-end))
+       (list (point) (line-end-position))))
+    (kill-ring-save beg end))
+
+  (global-set-key [remap indent-region] #'my/indent-region-or-buffer)
+  (global-set-key [remap untabify] #'my/untabify-region-or-buffer)
+
   ;; Backward kill word or the region if selected.
   (defun my/backward-kill-word-or-region ()
     "Kill a word backward or the region if selected."
@@ -1104,26 +1149,26 @@ Why does Emacs put those by default?
       (load-file el-config)
       (message "Reloaded %s" el-config)))
 
-  ;; Save all buffers.
+  ;; Save all buffers explicitly with `M-x my/save-all-buffers'.  The regular
+  ;; save key below saves only the current buffer so latency does not scale
+  ;; with every modified local or remote buffer.
   (defun my/save-all-buffers ()
-    "Instead of `save-buffer', save all opened buffers by calling
-		     `save-some-buffers' with ARG t."
+    "Save all modified file-visiting buffers without prompting."
     (interactive)
     (save-some-buffers t))
 
-  (bind-key "C-s" 'my/save-all-buffers)
+  (bind-key "C-s" #'save-buffer)
 
   ;; Mark until a char. A general version of `Zap-up-to-char`.
-  (defun my/mark-until-char ()
-    "Mark text from current cursor position until the first occurrence
-		  of a prompted character."
-    (interactive)
-    (let ((prompt (read-char "Enter the character: ")))
-      (save-excursion
-	(search-forward (string prompt) nil t)
-	(set-mark (point))
-	(goto-char (1- (point)))
-	(exchange-point-and-mark))))
+  (defun my/mark-until-char (character)
+    "Mark up to, but not including, the next occurrence of CHARACTER."
+    (interactive "cMark until character: ")
+    (let ((end (save-excursion
+		 (when (search-forward (char-to-string character) nil t)
+		   (1- (point))))))
+      (unless end
+	(user-error "Character %c not found" character))
+      (push-mark end nil t)))
 
   (bind-key "M-t" 'my/mark-until-char)
 
@@ -1161,19 +1206,26 @@ Why does Emacs put those by default?
 
   ;; Stolen from Stevey.
   (defun my/rename-file-and-buffer (new-name)
-    "Renames both current buffer and file it's visiting to NEW-NAME."
-    (interactive "sNew name: ")
-    (let ((name (buffer-name))
-	  (filename (buffer-file-name)))
-      (if (not filename)
-	  (message "Buffer '%s' is not visiting a file!" name)
-	(if (get-buffer new-name)
-	    (message "A buffer named '%s' already exists!" new-name)
-	  (progn
-	    (rename-file filename new-name 1)
-	    (rename-buffer new-name)
-	    (set-visited-file-name new-name)
-	    (set-buffer-modified-p nil))))))
+    "Rename the current file and its buffer to NEW-NAME without overwriting."
+    (interactive
+     (progn
+	(unless buffer-file-name
+	  (user-error "Current buffer is not visiting a file"))
+	(list (read-file-name "Rename file to: "
+			      (file-name-directory buffer-file-name)
+			      nil nil
+			      (file-name-nondirectory buffer-file-name)))))
+    (unless buffer-file-name
+      (user-error "Current buffer is not visiting a file"))
+    (let ((new-name (expand-file-name new-name)))
+      (when (file-equal-p buffer-file-name new-name)
+	(user-error "New name is the same as the current file"))
+      (when (get-file-buffer new-name)
+	(user-error "A buffer is already visiting %s" new-name))
+      (rename-file buffer-file-name new-name nil)
+      (set-visited-file-name new-name t)
+      (set-buffer-modified-p nil)
+      (message "Renamed file to %s" new-name)))
 
   (defun my/move-buffer-file (dir)
     "Moves both current buffer and file it's visiting to DIR."
@@ -1181,7 +1233,11 @@ Why does Emacs put those by default?
     (if-let* ((filename (buffer-file-name))
 	      (newname (expand-file-name (file-name-nondirectory filename) dir)))
 	(progn
-	  (rename-file filename newname 1)
+	  (when (file-exists-p newname)
+	    (user-error "Destination already exists: %s" newname))
+	  (when (get-file-buffer newname)
+	    (user-error "A buffer is already visiting %s" newname))
+	  (rename-file filename newname nil)
 	  (set-visited-file-name newname t)
 	  (set-buffer-modified-p nil))
       (user-error "Current buffer is not visiting a file")))
@@ -1254,7 +1310,7 @@ Why does Emacs put those by default?
   (bind-key "C-c e" 'end-of-buffer)       ; Mispress.
 
   ;; Conventional copy/paste.
-  (bind-key "M-c" 'kill-ring-save)
+  (bind-key "M-c" #'my/copy-region-or-rest-of-line)
   (bind-key "M-v" 'yank)
 
   ;; Default word and char movement are always awkward to me.
@@ -1275,8 +1331,8 @@ Why does Emacs put those by default?
   ;; Somehow those two packages aren't installed automatically by `use-package`.
   ;; Need to install them manually first. And then bind them here. And you can't do
   ;; `eval-after-load` for some reason.
-  (bind-key "C-c C-o" 'dumb-jump-go-other-window)
-  (bind-key "C-c C-y" 'dumb-jump-back)
+  (bind-key "C-c C-o" #'xref-find-definitions-other-window)
+  (bind-key "C-c C-y" #'xref-go-back)
   (bind-key "C-c ," 'goto-last-change)
   (bind-key "C-c ." 'goto-last-change-reverse)
 
@@ -1296,8 +1352,8 @@ Why does Emacs put those by default?
   (bind-key "M-l" 'recenter-top-bottom)
   (bind-key "M-o" 'other-window)
   ;; Keep these as ordinary global bindings so mode-local maps can take precedence.
-  (global-set-key (kbd "M-;") 'comment-or-uncomment-region)
-  (global-set-key (kbd "C-/") 'comment-or-uncomment-region)
+  (global-set-key (kbd "M-;") #'my/comment-region-or-line)
+  (global-set-key (kbd "C-/") #'my/comment-region-or-line)
 
   ;; Aliases.
   (defalias 'rl  'my/reload-init-file)
@@ -1352,6 +1408,8 @@ Handle copy/paste in OSX.
   ;; Move Custom-Set-Variables to Different File.
   (setq custom-file (locate-user-emacs-file "custom-set-variables.el"))
   (load custom-file 'noerror 'nomessage)
+  (when (boundp 'my/package-manifest)
+    (setq package-selected-packages my/package-manifest))
 
   ;; So Long mitigates slowness due to extremely long lines.
   (when (fboundp 'global-so-long-mode)
@@ -1464,8 +1522,6 @@ Handle copy/paste in OSX.
   (add-to-list 'auto-mode-alist '("\\.args\\'" . text-mode))
   (add-to-list 'auto-mode-alist '("\\.bb\\'" . shell-script-mode))
   (add-to-list 'auto-mode-alist '("\\.bbclass\\'" . shell-script-mode))
-  (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . markdown-mode))
-
   ;; Mark ring.
   ;; Decrease saving ring so that jump more efficiently.
   (setq mark-ring-max 6)
